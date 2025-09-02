@@ -4,7 +4,9 @@
   "description": "Parcial 2 de Programacion III",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devstart": "node index --watch",
+    "start": "node index"
   },
   "repository": {
     "type": "git",

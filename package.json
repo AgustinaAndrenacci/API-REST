@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/AgustinaAndrenacci/API-REST/issues"
   },
-  "homepage": "https://github.com/AgustinaAndrenacci/API-REST#readme"
+  "homepage": "https://github.com/AgustinaAndrenacci/API-REST#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }

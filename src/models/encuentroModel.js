@@ -1,5 +1,5 @@
 // src/models/encuentroModel.js
-let encuentros = require("../../data/encuentros");
+let encuentros = require("../data/encuentros");
 
 // Obtener todas
 function getAll() {

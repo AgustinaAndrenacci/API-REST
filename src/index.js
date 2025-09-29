@@ -4,14 +4,14 @@ const cors = require("cors");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const jornadaRoutes = require("./routes/jornadaRoutes");
 const encuentroRoutes = require("./routes/encuentroRoutes");
-//const connectDB = require("./config/db");
+const connectDB = require("./config/db");
 
 const app = express();
 app.use(cors()); // middleware para...
 app.use(express.json()); // middleware para...
 
 // Conectar BD
-//connectDB();
+connectDB();
 
 // Rutas
 app.use("/usuarios", usuarioRoutes);

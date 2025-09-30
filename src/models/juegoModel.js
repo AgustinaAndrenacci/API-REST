@@ -1,6 +1,19 @@
 // src/models/juegoModel.js
 let juegos = require("../data/juego");
-
+const mongoose = require("mongoose")
+  
+const juegoSchema = new mongoose.Schema(
+  {
+    titulo: { type: String, required: true },
+    imagen: { type: String, required: true },
+    descripcion: { type: String, required: true },
+    reglamento: { type: String, required: true },
+    cantJugadoresMax: { type: Number, required: true },
+    cantJugadoresMin: { type: Number, required: true },
+    tiempoEstimado: { type: Number, required: true }
+  }
+);
+/*
 // Obtener todos los juegos
 function getAll() {
   return juegos;
@@ -41,4 +54,6 @@ function remove(id) {
   return juegoEliminado; //devuelvo el juego que se elimino
 }
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, create, update, remove }; */
+
+module.exports = mongoose.model("Juego", juegoSchema);

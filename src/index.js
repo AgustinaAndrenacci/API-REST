@@ -11,8 +11,8 @@ const app = express();
 app.use(cors()); // middleware para...
 app.use(express.json()); // middleware para...
 
-/* Conectar BD
-connectDB(); */
+//Conectar BD
+connectDB(); 
 
 // Rutas
 app.use("/usuarios", usuarioRoutes);

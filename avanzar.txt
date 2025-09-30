@@ -1,0 +1,49 @@
+Hacer sin apuro:
+-Diccionario de errores
+
+
+login google
+
+Agregar: console.error("Error en el login",err); es para que nos 
+muestre a nosotros por consola
+
+paginacion
+
+ver que usuario tiene que usar cada funcion del crud
+Ver funciones nuevas del crud
+-USUARIO
+login OK
+registrar (chequear userName diferentes)
+dame datos del usuario x (perfil)
+cambiar contraseña
+
+-JORNADA
+crear 
+modificar
+eliminar: dar de baja
+añadir + JUEGO
+añadir + participantes
+añadir + encuentro
+cambiar estado
+
+-ENCUENTRO
+crear
+//modificar
+//eliminar - dar de baja
+cambiar estado
+añadir + jugadores
+indicar ganador
+
+-JUEGO
+crear (chequear x nombre)
+modificar
+eliminar
+ver x nombre
+ver x cant jugadores
+
+
+
+
+
+**AgusMejorar Jornada -> model y controller
+**AgusChequear si pongo json sin x propiedad, si lo valida

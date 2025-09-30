@@ -6,8 +6,8 @@ const jornadas = [
     "precioInscripcion": 1200.0,
     "capacidad": 20,
     "Juegoteka": {
-      "id": 1,
-      "nombre": "Juegoteka Central",
+      "id": 2,
+      "nombre": "Bruno",
       "direccion": "Av. Principal 1234"
     },
     "juegosDisponibles": [
@@ -17,13 +17,9 @@ const jornadas = [
       { "id": 6, "nombre": "Poker", "imagen": "poker.jpg" }
     ],
     "jugadoresInscriptos": [
-      { "id": 1, "nombre": "Ana López" },
-      { "id": 3, "nombre": "Carlos Díaz" },
-      { "id": 4, "nombre": "Elena Gómez" },
-      { "id": 6, "nombre": "Fernando Ruiz" },
-      { "id": 7, "nombre": "Gabriela Castro" },
-      { "id": 8, "nombre": "Héctor Pérez" },
-      { "id": 9, "nombre": "Irene Torres" }
+      { "id": 1, "userName": "user1", "nombre": "Agustina", "apellido": "Andrenacci" },
+      { "id": 3, "userName": "user3", "nombre": "Carlos", "apellido": "Díaz" },
+      { "id": 4, "userName": "user4", "nombre": "Elena", "apellido": "Gómez" }
     ],
     "encuentros": [
       { "id": 1, "tipo": "Desafio", "estado": "Finalizado" },
@@ -187,9 +183,9 @@ const jornadas = [
       { "id": 10, "nombre": "Jorge Vidal" }
     ],
     "encuentros": [
-      { "id": 6, "tipo": "Desafio", "estado": "Finalizado" },
-      { "id": 7, "tipo": "Torneo", "estado": "En proceso" },
-      { "id": 8, "tipo": "Desafio", "estado": "Abierto" }
+      { "id": 1, "tipo": "Desafio", "estado": "Finalizado" },
+      { "id": 2, "tipo": "Torneo", "estado": "En proceso" },
+      { "id": 3, "tipo": "Desafio", "estado": "Pendiente" }
     ]
   },
   {

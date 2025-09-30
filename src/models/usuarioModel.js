@@ -1,3 +1,4 @@
+/*
 // src/models/usuarioModel.js
 let usuarios = require("../data/usuario");
 
@@ -42,3 +43,24 @@ function remove(id) {
 }
 
 module.exports = { getAll, getById, create, update, remove };
+*/
+
+//mongoose
+const mongoose = require("mongoose");
+
+const usuarioSchema = new mongoose.Schema(
+  {
+    userName: { type: String, required: true, trim: true },
+    pass: { type: String, required: true },
+    rol: { type: String, enum: ["jugador", "administrador", "juegoteka"], required: true },
+    nombre: { type: String, required: true, trim: true },
+    apellido: { type: String, required: true, trim: true },
+    foto: { type: String },
+    telefono: { type: String },
+    mail: { type: String, required: true, trim: true },
+    direccion: { type: String, required: false, trim: true },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Usuario", usuarioSchema);

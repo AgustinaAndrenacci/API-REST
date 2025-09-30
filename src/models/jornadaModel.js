@@ -1,3 +1,4 @@
+/*
 // src/models/jornadaModel.js
 let jornadas = require("../data/jornada");
 
@@ -42,3 +43,51 @@ function remove(id) {
 }
 
 module.exports = { getAll, getById, create, update, remove };
+
+*/
+
+//mongoose
+const mongoose = require("mongoose");
+
+const jornadaSchema = new mongoose.Schema(
+  {
+    nombre: { type: String, required: true, trim: true },
+    fechaHora: { type: Date, required: true },
+    precioInscripcion: { type: Number, required: true },
+    capacidad: { type: Number, required: true },
+    Juegoteka: { //true
+      id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
+      nombre: { type: String, required: true },
+      direccion: { type: String, required: true }
+    },
+    juegosDisponibles: [  //true
+      {
+        id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
+        nombre: { type: String, required: true },
+        imagen: { type: String }
+      }
+    ],
+    jugadoresInscriptos: [ //false
+      {
+        id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
+        userName: { type: String, required: true },
+        nombre: { type: String, required: true },
+        apellido: { type: String, required: true }
+      }
+    ],
+    encuentros: [ //false
+      {
+        id: { type: mongoose.Schema.Types.ObjectId, ref: "Encuentro", required: true },
+        tipo: { type: String, required: true },
+        estado: { 
+          type: String, 
+          enum: ["Pendiente", "En proceso", "Finalizado", "Abierto", "Cerrado"], 
+          required: true 
+               }
+      }
+    ]
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Jornada", jornadaSchema);

@@ -21,7 +21,7 @@ app.use("/encuentros", encuentroRoutes);
 app.use("/juegos", juegosRoutes);
 
 // Inicio del server
-const PORT = 4000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

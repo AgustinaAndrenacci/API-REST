@@ -1,49 +1,48 @@
 Hacer sin apuro:
 -Diccionario de errores
+-Login google
+-Paginacion
+-Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
+
+Hacer:
+-Indicar para cada funcion del crud, que rol de usuario puede acceder (middlewares)
+-Mas middlewares: isAdmin, isJugador, isJuegoteka
+-Importa que usuario creo el encuentro?
+-En postMan ver el script para que tome el token
+-Agregar funciones al crud, ellas son:
+    USUARIO
+    login OK
+    registrar (chequear userName diferentes)
+    dame datos del usuario x (perfil)
+    cambiar contraseña
+
+    JORNADA
+    crear 
+    modificar
+    eliminar: dar de baja
+    añadir + JUEGO
+    añadir + participantes
+    añadir + encuentro
+    cambiar estado
+
+    ENCUENTRO
+    crear
+    modificar
+    eliminar - dar de baja
+    cambiar estado
+    añadir + jugadores
+    indicar ganador
+
+    JUEGO
+    crear (chequear x nombre)
+    modificar
+    eliminar
+    ver x nombre
+    ver x cant jugadores
 
 
-login google
-
-Agregar: console.error("Error en el login",err); es para que nos 
-muestre a nosotros por consola
-
-paginacion
-
-ver que usuario tiene que usar cada funcion del crud
-Ver funciones nuevas del crud
--USUARIO
-login OK
-registrar (chequear userName diferentes)
-dame datos del usuario x (perfil)
-cambiar contraseña
-
--JORNADA
-crear 
-modificar
-eliminar: dar de baja
-añadir + JUEGO
-añadir + participantes
-añadir + encuentro
-cambiar estado
-
--ENCUENTRO
-crear
-//modificar
-//eliminar - dar de baja
-cambiar estado
-añadir + jugadores
-indicar ganador
-
--JUEGO
-crear (chequear x nombre)
-modificar
-eliminar
-ver x nombre
-ver x cant jugadores
+-cambiar la ip en mongo atlas por la de render
 
 
-
-
-
-**AgusMejorar Jornada -> model y controller
-**AgusChequear si pongo json sin x propiedad, si lo valida
+**Agus -> Mejorar Jornada -> model y controller
+**Agus -> Chequear si pongo json sin x propiedad, si lo valida

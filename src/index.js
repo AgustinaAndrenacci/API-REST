@@ -1,10 +1,15 @@
+
 // src/index.js
+
 const express = require("express");
 const cors = require("cors");
+const dotenv = require("dotenv");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const jornadaRoutes = require("./routes/jornadaRoutes");
 const encuentroRoutes = require("./routes/encuentroRoutes");
 const connectDB = require("./config/db");
+
+dotenv.config(); // carga variables de entorno.env 
 
 const app = express();
 app.use(cors()); // middleware para...
@@ -19,7 +24,7 @@ app.use("/jornadas", jornadaRoutes);
 app.use("/encuentros", encuentroRoutes);
 
 // Inicio del server
-const PORT = 4000;
+const PORT= process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

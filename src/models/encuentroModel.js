@@ -1,3 +1,55 @@
+/////////////////////////////////
+//
+//     encuentroModel para mongoose
+//
+//////////////////////////////////
+
+const mongoose = require("mongoose");
+
+const juegoSchema = new mongoose.Schema({
+  id_juego: { type: String, required: true },
+  nombre: { type: String, required: true },
+  imagen: { type: String, default: "" },
+});
+
+const jugadorSchema = new mongoose.Schema({
+  id_jugador: { type: String },
+  nombre: { type: String },
+  apellido:{ type: String },
+  UserName :{ type: String },
+  
+});
+
+const encuentroSchema = new mongoose.Schema(
+  {
+    tipo: { type: String, required: true },
+    capacidad: { type: Number, required: true },
+    juego: { type: [juegoSchema], default: [] },
+    jugadores: { type: [jugadorSchema], default: [] },
+    ganador: { type: [jugadorSchema], default: [] },//podria ser default: null para un solo ganador pero neh
+    estado: { 
+      type: String, 
+      enum: ["pendiente", "abierto", "cerrado", "en proceso", "finalizado"], 
+      default: "pendiente"},
+  },
+
+
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Encuentro", encuentroSchema);
+
+
+
+
+////////////////////////////////////////////
+//
+//  Version funcionando en local sin persistencia
+//
+////////////////////////////////////////////
+
+/*
+
 // src/models/encuentroModel.js
 let encuentros = require("../data/encuentros");
 
@@ -42,3 +94,5 @@ function remove(id) {
 }
 
 module.exports = { getAll, getById, create, update, remove };
+
+*/

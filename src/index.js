@@ -10,7 +10,7 @@ const encuentroRoutes = require("./routes/encuentroRoutes");
 const juegosRoutes = require("./routes/juegoRoutes");
 const connectDB = require("./config/db");
 
-//dotenv.config(); // carga variables de entorno.env 
+dotenv.config(); // carga variables de entorno.env 
 
 const app = express();
 app.use(cors()); // middleware para...

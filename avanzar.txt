@@ -1,44 +1,54 @@
 Hacer sin apuro:
 -Diccionario de errores
 -Login google
--Paginacion
+-Paginacion *Ir agregando
 -Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
 
 Hacer:
--Indicar para cada funcion del crud, que rol de usuario puede acceder (middlewares)
--Mas middlewares: isAdmin, isJugador, isJuegoteka
--Importa que usuario creo el encuentro?
--En postMan ver el script para que tome el token
--Agregar funciones al crud, ellas son:
+-Mas middlewares: isAdmin *A, isJugador *F, isJuegoteka *G
+-Importa que usuario creo el encuentro? Si, agregar propiedad *F
+-En postMan ver el script para que tome el token **A
+-Agregar funciones al crud, ellas son: *Todos, cada uno su entidad
+Usuarios: jugador, administrador (todo), juegoteka 
     USUARIO
-    login OK
-    registrar (chequear userName diferentes)
-    dame datos del usuario x (perfil)
-    cambiar contraseña
+OK  login **todos
+    registrar (chequear userName diferentes) **jugadores, juegoteka
+    dame datos del usuario **todos
+    cambiar contraseña  **todos la suya
 
     JORNADA
-    crear 
-    modificar
-    eliminar: dar de baja
-    añadir + JUEGO
-    añadir + participantes
-    añadir + encuentro
-    cambiar estado
+    crear **juegoteka
+    modificar  **juegoteka
+    eliminar: dar de baja **juegoteka
+    añadir + JUEGO **juegoteka
+    añadir + participantes **jugadores
+    añadir + encuentro  **jugadores, juegoteka
+    cambiar estado  **juegoteka
 
-    ENCUENTRO
-    crear
-    modificar
-    eliminar - dar de baja
-    cambiar estado
-    añadir + jugadores
-    indicar ganador
+    ENCUENTRO (desafio o torneo)
+    Front: terminos y condiciones!!!!
+    DESAFIO
+    crear **jugador
+    modificar el estado  **jugador (solo el creador)
+    eliminar el encuentro  **jugador (solo el creador) + (noti) //front: dar de baja
+    añadir + jugadores  **jugador (solo el creador)
+    indicar ganador  **jugador (solo el creador) + (noti)
+
+    TORNEO
+    crear **juegoteka
+    modificar el estado  **juegoteka
+    eliminar el encuentro  **juegoteka + (noti)
+    cambiar estado  juegoteka
+    añadir + jugadores  **jugadores
+    indicar ganador   juegoteka
 
     JUEGO
-    crear (chequear x nombre)
-    modificar
-    eliminar
-    ver x nombre
-    ver x cant jugadores
+    crear (chequear x nombre) **juegoteka
+    modificar **juegoteka
+    eliminar **juegoteka
+    ver x nombre **todos
+    ver x cant jugadores **todos
+    filtro duracion  **todos
 
 
 -cambiar la ip en mongo atlas por la de render

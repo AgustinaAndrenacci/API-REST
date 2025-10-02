@@ -23,6 +23,9 @@ router.delete("/:id", encuentroController.deleteEncuentro);
 module.exports = router;
 
 
+//router.get("/torneo", encuentroController.getAllEncuentros);
+//router.get("/desafio", encuentroController.getAllEncuentros);
+
 /////////////////////////////////////////
 //  Version funcionando en local Data
 ////////////////////////////////////////

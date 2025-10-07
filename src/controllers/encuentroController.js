@@ -17,6 +17,95 @@ exports.getEncuentroById = async (req, res) => {
   res.json(enc);
 };
 
+//GET BY ...  
+
+
+exports.getEncuentrosByEstado = async (req, res) => {
+  try {
+    const { estado } = req.params;
+    const encuentros = await Encuentro.find({ estado });
+    let respuesta = {};
+    let codigo = 200;
+
+    if (encuentros.length === 0) {
+      codigo = 404;
+      respuesta = { message: "No se encontraron encuentros con ese estado" };
+    } else {
+      respuesta = encuentros;
+    }
+
+    res.status(codigo).json(respuesta);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// GET by GANADOR
+exports.getEncuentrosByGanador = async (req, res) => {
+  try {
+    const { id_jugador } = req.params;
+    const encuentros = await Encuentro.find({ "ganador.id_jugador": id_jugador });
+    let respuesta = {};
+    let codigo = 200;
+
+    if (encuentros.length === 0) {
+      codigo = 404;
+      respuesta = { message: "No se encontraron encuentros con ese ganador" };
+    } else {
+      respuesta = encuentros;
+    }
+
+    res.status(codigo).json(respuesta);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// GET by PARTICIPANTE
+exports.getEncuentrosByParticipante = async (req, res) => {
+  try {
+    const { id_jugador } = req.params;
+    const encuentros = await Encuentro.find({ "jugadores.id_jugador": id_jugador });
+    let respuesta = {};
+    let codigo = 200;
+
+    if (encuentros.length === 0) {
+      codigo = 404;
+      respuesta = { message: "No se encontraron encuentros con ese participante" };
+    } else {
+      respuesta = encuentros;
+    }
+
+    res.status(codigo).json(respuesta);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// GET by ORGANIZADOR
+exports.getEncuentrosByOrganizador = async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    const encuentros = await Encuentro.find({ "createdBy.id_usuario": id_usuario});
+    let respuesta = {};
+    let codigo = 200;
+
+    if (encuentros.length === 0) {
+      codigo = 404;
+      respuesta = { message: "No se encontraron encuentros de ese organizador" };
+    } else {
+      respuesta = encuentros;
+    }
+
+    res.status(codigo).json(respuesta);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
+////////////////////
+
 // CREATE
 exports.createEncuentro = async (req, res) => {
   try {

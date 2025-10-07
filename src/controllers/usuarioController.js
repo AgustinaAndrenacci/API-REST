@@ -74,8 +74,8 @@ exports.getUsuarioById = async (req, res) => {
             rol: usuario.rol,
             nombre: usuario.nombre + " " + usuario.apellido,
             foto: usuario.foto,
-        telefono: usuario.telefono,
-        mail: usuario.mail
+          telefono: usuario.telefono,
+         mail: usuario.mail
       },
       }) //true
       : res.status(404).json({ error: "Usuario no encontrado" }); //false
@@ -200,6 +200,8 @@ exports.updateUsuario = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
     const datosAActualizar = { ...req.body };
+    //que no se guarde el userName
+    delete datosAActualizar.userName;
     const usuarioActualizado = await Usuario.findByIdAndUpdate(id, datosAActualizar, { new: true });
     if(usuarioActualizado)
     {

@@ -8,7 +8,7 @@ const express = require("express");
 const router = express.Router();
 const encuentroController = require("../controllers/encuentroController");
 //middlewares
-const {autenticarToken, isJuegoteka} = require("../middlewares/authMiddleware");
+const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware");
 //const {esJdor} = require("../middlewares/esUsuarioMiddleware");
 //const {isJuegoteka} = require("../middlewares/isJuegotecaMiddleware");
 const {isCreator} = require("../middlewares/isCreatorMiddleware");
@@ -16,7 +16,7 @@ const {isCreator} = require("../middlewares/isCreatorMiddleware");
 
 //  Torneo
 // C - Crear un nuevo encuentro
-router.post("/torneo/", autenticarToken, isJuegoteka, encuentroController.createEncuentro);
+router.post("/torneo/", autenticarToken, validarPermisoRuta, encuentroController.createEncuentro);
 // R  -Leer un documento, Read
 //      get all 
 router.get("/torneo/", encuentroController.getAllEncuentros);
@@ -31,8 +31,8 @@ router.get("/torneo/organizador/:id_jugador", encuentroController.getEncuentrosB
 ////
 router.get("/torneo/:id", encuentroController.getEncuentroById);
 // U - Update, Actualizar un encuentro existente
-router.put("/torneo/:id", autenticarToken, isJuegoteka,isCreator, encuentroController.updateEncuentro);
-router.delete("/torneo/:id",autenticarToken, isJuegoteka,isCreator, encuentroController.deleteEncuentro);
+router.put("/torneo/:id", autenticarToken, validarPermisoRuta,isCreator, encuentroController.updateEncuentro);
+router.delete("/torneo/:id",autenticarToken, validarPermisoRuta,isCreator, encuentroController.deleteEncuentro);
 // :)
 
 

@@ -1,7 +1,5 @@
-
-
 const jwt = require("jsonwebtoken");
-
+const diccionarioRutasYPermisos = require("../authDictionary");
 
 //verifica token JWT
 //verifica si el token que me diste es mio
@@ -24,13 +22,18 @@ const autenticarToken = (req, res, next) => {
   //maneja el asincronismo con callbacks
 };
 
-// Verificar si el usuario es 'Juegoteka'
-const isJuegoteka = async (req, res, next) => {
+const validarPermisoRuta = async (req, res, next) => {
   let status;
-  req.user.rol !== "juegoteka" && req.user.rol !== "administrador"
-    ? status = res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' })
-    : status = next();
+  const permisoNecesario = diccionarioRutasYPermisos[req.baseUrl + req.route.path];// Ejemplo: req.path toma el path COMPLETO | req.route.path toma el cachito p/usar en diccionario
+  if (!permisoNecesario) {
+    status = res.status(404).json({ error: "La ruta especificada no existe." });
+  } else if ((req.user.rol === permisoNecesario || req.user.rol === "administrador")){
+    status = next();
+  } else {
+    console.log(permisoNecesario)
+    status = res.status(403).json({ error: "No tenés permisos para esta acción." });
+  }
   return status;
 };
 
-module.exports = { autenticarToken, isJuegoteka};
+module.exports = { autenticarToken, validarPermisoRuta};

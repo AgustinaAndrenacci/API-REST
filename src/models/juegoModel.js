@@ -13,6 +13,8 @@ const juegoSchema = new mongoose.Schema(
     tiempoEstimado: { type: Number, required: true }
   }
 );
+
+module.exports = mongoose.model("Juego", juegoSchema);
 /*
 // Obtener todos los juegos
 function getAll() {
@@ -55,5 +57,3 @@ function remove(id) {
 }
 
 module.exports = { getAll, getById, create, update, remove }; */
-
-module.exports = mongoose.model("Juego", juegoSchema);

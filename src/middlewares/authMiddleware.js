@@ -22,4 +22,13 @@ const autenticarToken = (req, res, next) => {
   //maneja el asincronismo con callbacks
 };
 
-module.exports = { autenticarToken };
+// Verificar si el usuario es 'Juegoteka'
+const isJuegoteka = async (req, res, next) => {
+  let status;
+  req.usuario.rol !== "juegoteka" || req.usuario.rol !== "administrador"
+    ? status = res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' })
+    : status = next();
+  return status;
+};
+
+module.exports = { autenticarToken, isJuegoteka};

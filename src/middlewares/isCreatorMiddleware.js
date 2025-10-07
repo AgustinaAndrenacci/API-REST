@@ -28,4 +28,4 @@ const isCreator = async (req, res, next) => {
   }
 };
 
-module.exports = isCreator;
+module.exports = {isCreator};

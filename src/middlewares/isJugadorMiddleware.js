@@ -46,4 +46,4 @@ const isJugadorMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = isJugadorMiddleware;
+module.exports = {isJugadorMiddleware};

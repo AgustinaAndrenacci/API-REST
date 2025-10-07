@@ -129,7 +129,7 @@ exports.updateJornadaJugadores = async (req, res) => {
   }
 };
 
-/*exports.updateJornadaJuegos = async (req, res) => {
+exports.updateJornadaJuegos = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
     const { juegosDisponibles } = req.body;
@@ -147,8 +147,8 @@ exports.updateJornadaJugadores = async (req, res) => {
     } catch (err) {
     res.status(500).json({ error: "Error al actualizar jornada" });
   }
-};*/
-
+};
+//este no va
 exports.updateJornadaEstado = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL

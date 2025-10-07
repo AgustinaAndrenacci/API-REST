@@ -2,12 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const usuarioController = require("../controllers/usuarioController");
-const {autenticarToken} = require("../middlewares/authMiddleware");
+//const {autenticarToken} = require("../middlewares/authMiddleware");
 
 
  
 // CRUD
-router.get("/",autenticarToken,usuarioController.getAllUsuarios);
+router.get("/",usuarioController.getAllUsuarios);
 router.get("/getId/:id", usuarioController.getUsuarioById);
 router.get("/getUsername/:userName", usuarioController.getUsuarioByUsername);
 router.post("/registrar", usuarioController.registrar);

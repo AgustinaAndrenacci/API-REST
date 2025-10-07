@@ -8,15 +8,15 @@ const express = require("express");
 const router = express.Router();
 const encuentroController = require("../controllers/encuentroController");
 //middlewares
-const {auth} = require("../middlewares/authMiddleware");
-const {esJdor} = require("../middlewares/esUsuarioMiddleware");
-const {esJtca} = require("../middlewares/esJuegotecaMiddleware");
-const {isCreator} = require("../middlewares/isCreator");
+const {autenticarToken, isJuegoteka} = require("../middlewares/authMiddleware");
+//const {esJdor} = require("../middlewares/esUsuarioMiddleware");
+//const {isJuegoteka} = require("../middlewares/isJuegotecaMiddleware");
+const {isCreator} = require("../middlewares/isCreatorMiddleware");
 
 
 //  Torneo
 // C - Crear un nuevo encuentro
-router.post("/torneo/", auth, esJtca, encuentroController.createEncuentro);
+router.post("/torneo/", autenticarToken, isJuegoteka, encuentroController.createEncuentro);
 // R  -Leer un documento, Read
 //      get all 
 router.get("/torneo/", encuentroController.getAllEncuentros);
@@ -31,14 +31,14 @@ router.get("/torneo/organizador/:id_jugador", encuentroController.getEncuentrosB
 ////
 router.get("/torneo/:id", encuentroController.getEncuentroById);
 // U - Update, Actualizar un encuentro existente
-router.put("/torneo/:id", auth, esJtca,isCreator, encuentroController.updateEncuentro);
-router.delete("/torneo/:id",auth, esJtca,isCreator, encuentroController.deleteEncuentro);
+router.put("/torneo/:id", autenticarToken, isJuegoteka,isCreator, encuentroController.updateEncuentro);
+router.delete("/torneo/:id",autenticarToken, isJuegoteka,isCreator, encuentroController.deleteEncuentro);
 // :)
 
 
 // Desafio
 // C - Crear un nuevo encuentro
-router.post("/desafio/",auth,esJdor, encuentroController.createEncuentro);
+router.post("/desafio/",autenticarToken, encuentroController.createEncuentro);
 // R  -Leer un documento, Read
 //      get all 
 router.get("/desafio/", encuentroController.getAllEncuentros);
@@ -52,9 +52,9 @@ router.get("/desafio/organizador/:id_jugador", encuentroController.getEncuentros
 /////
 router.get("/desafio/:id", encuentroController.getEncuentroById);
 // U - Update, Actualizar un encuentro existente
-router.put("/desafio/:id",auth,esJdor, encuentroController.updateEncuentro); //FALTA ES AUTOR??
+router.put("/desafio/:id",autenticarToken, encuentroController.updateEncuentro); //FALTA ES AUTOR??
 // D - Eliminar un encuentro
-router.delete("/desafio/:id",auth,esJdor, encuentroController.deleteEncuentro); //FALTA ES AUTOR??
+router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); //FALTA ES AUTOR??
 
 module.exports = router;
 

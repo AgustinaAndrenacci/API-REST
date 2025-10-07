@@ -5,25 +5,24 @@ Hacer sin apuro:
 -Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
 
 Hacer:
--Mas middlewares: isAdmin *A, isJugador *F, isJuegoteka *G
+-Mas middlewares: isAdmin *A OK, isJugador *F, isJuegoteka *G
 -Importa que usuario creo el encuentro? Si, agregar propiedad *F
 -En postMan ver el script para que tome el token **A
 -Agregar funciones al crud, ellas son: *Todos, cada uno su entidad
 Usuarios: jugador, administrador (todo), juegoteka 
     USUARIO
 OK  login **todos
-    registrar (chequear userName diferentes) **jugadores, juegoteka
-    dame datos del usuario **todos
-    cambiar contraseña  **todos la suya
+OK  registrar (chequear userName diferentes) **jugadores, juegoteka
+OK  dame datos del usuario **todos
+PROBAR    cambiar contraseña  **todos la suya
 
     JORNADA
-    crear **juegoteka
-    modificar  **juegoteka
-    eliminar: dar de baja **juegoteka
-    añadir + JUEGO **juegoteka
-    añadir + participantes **jugadores
-    añadir + encuentro  **jugadores, juegoteka
-    cambiar estado  **juegoteka
+OK  crear **juegoteka
+OK  modificar  **juegoteka
+OK  eliminar: dar de baja **juegoteka
+OK  añadir + JUEGO **juegoteka
+OK  añadir + participantes **jugadores
+OK  añadir + encuentro  **jugadores, juegoteka
 
     ENCUENTRO (desafio o torneo)
     Front: terminos y condiciones!!!!
@@ -54,5 +53,6 @@ OK  login **todos
 -cambiar la ip en mongo atlas por la de render
 
 
-**Agus -> Mejorar Jornada -> model y controller
-**Agus -> Chequear si pongo json sin x propiedad, si lo valida
+OK **Agus -> Mejorar Jornada -> model y controller
+OK **Agus -> Mejorar Usuario -> controller (falta update)
+OK **Agus -> Chequear si pongo json sin x propiedad, si lo valida

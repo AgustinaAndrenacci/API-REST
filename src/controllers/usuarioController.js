@@ -47,7 +47,17 @@ const Usuario = require("../models/usuarioModel");
 exports.getAllUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuario.find();
-    res.json(usuarios);
+    res.json(
+      usuarios.map(usuario => ({
+        id: usuario._id,
+        user: usuario.userName,
+        rol: usuario.rol,
+        nombre: usuario.nombre + " " + usuario.apellido,
+        foto: usuario.foto,
+        telefono: usuario.telefono,
+        mail: usuario.mail
+      }))
+    );
   } catch (err) {
     res.status(500).json({ error: "Error al obtener usuarios" });
   }
@@ -57,7 +67,39 @@ exports.getUsuarioById = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id);
     usuario
-      ? res.json(usuario) //true
+      ? res.json({
+          usuario: {
+            id: usuario._id,
+            user: usuario.userName,
+            rol: usuario.rol,
+            nombre: usuario.nombre + " " + usuario.apellido,
+            foto: usuario.foto,
+        telefono: usuario.telefono,
+        mail: usuario.mail
+      },
+      }) //true
+      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+  } catch (err) {
+    res.status(500).json({ error: "Error al buscar usuario" });
+  }
+};
+
+exports.getUsuarioByUsername = async (req, res) => {
+  try {
+    const { userName } = req.params;
+    const usuario = await Usuario.findOne({ userName });
+    usuario
+      ? res.json({
+          usuario: {
+            id: usuario._id,
+            user: usuario.userName,
+            rol: usuario.rol,
+            nombre: usuario.nombre + " " + usuario.apellido,
+            foto: usuario.foto,
+            telefono: usuario.telefono,
+            mail: usuario.mail
+      },
+      }) //true
       : res.status(404).json({ error: "Usuario no encontrado" }); //false
   } catch (err) {
     res.status(500).json({ error: "Error al buscar usuario" });
@@ -107,34 +149,98 @@ exports.login = async (req, res) => {
       },
     });
 
-  
-  
     } catch (err) {
     console.error("Error en el login",err); //NUEVO
     res.status(500).json({ error: "Error al buscar usuario" });
   }
 };
 
-exports.createUsuario = async (req, res) => {
+exports.registrar = async (req, res) => {
   try {
     const { userName, pass, rol, nombre, apellido, foto, telefono, mail } = req.body;
-    if (!userName || !pass || !rol || !nombre || !apellido || !mail) {
-      return res.status(400).json({ error: "Faltan campos obligatorios" }); //false
+    if (!userName || !pass || !rol || !nombre || !apellido || !mail || !telefono) {
+      res.status(400).json({ error: "Faltan campos obligatorios" }); //false
     }
-    const nuevoUsuario = new Usuario({ userName, pass, rol, nombre, apellido, foto, telefono, mail });
-    await nuevoUsuario.save();
-    res.status(201).json(nuevoUsuario); //true
+    else{
+      //Chequeo si existe el username
+      const usuarioConUserNameIgual = await Usuario.findOne({ userName });
+
+      if(!usuarioConUserNameIgual){
+        const nuevoUsuario = new Usuario({ userName, pass, rol, nombre, apellido, foto, telefono, mail });
+        await nuevoUsuario.save();
+        res.status(201).json({
+          message: "Usuario creado con éxito",
+          usuario: {
+            id: nuevoUsuario._id,
+            user: nuevoUsuario.userName,
+            rol: nuevoUsuario.rol,
+            nombre: nuevoUsuario.nombre,
+            apellido: nuevoUsuario.apellido,
+            foto: nuevoUsuario.foto,
+            telefono: nuevoUsuario.telefono,
+            mail: nuevoUsuario.mail
+      },
+      }); //true
+      }
+      else{ 
+        res.status(400).json({ error: "El username ya existe" }); //false
+      }
+    }
+    
   } catch (err) {
     res.status(500).json({ error: "Error al crear usuario" });
   }
 };
 
+
+
+
+//El userName no se modifica!
 exports.updateUsuario = async (req, res) => {
   try {
-    const usuarioActualizado = await Usuario.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    usuarioActualizado
-      ? res.json(usuarioActualizado) //true
-      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+    const id = req.params.id; // Usar el ID de la URL
+    const datosAActualizar = { ...req.body };
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(id, datosAActualizar, { new: true });
+    if(usuarioActualizado)
+    {
+        res.json({
+          usuarioActualizado: {
+            id: usuarioActualizado._id,
+            user: usuarioActualizado.userName,
+            rol: usuarioActualizado.rol,
+            nombre: usuarioActualizado.nombre,
+            apellido: usuarioActualizado.apellido,
+            foto: usuarioActualizado.foto,
+            telefono: usuarioActualizado.telefono,
+            mail: usuarioActualizado.mail
+          }
+        });
+    }
+    else
+    {
+      res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+  } catch (err) {
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+};
+
+//Falta chequear si existe el userName
+exports.updatePassword = async (req, res) => {
+  try {
+    // Capturar el userName del token
+    const userName = req.usuario.userName; 
+    const {pass} = req.body; 
+
+    if(!pass){
+        res.status(400).json({ error: "Debe ingresar una contraseña" });
+    } 
+    else {
+        Usuario.save(req.params.id, req.body, { new: true });
+        res.json({"mensaje": "Contraseña actualizada correctamente", Usuario});
+    }
+
   } catch (err) {
     res.status(500).json({ error: "Error al actualizar usuario" });
   }
@@ -143,9 +249,23 @@ exports.updateUsuario = async (req, res) => {
 exports.deleteUsuario = async (req, res) => {
   try {
     const usuarioEliminado = await Usuario.findByIdAndDelete(req.params.id);
-    usuarioEliminado
-      ? res.json({ message: "Usuario eliminado" }) //true
-      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+    if(usuarioEliminado)
+    {
+      res.json({ message: "Usuario eliminado",
+        usuarioEliminado:{
+          id: usuarioEliminado._id,
+          user: usuarioEliminado.userName,
+          rol: usuarioEliminado.rol,
+          nombre: usuarioEliminado.nombre,
+          apellido: usuarioEliminado.apellido,
+          telefono: usuarioEliminado.telefono,
+          mail: usuarioEliminado.mail
+        }}
+      )
+    }
+    else{
+      res.status(404).json({ error: "Usuario no encontrado" });
+    }
   } catch (err) {
     res.status(500).json({ error: "Error al eliminar usuario" });
   }

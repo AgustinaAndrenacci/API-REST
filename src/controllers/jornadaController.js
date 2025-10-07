@@ -66,13 +66,13 @@ exports.getJornadaById = async (req, res) => {
 
 exports.createJornada = async (req, res) => {
   try {
-    const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles, jugadoresInscriptos, encuentros } = req.body;
+    const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
     if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
       return res.status(400).json({ error: "Faltan campos obligatorios" }); //false
     }
-    const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles, jugadoresInscriptos, encuentros });
+    const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles});
     await nuevaJornada.save();
-    res.status(201).json(nuevaJornada); //true
+    res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true
   } catch (err) {
     res.status(500).json({ error: "Error al crear jornada" });
   }
@@ -89,11 +89,91 @@ exports.updateJornada = async (req, res) => {
   }
 };
 
+exports.updateJornadaEncuentros = async (req, res) => {
+  try {
+    const id = req.params.id; // Usar el ID de la URL
+    const { encuentros } = req.body;
+    if (!encuentros) {
+      res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+    else{//push: actualiza y no pisa
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros } }, { new: true, runValidators: true });
+      jornadaActualizada
+        ? res.json(jornadaActualizada) //true
+        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+
+    }
+
+    } catch (err) {
+    res.status(500).json({ error: "Error al actualizar jornada" });
+  }
+};
+
+exports.updateJornadaJugadores = async (req, res) => {
+  try {
+    const id = req.params.id; // Usar el ID de la URL
+    const { jugadoresInscriptos } = req.body;
+    if (!jugadoresInscriptos) {
+      res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+    else{//push: actualiza y no pisa
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos } }, { new: true, runValidators: true });
+      jornadaActualizada
+        ? res.json(jornadaActualizada) //true
+        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+
+    }
+
+    } catch (err) {
+    res.status(500).json({ error: "Error al actualizar jornada" });
+  }
+};
+
+exports.updateJornadaJuegos = async (req, res) => {
+  try {
+    const id = req.params.id; // Usar el ID de la URL
+    const { juegosDisponibles } = req.body;
+    if (!juegosDisponibles) {
+      res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+    else{//push: actualiza y no pisa
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { juegosDisponibles } }, { new: true, runValidators: true });
+      jornadaActualizada
+        ? res.json(jornadaActualizada) //true
+        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+
+    }
+
+    } catch (err) {
+    res.status(500).json({ error: "Error al actualizar jornada" });
+  }
+};
+
+exports.updateJornadaEstado = async (req, res) => {
+  try {
+    const id = req.params.id; // Usar el ID de la URL
+    const { estado } = req.body;
+    if (!estado) {
+      res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+    else{
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { estado } , { new: true, runValidators: true });
+      jornadaActualizada
+        ? res.json(jornadaActualizada) //true
+        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+
+    }
+
+    } catch (err) {
+    res.status(500).json({ error: "Error al actualizar jornada" });
+  }
+};
+
 exports.deleteJornada = async (req, res) => {
   try {
     const jornadaEliminada = await Jornada.findByIdAndDelete(req.params.id);
     jornadaEliminada
-      ? res.json({ message: "Jornada eliminada" }) //true
+      ? res.json({ message: "Jornada eliminada", jornadaEliminada }) //true
       : res.status(404).json({ error: "Jornada no encontrada" }); //false
   } catch (err) {
     res.status(500).json({ error: "Error al eliminar jornada" });

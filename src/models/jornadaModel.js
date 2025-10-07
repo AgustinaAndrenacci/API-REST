@@ -53,7 +53,7 @@ const jornadaSchema = new mongoose.Schema(
   {
     nombre: { type: String, required: true, trim: true },
     fechaHora: { type: Date, required: true },
-    precioInscripcion: { type: Number, required: true },
+    precioInscripcion: { type: Number, default: 0 }, //0 si no se ingresa
     capacidad: { type: Number, required: true },
     Juegoteka: { //true
       id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
@@ -63,7 +63,7 @@ const jornadaSchema = new mongoose.Schema(
     juegosDisponibles: [  //true
       {
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
-        nombre: { type: String, required: true },
+        titulo: { type: String, required: true },
         imagen: { type: String }
       }
     ],

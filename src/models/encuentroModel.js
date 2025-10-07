@@ -20,8 +20,18 @@ const jugadorSchema = new mongoose.Schema({
   
 });
 
+const organizadorSchema = new mongoose.Schema({
+  id_usuario: { type: String },
+  nombre: { type: String },
+  apellido:{ type: String },
+  UserName :{ type: String },
+  
+});
+
+
 const encuentroSchema = new mongoose.Schema(
   {
+    createdBy: { type: [organizadorSchema], required: true },
     tipo: { type: String, required: true },
     capacidad: { type: Number, required: true },
     juego: { type: [juegoSchema], default: [] },

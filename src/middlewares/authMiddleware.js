@@ -27,7 +27,7 @@ const autenticarToken = (req, res, next) => {
 // Verificar si el usuario es 'Juegoteka'
 const isJuegoteka = async (req, res, next) => {
   let status;
-  req.usuario.rol !== "juegoteka" || req.usuario.rol !== "administrador"
+  req.user.rol !== "juegoteka" && req.user.rol !== "administrador"
     ? status = res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' })
     : status = next();
   return status;

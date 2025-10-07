@@ -7,9 +7,9 @@ const {autenticarToken, isJuegoteka} = require("../middlewares/authMiddleware")
 // CRUD
 router.get("/", juegoController.getAllJuegos);
 router.get("/:id", juegoController.getJuegoById);
-router.post("/", isJuegoteka, juegoController.createJuego);
-router.put("/:id", isJuegoteka, juegoController.updateJuego);
-router.delete("/:id", isJuegoteka, juegoController.deleteJuego);
+router.post("/", autenticarToken, isJuegoteka, juegoController.createJuego);
+router.put("/:id", autenticarToken, isJuegoteka, juegoController.updateJuego);
+router.delete("/:id", autenticarToken, isJuegoteka, juegoController.deleteJuego);
 
 //Nuevos Endpoints
 router.get("/nombre/:nombre", juegoController.getJuegoPorNombre);

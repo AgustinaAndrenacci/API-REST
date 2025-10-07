@@ -23,15 +23,18 @@ const autenticarToken = (req, res, next) => {
 };
 
 const validarPermisoRuta = async (req, res, next) => {
-  let status;
-  const permisoNecesario = diccionarioRutasYPermisos[req.baseUrl + req.route.path];// Ejemplo: req.path toma el path COMPLETO | req.route.path toma el cachito p/usar en diccionario
-  if (!permisoNecesario) {
-    status = res.status(404).json({ error: "La ruta especificada no existe." });
-  } else if ((req.user.rol === permisoNecesario || req.user.rol === "administrador")){
+  let status = null;
+  if (req.user.rol === "administrador"){
     status = next();
   } else {
-    console.log(permisoNecesario)
-    status = res.status(403).json({ error: "No tenés permisos para esta acción." });
+    const permisoNecesario = diccionarioRutasYPermisos[req.baseUrl + req.route.path]; // Ejemplo: req.path toma el path COMPLETO | req.route.path toma el cachito p/usar en diccionario
+    if (!permisoNecesario) {
+      status = res.status(404).json({ error: "La ruta especificada no existe." });
+    } else if ((req.user.rol === permisoNecesario)){
+      status = next();
+    } else {
+      status = res.status(403).json({ error: "No tenés permisos para esta acción." });
+    }
   }
   return status;
 };

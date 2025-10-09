@@ -6,9 +6,20 @@ const Encuentro = require("../models/encuentroModel");
 
 // GET all
 exports.getAllEncuentros = async (req, res) => {
-  const data = await Encuentro.find();
-  res.json(data);
+  try {
+    const route = req.path; 
+
+    const filtro = {};
+    if (route.includes("torneo")) filtro.tipo = 'torneo';
+    if (route.includes("desafio")) filtro.tipo = 'desafio'; //if redundante, tomar de regex el filtro directo
+
+    const data = await Encuentro.find(filtro);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching encuentros", detail: err.message });
+  }
 };
+
 
 // GET by ID
 exports.getEncuentroById = async (req, res) => {
@@ -22,8 +33,13 @@ exports.getEncuentroById = async (req, res) => {
 
 exports.getEncuentrosByEstado = async (req, res) => {
   try {
-    const { estado } = req.params;
-    const encuentros = await Encuentro.find({ estado });
+    const {tipo,estado} = req.params;
+     
+
+    const encuentros = await Encuentro.find({ 
+      "tipo": tipo,
+      "estado": estado
+     });
     let respuesta = {};
     let codigo = 200;
 
@@ -43,8 +59,12 @@ exports.getEncuentrosByEstado = async (req, res) => {
 // GET by GANADOR
 exports.getEncuentrosByGanador = async (req, res) => {
   try {
-    const { id_jugador } = req.params;
-    const encuentros = await Encuentro.find({ "ganador.id_jugador": id_jugador });
+    const {tipo, id_jugador} = req.params;
+  
+    const encuentros = await Encuentro.find({ 
+      tipo:tipo,
+      "ganador.id_jugador": id_jugador 
+    });
     let respuesta = {};
     let codigo = 200;
 
@@ -64,8 +84,12 @@ exports.getEncuentrosByGanador = async (req, res) => {
 // GET by PARTICIPANTE
 exports.getEncuentrosByParticipante = async (req, res) => {
   try {
-    const { id_jugador } = req.params;
-    const encuentros = await Encuentro.find({ "jugadores.id_jugador": id_jugador });
+    const {tipo, id_jugador} = req.params;
+
+    const encuentros = await Encuentro.find({ 
+      "tipo":tipo,
+      "jugadores.id_jugador": id_jugador 
+    });
     let respuesta = {};
     let codigo = 200;
 
@@ -85,8 +109,12 @@ exports.getEncuentrosByParticipante = async (req, res) => {
 // GET by ORGANIZADOR
 exports.getEncuentrosByOrganizador = async (req, res) => {
   try {
-    const { id_usuario } = req.params;
-    const encuentros = await Encuentro.find({ "createdBy.id_usuario": id_usuario});
+    const {tipo, id_usuario  } = req.params.tipo;
+  
+    const encuentros = await Encuentro.find({ 
+      tipo:tipo,
+      "createdBy.id_usuario": id_usuario
+    });
     let respuesta = {};
     let codigo = 200;
 
@@ -109,8 +137,13 @@ exports.getEncuentrosByOrganizador = async (req, res) => {
 // CREATE
 exports.createEncuentro = async (req, res) => {
   try {
+
     const nuevo = new Encuentro(req.body);
+    const route = req.path; 
+    if (route.includes("torneo")) nuevo.tipo = 'torneo';
+    if (route.includes("desafio")) nuevo.tipo = 'desafio';  //If redundante, tomar de regex
     const saved = await nuevo.save();
+
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ error: err.message });

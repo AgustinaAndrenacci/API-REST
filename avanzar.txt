@@ -4,12 +4,11 @@ Hacer sin apuro:
 -Paginacion *Ir agregando
 -Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
 
-Hacer:
--Mas middlewares: isAdmin *A OK, isJugador *F, isJuegoteka *G
--Importa que usuario creo el encuentro? Si, agregar propiedad *F
--En postMan ver el script para que tome el token **A
--Agregar funciones al crud, ellas son: *Todos, cada uno su entidad
-Usuarios: jugador, administrador (todo), juegoteka 
+OK  -Importa que usuario creo el encuentro? Si, agregar propiedad *F
+Falta1  -En postMan ver el script para que tome el token **A 
+OK  -Agregar funciones al crud, ellas son: *Todos, cada uno su entidad
+OK  Usuarios: jugador, administrador (todo), juegoteka 
+
     USUARIO
 OK  login **todos
 OK  registrar (chequear userName diferentes) **jugadores, juegoteka
@@ -25,34 +24,47 @@ OK  añadir + participantes **jugadores
 OK  añadir + encuentro  **jugadores, juegoteka
 
     ENCUENTRO (desafio o torneo)
-    Front: terminos y condiciones!!!!
+OK  Front: terminos y condiciones!!!!
     DESAFIO
-    crear **jugador
-    modificar el estado  **jugador (solo el creador)
-    eliminar el encuentro  **jugador (solo el creador) + (noti) //front: dar de baja
-    añadir + jugadores  **jugador (solo el creador)
-    indicar ganador  **jugador (solo el creador) + (noti)
+OK  crear **jugador
+OK  modificar el estado  **jugador (solo el creador)
+OK  eliminar el encuentro  **jugador (solo el creador) + (noti) //front: dar de baja
+OK  añadir + jugadores  **jugador (solo el creador)
+OK  indicar ganador  **jugador (solo el creador) + (noti)
 
     TORNEO
-    crear **juegoteka
-    modificar el estado  **juegoteka
-    eliminar el encuentro  **juegoteka + (noti)
-    cambiar estado  juegoteka
-    añadir + jugadores  **jugadores
-    indicar ganador   juegoteka
+OK  crear **juegoteka
+OK  modificar el estado  **juegoteka
+OK  eliminar el encuentro  **juegoteka + (noti)
+OK  cambiar estado  juegoteka
+OK  añadir + jugadores  **jugadores
+OK  indicar ganador   juegoteka
 
     JUEGO
-    crear (chequear x nombre) **juegoteka
-    modificar **juegoteka
-    eliminar **juegoteka
-    ver x nombre **todos
-    ver x cant jugadores **todos
-    filtro duracion  **todos
+OK  crear (chequear x nombre) **juegoteka
+OK  modificar **juegoteka
+OK  eliminar **juegoteka
+OK  ver x nombre **todos
+OK  ver x cant jugadores **todos
+OK  filtro duracion  **todos
 
 
 -cambiar la ip en mongo atlas por la de render
 
 
-OK **Agus -> Mejorar Jornada -> model y controller
-OK **Agus -> Mejorar Usuario -> controller (falta update)
-OK **Agus -> Chequear si pongo json sin x propiedad, si lo valida
+OK  **Agus -> Mejorar Jornada -> model y controller
+OK  **Agus -> Mejorar Usuario -> controller (falta update)
+OK  **Agus -> Chequear si pongo json sin x propiedad, si lo valida
+
+--verificar:
+OK  no ingresen campos nulos
+HACER *verificar por ej: creo jornada y los encuentros que paso que existan, usuarios,juegos
+
+HACER -Agregar: *cantidad de jugadores en un encuentro
+          *cantidad de jugadores en una jornada
+          *cantidad de encuentros?
+          //porque hoy no se verifica!
+
+Sacar la duplicacion en cargar jornada,jugadores,etc
+
+HACER isAdmin cambia a validarRol y lo anido a el Diccionario

@@ -8,7 +8,7 @@ const express = require("express");
 const router = express.Router();
 const encuentroController = require("../controllers/encuentroController");
 //middlewares
-const {autenticarToken, isJuegoteka} = require("../middlewares/authMiddleware");
+const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware");
 //const {esJdor} = require("../middlewares/esUsuarioMiddleware");
 const {isCreator} = require("../middlewares/isCreatorMiddleware");
 

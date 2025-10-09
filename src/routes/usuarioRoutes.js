@@ -2,18 +2,19 @@
 const express = require("express");
 const router = express.Router();
 const usuarioController = require("../controllers/usuarioController");
-//const {autenticarToken} = require("../middlewares/authMiddleware");
+const {autenticarToken,isJuegoteka} = require("../middlewares/authMiddleware");
+const {isAdmin} = require("../middlewares/isAdmin");
+const {isJugadorMiddleware} = require("../middlewares/isJugadorMiddleware");
 
-
- 
+  
 // CRUD
-router.get("/",usuarioController.getAllUsuarios);
-router.get("/getId/:id", usuarioController.getUsuarioById);
-router.get("/getUsername/:userName", usuarioController.getUsuarioByUsername);
-router.post("/registrar", usuarioController.registrar);
+router.get("/", autenticarToken,usuarioController.getAllUsuarios);
+router.get("/getId/:id",autenticarToken, usuarioController.getUsuarioById);
+router.get("/getUsername/:userName",autenticarToken, usuarioController.getUsuarioByUsername);
+router.post("/registrar",usuarioController.registrar);
 router.post("/login", usuarioController.login);
-router.put("/:id", usuarioController.updateUsuario);
-router.put("/cambiarPassword", usuarioController.updatePassword);
-router.delete("/:id", usuarioController.deleteUsuario);
+router.put("/:id",autenticarToken, usuarioController.updateUsuario);
+router.put("/cambiarPassword",autenticarToken, usuarioController.updatePassword);
+router.delete("/:id",autenticarToken, usuarioController.deleteUsuario);
 
 module.exports = router;

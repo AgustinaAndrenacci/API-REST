@@ -144,7 +144,13 @@ exports.createEncuentro = async (req, res) => {
     if (route.includes("desafio")) nuevo.tipo = 'desafio';  //If redundante, tomar de regex
     const saved = await nuevo.save();
 
-    res.status(201).json(saved);
+    //res.status(201).json(saved);
+    res.status(201).json({ message: "Encuentro Creado",
+        Encuentro:{
+          id: saved._id,
+          tipo: saved.tipo,
+          estado: saved.estado
+          }});
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

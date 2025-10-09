@@ -17,6 +17,10 @@ const jugadorSchema = new mongoose.Schema({
   nombre: { type: String },
   apellido:{ type: String },
   UserName :{ type: String },
+  estado: { 
+      type: String, 
+      enum: ["pendiente", "confirmado"], 
+      default: "pendiente"},
   
 });
 

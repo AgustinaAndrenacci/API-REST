@@ -18,11 +18,11 @@ const {isCreator} = require("../middlewares/isCreatorMiddleware");
 router.get ("/", encuentroController.getAllEncuentros);
  
 
-// C - Crear un nuevo encuentro
+// C - Crear un nuevo encuentro--> ojo, solo desde UPDATE Jornada
 router.post("/torneo", encuentroController.createEncuentro);
 router.post("/desafio", encuentroController.createEncuentro);
 
-// R  -Leer un documento, Read
+// R  -Leer un encuentro, Read
 //      get all 
 router.get("/torneo", encuentroController.getAllEncuentros);
 router.get("/desafio", encuentroController.getAllEncuentros);

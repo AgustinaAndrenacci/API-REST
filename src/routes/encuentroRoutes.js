@@ -43,7 +43,7 @@ router.get("/:tipo/organizador/:id_jugador", encuentroController.getEncuentrosBy
 router.put(":id", autenticarToken,isCreator, encuentroController.updateEncuentro);
 
 // D - delete
-router.delete("/torneo/:id",autenticarToken, isJuegoteka,isCreator, encuentroController.deleteEncuentro);
+router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
 router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); 
 
 // :)

@@ -43,6 +43,7 @@ exports.deleteJornada = (req, res) => {
 */
 
 const Jornada = require("../models/jornadaModel");
+const encuentro = require("./encuentroController");
 
 exports.getAllJornadas = async (req, res) => {
   try {
@@ -97,7 +98,9 @@ exports.updateJornadaEncuentros = async (req, res) => {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }
     else{//push: actualiza y no pisa
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros } }, { new: true, runValidators: true });
+      //crear el encuentro en la bd
+      const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
         : res.status(404).json({ error: "Jornada no encontrada" }); //false
@@ -117,10 +120,21 @@ exports.updateJornadaJugadores = async (req, res) => {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }
     else{//push: actualiza y no pisa
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos } }, { new: true, runValidators: true });
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+      //verifico que la cantidad de jugadores no supere la capacidad
+      const jornada = await Jornada.findById(id);
+      if (jornada) {
+        const cantidadJugadores = jornada.jugadoresInscriptos.length;
+        if (cantidadJugadores + jugadoresInscriptos.length > jornada.capacidad) {
+          res.status(400).json({ error: "Capacidad máxima superada" });
+        }
+        else{
+          const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos } }, { new: true, runValidators: true });
+          res.json(jornadaActualizada) //true
+          }
+      }
+      else{
+        res.status(404).json({ error: "Jornada no encontrada" }); //false
+      }
 
     }
 
@@ -172,10 +186,57 @@ exports.updateJornadaEstado = async (req, res) => {
 exports.deleteJornada = async (req, res) => {
   try {
     const jornadaEliminada = await Jornada.findByIdAndDelete(req.params.id);
-    jornadaEliminada
-      ? res.json({ message: "Jornada eliminada", jornadaEliminada }) //true
-      : res.status(404).json({ error: "Jornada no encontrada" }); //false
+    if(jornadaEliminada){
+      res.json({ message: "Jornada eliminada", jornadaEliminada }); //true
+      //borrar todos los encuentros asociados a la jornada
+      eliminarEncuentrosPorJornada(jornadaEliminada);
+    }
+    else{
+      res.status(404).json({ error: "Jornada no encontrada" }); //false
+    }
   } catch (err) {
     res.status(500).json({ error: "Error al eliminar jornada" });
+  }
+};
+
+exports.countJugadoresEnJornada = async (req, res) => {
+  try {
+    const id = req.params.id; // Usar el ID de la URL
+    const jornada = await Jornada.findById(id);
+    if (!jornada) {
+      res.status(404).json({ error: "Jornada no encontrada" });
+    }
+    else{
+      const cantidadJugadores = jornada.jugadoresInscriptos.length;
+      //res.json({ cantidadJugadores });
+    }
+    return cantidadJugadores;
+  } catch (err) {
+    res.status(500).json({ error: "Error al contar jugadores en la jornada" });
+  }
+};
+
+exports.eliminarEncuentrosPorJornada = async (jornadaEliminada) => {
+  try {
+        jornadaEliminada.encuentros.forEach(async (encuentroId) => {
+        await encuentro.deleteEncuentro(encuentroId);
+      });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+exports.crearEncuentrosPorJornada = async (encuentroJson) => {
+  //me falta el id que se crea una vez en createEncuentro
+  try {
+      encuentroJson.forEach(async (encuentroData) => {
+      const encuentroConId = await encuentro.createEncuentro(encuentroData);
+      //crear un vector con encuentroConId
+      encuentrosConId.push(encuentroConId);
+
+      return encuentrosConId;
+    });
+  } catch (err) {
+    console.error(err);
   }
 };

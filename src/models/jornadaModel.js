@@ -69,6 +69,7 @@ const jornadaSchema = new mongoose.Schema(
     ],
     jugadoresInscriptos: [ //false
       {
+        //Usar referencia para no tener problema en el modificar
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
         userName: { type: String, required: true },
         nombre: { type: String, required: true },
@@ -83,7 +84,7 @@ const jornadaSchema = new mongoose.Schema(
           type: String, 
           enum: ["Pendiente", "En proceso", "Finalizado", "Abierto", "Cerrado"], 
           required: true 
-               }
+          }
       }
     ]
   },

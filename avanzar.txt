@@ -5,7 +5,7 @@ Hacer sin apuro:
 -Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
 
 OK  -Importa que usuario creo el encuentro? Si, agregar propiedad *F
-Falta1  -En postMan ver el script para que tome el token **A 
+OK  -En postMan ver el script para que tome el token **A 
 OK  -Agregar funciones al crud, ellas son: *Todos, cada uno su entidad
 OK  Usuarios: jugador, administrador (todo), juegoteka 
 
@@ -13,7 +13,7 @@ OK  Usuarios: jugador, administrador (todo), juegoteka
 OK  login **todos
 OK  registrar (chequear userName diferentes) **jugadores, juegoteka
 OK  dame datos del usuario **todos
-PROBAR    cambiar contraseña  **todos la suya
+OK  cambiar contraseña  **todos la suya
 
     JORNADA
 OK  crear **juegoteka
@@ -43,13 +43,13 @@ OK  indicar ganador   juegoteka
     JUEGO
 OK  crear (chequear x nombre) **juegoteka
 OK  modificar **juegoteka
-OK  eliminar **juegoteka
+OK  eliminar **ADMIN
 OK  ver x nombre **todos
 OK  ver x cant jugadores **todos
 OK  filtro duracion  **todos
 
 
--cambiar la ip en mongo atlas por la de render
+FALTA   -cambiar la ip en mongo atlas por la de render
 
 
 OK  **Agus -> Mejorar Jornada -> model y controller
@@ -58,13 +58,27 @@ OK  **Agus -> Chequear si pongo json sin x propiedad, si lo valida
 
 --verificar:
 OK  no ingresen campos nulos
-HACER *verificar por ej: creo jornada y los encuentros que paso que existan, usuarios,juegos
+HACER *verificar por ej:  *F y *A
+        creo jornada y los encuentros que paso que existan,
+        usuarios,juegos
 
-HACER -Agregar: *cantidad de jugadores en un encuentro
-          *cantidad de jugadores en una jornada
-          *cantidad de encuentros?
-          //porque hoy no se verifica!
+HACER -Agregar: *cantidad de jugadores en un encuentro *F
+OK              *cantidad de jugadores en una jornada *A
+HACER           *cantidad de encuentros? *F
 
-Sacar la duplicacion en cargar jornada,jugadores,etc
+Sacar la duplicacion en cargar jornada,jugadores,etc *A
 
-HACER isAdmin cambia a validarRol y lo anido a el Diccionario
+OK  Hacer que cada jugador pueda modificar su propio usuario y pass, *a
+que cada persona su encuentro?
+
+HACER isAdmin cambia a validarRol y lo anido a el Diccionario *G
+
+cuando se crea una jornada, no se crean encuentros-
+
+Charla 9/10:
+-Juego, que funciones verdaderamente hace c/u
+-Relacion jornada-encuentro (ABME)
+-
+//Usar referencia para no tener problema en el modificar
+Usuario-Jornada y Usuario-Encuentro
+Chequear que usuarios se pueden borrar y ver la relacion con jornada,encuentro

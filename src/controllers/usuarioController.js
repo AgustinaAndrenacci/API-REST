@@ -228,24 +228,43 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-//Falta chequear si existe el userName
 exports.updatePassword = async (req, res) => {
-  try {
-    // Capturar el userName del token
-    const userName = req.usuario.userName; 
-    const {pass} = req.body; 
+    try {
+        //obtiene el id a traves del token
+       // const _id = req.user._id; // ID del usuario a modificar (del token)
+        const id = req.params.id; // ID del usuario a modificar (de la URL)
+        const { pass } = req.body; 
+        
+        if (!pass) {
+            return res.status(400).json({ error: "Debe ingresar la nueva contraseña" });
+        }
 
-    if(!pass){
-        res.status(400).json({ error: "Debe ingresar una contraseña" });
-    } 
-    else {
-        Usuario.save(req.params.id, req.body, { new: true });
-        res.json({"mensaje": "Contraseña actualizada correctamente", Usuario});
+        const datosAActualizar = { pass }; // Objeto solo con el campo 'pass'
+
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(
+            id, 
+            datosAActualizar, 
+            { 
+                new: true,
+                runValidators: true, // Ejecuta validaciones del modelo antes de actualizar
+                // **CLAVE:** Excluir el campo 'pass' de la respuesta
+                select: '-pass -__v' 
+            }
+        );
+
+        if (usuarioActualizado) {
+            // El usuario fue encontrado y actualizado. Lo devolvemos sin la contraseña.
+            res.json({ message: "Contraseña actualizada correctamente" });
+        } else {
+            // No se encontró ningún usuario con ese ID
+            res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+    } catch (err) {
+        // En caso de errores de validación de Mongoose, el 500 se activa.
+        console.error("Error en updatePassword:", err); 
+        res.status(500).json({ error: "Error al actualizar usuario" });
     }
-
-  } catch (err) {
-    res.status(500).json({ error: "Error al actualizar usuario" });
-  }
 };
 
 exports.deleteUsuario = async (req, res) => {

@@ -72,7 +72,8 @@ exports.getUsuarioById = async (req, res) => {
             id: usuario._id,
             user: usuario.userName,
             rol: usuario.rol,
-            nombre: usuario.nombre + " " + usuario.apellido,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
             foto: usuario.foto,
           telefono: usuario.telefono,
          mail: usuario.mail
@@ -82,6 +83,17 @@ exports.getUsuarioById = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Error al buscar usuario" });
   }
+};
+
+exports.findUserForJornada = async (id) => {
+    try {
+        //no usa req y res
+        // Busca el usuario por ID y solo selecciona los campos necesarios para la inscripción
+        const usuario = await Usuario.findById(id, 'userName nombre apellido');
+        return usuario; // Retorna el objeto Mongoose o null/undefined si no lo encuentra
+    } catch (err) {
+        console.error("Error al buscar usuario para inscripción:", err);
+    }
 };
 
 exports.getUsuarioByUsername = async (req, res) => {

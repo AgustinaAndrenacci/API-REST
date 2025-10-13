@@ -47,6 +47,7 @@ exports.deleteJornada = (req, res) => {
 const Jornada = require("../models/jornadaModel");
 const Usuario = require('../models/usuarioModel');
 const encuentro = require("./encuentroController");
+const usuario = require("./usuarioController");
 
 exports.getAllJornadas = async (req, res) => {
   try {
@@ -116,10 +117,58 @@ exports.updateJornadaEncuentros = async (req, res) => {
 };
 
 //Un jugador se inscribe en la jornada, no un conjunto
+exports.updateJornadaJugador = async (req, res) => {
+  try {
+      const idJornada = req.params.id; // Usar el ID de la URL
+      const idJugador = req.user.id; // Usar el ID del token 
+
+      const datosJugador = await usuario.findUserForJornada(idJugador);
+
+      //push: actualiza y no pisa
+      const jornada = await Jornada.findById(idJornada);
+      
+      if (jornada) {
+        //verifico que el usuario no este anotado
+        const usuarioYaAnotado = jornada.jugadoresInscriptos.find(jugador => String(jugador.id) === String(idJugador));
+        if (usuarioYaAnotado) {
+          res.status(400).json({ error: "El jugador ya está anotado en la jornada" });
+        }else{
+          //verifico que la cantidad de jugadores no supere la capacidad
+          const cantidadJugadores = jornada.jugadoresInscriptos.length;
+          if (cantidadJugadores + 1 > jornada.capacidad) {
+            res.status(400).json({ error: "Capacidad máxima superada" });
+          }
+          else{
+            const jornadaActualizada = await Jornada.findByIdAndUpdate(
+              idJornada, 
+              {// Se agrega el objeto de jugador directamente, no dentro de un array
+              $push: { 
+                  jugadoresInscriptos: {
+                      id: idJugador,
+                      userName: datosJugador.userName,
+                      nombre: datosJugador.nombre,
+                      apellido: datosJugador.apellido
+                  } 
+              } 
+              }, { new: true, runValidators: true });
+            res.json(jornadaActualizada) //true
+            }
+      }}
+      else{
+        res.status(404).json({ error: "Jornada no encontrada" }); //false
+      }
+    } catch (err) {
+    
+  console.error("Error detallado al actualizar jornada:", err); 
+        res.status(500).json({ error: "Error al actualizar jornada" });
+        }
+};
+
+//viejo
 exports.updateJornadaJugadores = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    //const { jugadorInscripto } = req.body;
+    const { jugadorInscripto } = req.body;
     if (!jugadorInscripto) {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }

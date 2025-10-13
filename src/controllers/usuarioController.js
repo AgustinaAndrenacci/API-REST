@@ -106,6 +106,27 @@ exports.getUsuarioByUsername = async (req, res) => {
   }
 };
 
+exports.getPerfil = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.user.id);
+    usuario
+      ? res.json({
+          usuario: {
+            id: usuario._id,
+            user: usuario.userName,
+            rol: usuario.rol,
+            nombre: usuario.nombre + " " + usuario.apellido,
+            foto: usuario.foto,
+            telefono: usuario.telefono,
+            mail: usuario.mail
+          },
+        }) //true
+      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+  } catch (err) {
+    res.status(500).json({ error: "Error al buscar usuario" });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     //desestructuracion en javascript

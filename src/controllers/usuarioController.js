@@ -198,7 +198,8 @@ exports.registrar = async (req, res) => {
 //El userName no se modifica!
 exports.updateUsuario = async (req, res) => {
   try {
-    const id = req.params.id; // Usar el ID de la URL
+    const id = req.user.id //id del token
+    //const id = req.params.id; // Usar el ID de la URL
     const datosAActualizar = { ...req.body };
     //que no se guarde el userName
     delete datosAActualizar.userName;
@@ -231,8 +232,7 @@ exports.updateUsuario = async (req, res) => {
 exports.updatePassword = async (req, res) => {
     try {
         //obtiene el id a traves del token
-       // const _id = req.user._id; // ID del usuario a modificar (del token)
-        const id = req.params.id; // ID del usuario a modificar (de la URL)
+        const id = req.user.id
         const { pass } = req.body; 
         
         if (!pass) {

@@ -14,8 +14,8 @@ router.get("/getId/:id",autenticarToken, usuarioController.getUsuarioById);
 router.get("/getUsername/:userName",autenticarToken, usuarioController.getUsuarioByUsername);
 router.post("/registrar",usuarioController.registrar);
 router.post("/login", usuarioController.login);
-router.put("/:id",autenticarToken,isMe, usuarioController.updateUsuario);
-router.put("/cambiarPassword/:id",autenticarToken, isMe, usuarioController.updatePassword);
+router.put("/",autenticarToken, usuarioController.updateUsuario);
+router.put("/cambiarPassword",autenticarToken, usuarioController.updatePassword);
 router.delete("/:id",autenticarToken, usuarioController.deleteUsuario);
 
 module.exports = router;

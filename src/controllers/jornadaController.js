@@ -42,7 +42,10 @@ exports.deleteJornada = (req, res) => {
 
 */
 
+
+
 const Jornada = require("../models/jornadaModel");
+const Usuario = require('../models/usuarioModel');
 const encuentro = require("./encuentroController");
 
 exports.getAllJornadas = async (req, res) => {
@@ -112,11 +115,12 @@ exports.updateJornadaEncuentros = async (req, res) => {
   }
 };
 
+//Un jugador se inscribe en la jornada, no un conjunto
 exports.updateJornadaJugadores = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    const { jugadoresInscriptos } = req.body;
-    if (!jugadoresInscriptos) {
+    //const { jugadorInscripto } = req.body;
+    if (!jugadorInscripto) {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }
     else{//push: actualiza y no pisa
@@ -124,11 +128,11 @@ exports.updateJornadaJugadores = async (req, res) => {
       const jornada = await Jornada.findById(id);
       if (jornada) {
         const cantidadJugadores = jornada.jugadoresInscriptos.length;
-        if (cantidadJugadores + jugadoresInscriptos.length > jornada.capacidad) {
+        if (cantidadJugadores + 1 > jornada.capacidad) {
           res.status(400).json({ error: "Capacidad máxima superada" });
         }
         else{
-          const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos } }, { new: true, runValidators: true });
+          const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos: jugadorInscripto } }, { new: true, runValidators: true });
           res.json(jornadaActualizada) //true
           }
       }
@@ -137,6 +141,7 @@ exports.updateJornadaJugadores = async (req, res) => {
       }
 
     }
+    
 
     } catch (err) {
     res.status(500).json({ error: "Error al actualizar jornada" });
@@ -150,7 +155,8 @@ exports.updateJornadaJuegos = async (req, res) => {
     if (!juegosDisponibles) {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }
-    else{//push: actualiza y no pisa
+    else{//push: actualiza y no pisa   
+
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { juegosDisponibles } }, { new: true, runValidators: true });
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
@@ -162,6 +168,7 @@ exports.updateJornadaJuegos = async (req, res) => {
     res.status(500).json({ error: "Error al actualizar jornada" });
   }
 };
+
 //este no va
 exports.updateJornadaEstado = async (req, res) => {
   try {
@@ -236,6 +243,17 @@ exports.crearEncuentrosPorJornada = async (encuentroJson) => {
 
       return encuentrosConId;
     });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+exports.validarJugadoresInscriptos = async (jugadoresInscriptos) => {
+  try {
+    logConsole("Validando jugadores inscriptos:");
+    const jugadoresExistentes = await Usuario.find({ userName: { $in: jugadoresInscriptos } });
+    const jugadoresNoExistentes = jugadoresInscriptos.filter(userName => !jugadoresExistentes.some(usuario => usuario.userName === userName));
+    return jugadoresNoExistentes;
   } catch (err) {
     console.error(err);
   }

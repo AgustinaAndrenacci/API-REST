@@ -42,7 +42,7 @@ OK  indicar ganador   juegoteka
 
     JUEGO
 OK  crear (chequear x nombre) **juegoteka
-OK  modificar **juegoteka
+OK  modificar **ADMIN
 OK  eliminar **ADMIN
 OK  ver x nombre **todos
 OK  ver x cant jugadores **todos
@@ -66,7 +66,7 @@ HACER -Agregar: *cantidad de jugadores en un encuentro *F
 OK              *cantidad de jugadores en una jornada *A
 HACER           *cantidad de encuentros? *F
 
-Sacar la duplicacion en cargar jornada,jugadores,etc *A
+OK Sacar la duplicacion en cargar jornada,jugadores,etc *A
 
 OK  Hacer que cada jugador pueda modificar su propio usuario y pass, *a
 que cada persona su encuentro?
@@ -85,12 +85,17 @@ Chequear que usuarios se pueden borrar y ver la relacion con jornada,encuentro
 
 
 //AGUS*-*-*-
-Preguntar profe:
-importa que recibe y completo?
-por ejemplo: solo username y yo pongo id, nombre, ape
-
-creo jornada chequeo que existan los usuarios,juegos
-Sacar la duplicacion en cargar jugadores,juegos
-Hacer que los updateJornadaX sean unicos y n codigo repedito
 ver cuando se cambian los datos, ej: se modifica tal dato de usuario
 
+
+Hacer:
+misJuegos (añadir propiedad a los usuarios)
+
+jornada(juegoteka): cuando creo la jornada, automaticamente se colocan en la propiedad jornada.juegosDisponibles, el vector usuario(juegoteka).misJuegos 
+
+endpoint jornada:juegos SACAR
+
+jornada: estado
+enum: suspendido, cancelado, activo
+
+ver funciones de mis juegos

@@ -97,12 +97,21 @@ exports.updateJornada = async (req, res) => {
 exports.updateJornadaEncuentros = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    const { encuentros } = req.body;
-    if (!encuentros) {
+    const { encuentros } = req.body; //uno solo
+    if (!encuentros) { 
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }
     else{//push: actualiza y no pisa
       //crear el encuentro en la bd
+      //json encuentros
+      
+      //añado el createdBy en encuentros
+      encuentros.createdBy = req.user.id; //json
+      
+      //const encuentroConId = await encuentroService.create(encuentros);
+      
+      //añadir encuentroConId a la jornada
+
       const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
       jornadaActualizada
@@ -199,8 +208,9 @@ exports.updateJornadaJugadores = async (req, res) => {
 
 exports.updateJornadaJuegos = async (req, res) => {
   try {
+    //directamente carga todos los de misJuegos
     const id = req.params.id; // Usar el ID de la URL
-    const { juegosDisponibles } = req.body;
+    const juegosDisponibles = await usuarioController.getMisJuegos();
     if (!juegosDisponibles) {
       res.status(400).json({ error: "Faltan campos obligatorios" });
     }

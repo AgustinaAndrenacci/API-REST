@@ -221,6 +221,7 @@ exports.registrar = async (req, res) => {
     }
     
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al crear usuario" });
   }
 };
@@ -322,5 +323,55 @@ exports.deleteUsuario = async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+};
+
+exports.getMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    //const juegos = await usuario.MisJuegos(idUsuario); // Buscar juegos creados por el usuario
+    res.json(juegos);
+  } catch (err) {
+    console.error("Error al obtener los juegos del usuario:", err);
+    res.status(500).json({ error: "Error al obtener los juegos del usuario" });
+  }
+};
+
+exports.agregarMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    const { juegos } = req.body; // todos los juegos en el json
+
+    const flag = juegosServices.verificarExistenciaJuegos(juegos);
+    //true: existen todos false:alguno no existe
+    if (!flag) {
+      res.status(400).json({ error: "Algunos juegos no existen" });
+    }else{
+      // Lógica para agregar los juegos a la lista de juegos del usuario
+          const juegosAgregados = await usuario.agregarJuegos(idUsuario, juegos);
+          res.json(juegosAgregados);
+    }
+
+  } catch (err) {
+    console.error("Error al agregar juego a mis juegos:", err);
+    res.status(500).json({ error: "Error al agregar juego a mis juegos" });
+  }
+};
+
+exports.eliminarJuegoDeMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    const { juegoId } = req.body; // Obtener el ID del juego a eliminar
+
+    if (!juegoId) {
+      return res.status(400).json({ error: "Falta el ID del juego" });
+    }
+
+    // Lógica para eliminar el juego de la lista de juegos del usuario
+    const juegoEliminado = await usuario.eliminarJuego(idUsuario, juegoId);
+    res.json(juegoEliminado);
+  } catch (err) {
+    console.error("Error al eliminar juego de mis juegos:", err);
+    res.status(500).json({ error: "Error al eliminar juego de mis juegos" });
   }
 };

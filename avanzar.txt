@@ -42,8 +42,8 @@ OK  indicar ganador   juegoteka
 
     JUEGO
 OK  crear (chequear x nombre) **juegoteka
-OK  modificar **juegoteka
-OK  eliminar **juegoteka
+OK  modificar **ADMIN
+OK  eliminar **ADMIN
 OK  ver x nombre **todos
 OK  ver x cant jugadores **todos
 OK  filtro duracion  **todos

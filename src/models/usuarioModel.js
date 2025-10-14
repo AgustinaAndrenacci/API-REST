@@ -66,6 +66,7 @@ const usuarioSchema = new mongoose.Schema(
     telefono: { type: String },
     mail: { type: String, required: true, trim: true },
     direccion: { type: String, required: false, trim: true },
+    //misJuegos {vector}
     //inbox: { type: [msjSchema], default: [] },
     //msjEnviados: { type: [msjSchema], default: [] }
   },

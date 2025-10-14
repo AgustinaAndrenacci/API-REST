@@ -26,10 +26,11 @@ const jugadorSchema = new mongoose.Schema({
 
 const organizadorSchema = new mongoose.Schema({
   id_usuario: { type: String },
-  nombre: { type: String },
-  apellido:{ type: String },
   UserName :{ type: String },
-  
+  tipo: { 
+      type: String, 
+      enum: ["jugador", "juegoteca"],
+      required: true}, 
 });
 
 

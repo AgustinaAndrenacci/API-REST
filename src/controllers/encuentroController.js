@@ -1,3 +1,167 @@
+
+/**
+ * controllers/encuentroController.js
+ *
+ * Controller refactorizado: delega la lógica al servicio (encuentroService).
+ * Mantiene la firma (req, res) para que las rutas no requieran cambios.
+ *
+ * Manejo de errores:
+ *  - Errores de validación del service devuelven 400 (Bad Request)
+ *  - Errores por recurso no encontrado devuelven 404
+ *  - Errores inesperados devuelven 500
+ *
+ * Nota: si querés otro esquema de códigos HTTP (ej: 422 para validaciones), lo adapto.
+ */
+
+const encuentroService = require("../services/encuentroService");
+
+// Helper para mapear errores a códigos HTTP
+function mapErrorToStatus(err) {
+  const msg = (err && err.message) || "";
+  // reglas simples: si mensaje contiene 'no encontrado' o 'no existe' -> 404
+  if (/no encontrado|no existe|not found/i.test(msg)) return 404;
+  // si mensaje contiene 'invalid|inválid|id inválido' -> 400
+  if (/inválid|invalid|requerido|obligatorio|no encontrado/i.test(msg)) return 400;
+  // default 400 para errores de validación y 500 para otros
+  return 400;
+}
+
+// GET / (o rutas /torneo, /desafio)
+exports.getAllEncuentros = async (req, res) => {
+  try {
+    const route = req.path || "";
+    const filtro = {};
+    if (route.includes("torneo")) filtro.tipo = "torneo";
+    if (route.includes("desafio")) filtro.tipo = "desafio";
+    // Podés agregar paginación: req.query.page, limit, etc.
+    const data = await encuentroService.getAll(filtro);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err) || 500;
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+exports.getEncuentroById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const encuentro = await encuentroService.getById(id);
+    return res.json(encuentro);
+  } catch (err) {
+    const msg = err.message || "";
+    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+    return res.status(400).json({ error: msg });
+  }
+};
+
+exports.getEncuentrosByEstado = async (req, res) => {
+  try {
+    const estado = req.params.estado || req.query.estado || req.body.estado;
+    if (!estado) return res.status(400).json({ error: "Parámetro 'estado' requerido." });
+    const data = await encuentroService.getByEstado(estado);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err);
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+exports.getByCreador = async (req, res) => {
+  try {
+    const idCreador = req.params.creadorId || req.query.creadorId || req.body.creadorId;
+    if (!idCreador) return res.status(400).json({ error: "creadorId requerido." });
+    const data = await encuentroService.getByCreador(idCreador);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err);
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+exports.getByGanador = async (req, res) => {
+  try {
+    const idGanador = req.params.ganadorId || req.query.ganadorId || req.body.ganadorId;
+    if (!idGanador) return res.status(400).json({ error: "ganadorId requerido." });
+    const data = await encuentroService.getByGanador(idGanador);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err);
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+exports.getByJuego = async (req, res) => {
+  try {
+    const idJuego = req.params.juegoId || req.query.juegoId || req.body.juegoId;
+    if (!idJuego) return res.status(400).json({ error: "juegoId requerido." });
+    const data = await encuentroService.getByJuego(idJuego);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err);
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+exports.getByJugador = async (req, res) => {
+  try {
+    const idJugador = req.params.jugadorId || req.query.jugadorId || req.body.jugadorId;
+    if (!idJugador) return res.status(400).json({ error: "jugadorId requerido." });
+    const data = await encuentroService.getByJugador(idJugador);
+    return res.json(data);
+  } catch (err) {
+    const status = mapErrorToStatus(err);
+    return res.status(status).json({ error: err.message });
+  }
+};
+
+// POST /encuentro
+exports.createEncuentro = async (req, res) => {
+  try {
+    const payload = {... req.body};
+    const route = req.path;
+    if (route.includes("torneo")) payload.tipo = "torneo";
+    if (route.includes("desafio")) payload.tipo = "desafio";
+    
+    const created = await encuentroService.create(payload);
+    return res.status(201).json(created);
+  } catch (err) {
+    // si es validación, 400; si no, 500
+    const msg = err.message || "";
+    if (/no encontrado|no existe|no encontrado/i.test(msg)) return res.status(404).json({ error: msg });
+    return res.status(400).json({ error: msg });
+  }
+};
+
+// PUT /encuentros/:id
+exports.updateEncuentro = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updates = req.body;
+    const updated = await encuentroService.update(id, updates);
+    return res.json(updated);
+  } catch (err) {
+    const msg = err.message || "";
+    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+    return res.status(400).json({ error: msg });
+  }
+};
+
+// DELETE /encuentros/:id
+exports.deleteEncuentro = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await encuentroService.deleteById(id);
+    return res.json(result);
+  } catch (err) {
+    const msg = err.message || "";
+    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+    return res.status(400).json({ error: msg });
+  }
+};
+
+
+
+/*
 //
 //    encuentoController.js para mongoose
 //
@@ -177,7 +341,9 @@ exports.deleteEncuentro = async (req, res) => {
 };
 
 
+*/
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////
 ///

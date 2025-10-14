@@ -34,13 +34,16 @@ router.get ("/:id", encuentroController.getEncuentroById);
 
 /////
 router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
-router.get("/:tipo/ganador/:id_jugador", encuentroController.getEncuentrosByGanador);
-router.get("/:tipo/participante/:id_jugador", encuentroController.getEncuentrosByParticipante);
-router.get("/:tipo/organizador/:id_jugador", encuentroController.getEncuentrosByOrganizador);
+router.get("/:tipo/ganador/:id_jugador", encuentroController.getByGanador);
+router.get("/:tipo/participante/:id_jugador", encuentroController.getByJugador);
+router.get("/:tipo/organizador/:id_jugador", encuentroController.getByCreador);
 ////
 
 // U - Update, Actualizar un encuentro existente
 router.put(":id", autenticarToken,isCreator, encuentroController.updateEncuentro);
+
+//crear nueva ruta de Update solo para updetear parricipantes , no necesita ser creador.
+
 
 // D - delete
 router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);

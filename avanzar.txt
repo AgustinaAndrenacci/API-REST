@@ -19,27 +19,15 @@ OK  cambiar contraseña  **todos la suya
 OK  crear **juegoteka
 OK  modificar  **juegoteka
 OK  eliminar: dar de baja **juegoteka
-OK  añadir + JUEGO **juegoteka
 OK  añadir + participantes **jugadores
 OK  añadir + encuentro  **jugadores, juegoteka
 
     ENCUENTRO (desafio o torneo)
-OK  Front: terminos y condiciones!!!!
-    DESAFIO
-OK  crear **jugador
-OK  modificar el estado  **jugador (solo el creador)
-OK  eliminar el encuentro  **jugador (solo el creador) + (noti) //front: dar de baja
-OK  añadir + jugadores  **jugador (solo el creador)
-OK  indicar ganador  **jugador (solo el creador) + (noti)
-
-    TORNEO
-OK  crear **juegoteka
-OK  modificar el estado  **juegoteka
-OK  eliminar el encuentro  **juegoteka + (noti)
-OK  cambiar estado  juegoteka
-OK  añadir + jugadores  **jugadores
-OK  indicar ganador   juegoteka
-
+    OK  Front: terminos y condiciones!!!!
+    eliminar encuentro *creador
+    añadir + jugadores *jugadores
+    update *creador
+   
     JUEGO
 OK  crear (chequear x nombre) **juegoteka
 OK  modificar **ADMIN

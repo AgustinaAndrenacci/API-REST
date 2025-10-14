@@ -48,6 +48,13 @@ module.exports = { getAll, getById, create, update, remove };
 //mongoose
 const mongoose = require("mongoose");
 
+/*
+const msjSchema = new mongoose.Schema({
+  remitente: { type: usuarioSchema },
+  destinatario: { type: usuarioSchema },
+  body:{ type: String },
+  });
+*/
 const usuarioSchema = new mongoose.Schema(
   {
     userName: { type: String, required: true, trim: true },
@@ -60,6 +67,8 @@ const usuarioSchema = new mongoose.Schema(
     mail: { type: String, required: true, trim: true },
     direccion: { type: String, required: false, trim: true },
     //misJuegos {vector}
+    //inbox: { type: [msjSchema], default: [] },
+    //msjEnviados: { type: [msjSchema], default: [] }
   },
   { timestamps: true }
 );

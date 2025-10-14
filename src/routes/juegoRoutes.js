@@ -2,14 +2,14 @@
 const express = require("express");
 const router = express.Router();
 const juegoController = require("../controllers/juegoController");
-const {autenticarToken, isJuegoteka} = require("../middlewares/authMiddleware")
+const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware")
 
 // CRUD
 router.get("/", juegoController.getAllJuegos);
 router.get("/:id", juegoController.getJuegoById);
-router.post("/", autenticarToken, isJuegoteka, juegoController.createJuego);
-router.put("/:id", autenticarToken, isJuegoteka, juegoController.updateJuego);
-router.delete("/:id", autenticarToken, isJuegoteka, juegoController.deleteJuego);
+router.post("/create", autenticarToken, validarPermisoRuta, juegoController.createJuego);
+router.put("/update/:id", autenticarToken, validarPermisoRuta, juegoController.updateJuego);
+router.delete("/delete/:id", autenticarToken, validarPermisoRuta, juegoController.deleteJuego);
 
 //Nuevos Endpoints
 router.get("/nombre/:nombre", juegoController.getJuegoPorNombre);

@@ -10,51 +10,54 @@ const encuentroController = require("../controllers/encuentroController");
 //middlewares
 const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware");
 //const {esJdor} = require("../middlewares/esUsuarioMiddleware");
-//const {isJuegoteka} = require("../middlewares/isJuegotecaMiddleware");
 const {isCreator} = require("../middlewares/isCreatorMiddleware");
 
 
-//  Torneo
-// C - Crear un nuevo encuentro
-router.post("/torneo/", autenticarToken, validarPermisoRuta, encuentroController.createEncuentro);
-// R  -Leer un documento, Read
+//Rutas Generales
+
+router.get ("/", encuentroController.getAllEncuentros);
+ 
+
+// C - Crear un nuevo encuentro--> ojo, solo desde UPDATE Jornada
+router.post("/torneo", encuentroController.createEncuentro);
+router.post("/desafio", encuentroController.createEncuentro);
+
+// R  -Leer un encuentro, Read
 //      get all 
-router.get("/torneo/", encuentroController.getAllEncuentros);
+router.get("/torneo", encuentroController.getAllEncuentros);
+router.get("/desafio", encuentroController.getAllEncuentros);
+
 //      get byID
+router.get ("/:id", encuentroController.getEncuentroById);
+//router.get("/torneo/:id", encuentroController.getEncuentroById);
+//router.get("/desafio/:id", encuentroController.getEncuentroById);
 
 /////
-router.get("/torneo/estado/:estado", encuentroController.getEncuentrosByEstado);
-router.get("/torneo/ganador/:id_jugador", encuentroController.getEncuentrosByGanador);
-router.get("/torneo/participante/:id_jugador", encuentroController.getEncuentrosByParticipante);
-router.get("/torneo/organizador/:id_jugador", encuentroController.getEncuentrosByOrganizador);
-
+router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
+router.get("/:tipo/ganador/:id_jugador", encuentroController.getByGanador);
+router.get("/:tipo/participante/:id_jugador", encuentroController.getByJugador);
+router.get("/:tipo/organizador/:id_jugador", encuentroController.getByCreador);
 ////
-router.get("/torneo/:id", encuentroController.getEncuentroById);
+
 // U - Update, Actualizar un encuentro existente
-router.put("/torneo/:id", autenticarToken, validarPermisoRuta,isCreator, encuentroController.updateEncuentro);
-router.delete("/torneo/:id",autenticarToken, validarPermisoRuta,isCreator, encuentroController.deleteEncuentro);
+router.put(":id", autenticarToken,isCreator, encuentroController.updateEncuentro);
+
+//crear nueva ruta de Update solo para updetear parricipantes , no necesita ser creador.
+
+
+// D - delete
+router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
+router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); 
+
 // :)
 
 
-// Desafio
-// C - Crear un nuevo encuentro
-router.post("/desafio/",autenticarToken, encuentroController.createEncuentro);
-// R  -Leer un documento, Read
-//      get all 
-router.get("/desafio/", encuentroController.getAllEncuentros);
-//      get byID
 
 /////
-router.get("/desafio/estado/:estado", encuentroController.getEncuentrosByEstado);
-router.get("/desafio/ganador/:id_jugador", encuentroController.getEncuentrosByGanador);
-router.get("/desafio/participante/:id_jugador", encuentroController.getEncuentrosByParticipante);
-router.get("/desafio/organizador/:id_jugador", encuentroController.getEncuentrosByOrganizador);
-/////
-router.get("/desafio/:id", encuentroController.getEncuentroById);
-// U - Update, Actualizar un encuentro existente
-router.put("/desafio/:id",autenticarToken, encuentroController.updateEncuentro); //FALTA ES AUTOR??
-// D - Eliminar un encuentro
-router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); //FALTA ES AUTOR??
+
+
+
+
 
 module.exports = router;
 

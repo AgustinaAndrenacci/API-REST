@@ -17,15 +17,20 @@ const jugadorSchema = new mongoose.Schema({
   nombre: { type: String },
   apellido:{ type: String },
   UserName :{ type: String },
+  estado: { 
+      type: String, 
+      enum: ["pendiente", "confirmado"], 
+      default: "pendiente"},
   
 });
 
 const organizadorSchema = new mongoose.Schema({
   id_usuario: { type: String },
-  nombre: { type: String },
-  apellido:{ type: String },
   UserName :{ type: String },
-  
+  tipo: { 
+      type: String, 
+      enum: ["jugador", "juegoteca"],
+      required: true}, 
 });
 
 

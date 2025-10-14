@@ -24,6 +24,8 @@ const autenticarToken = (req, res, next) => {
 
 const validarPermisoRuta = async (req, res, next) => {
   let status = null;
+
+  
   if (req.user.rol === "administrador"){
     status = next();
   } else {

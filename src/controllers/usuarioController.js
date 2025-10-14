@@ -72,7 +72,8 @@ exports.getUsuarioById = async (req, res) => {
             id: usuario._id,
             user: usuario.userName,
             rol: usuario.rol,
-            nombre: usuario.nombre + " " + usuario.apellido,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
             foto: usuario.foto,
           telefono: usuario.telefono,
          mail: usuario.mail
@@ -82,6 +83,17 @@ exports.getUsuarioById = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Error al buscar usuario" });
   }
+};
+
+exports.findUserForJornada = async (id) => {
+    try {
+        //no usa req y res
+        // Busca el usuario por ID y solo selecciona los campos necesarios para la inscripción
+        const usuario = await Usuario.findById(id, 'userName nombre apellido');
+        return usuario; // Retorna el objeto Mongoose o null/undefined si no lo encuentra
+    } catch (err) {
+        console.error("Error al buscar usuario para inscripción:", err);
+    }
 };
 
 exports.getUsuarioByUsername = async (req, res) => {
@@ -100,6 +112,27 @@ exports.getUsuarioByUsername = async (req, res) => {
             mail: usuario.mail
       },
       }) //true
+      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+  } catch (err) {
+    res.status(500).json({ error: "Error al buscar usuario" });
+  }
+};
+
+exports.getPerfil = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.user.id);
+    usuario
+      ? res.json({
+          usuario: {
+            id: usuario._id,
+            user: usuario.userName,
+            rol: usuario.rol,
+            nombre: usuario.nombre + " " + usuario.apellido,
+            foto: usuario.foto,
+            telefono: usuario.telefono,
+            mail: usuario.mail
+          },
+        }) //true
       : res.status(404).json({ error: "Usuario no encontrado" }); //false
   } catch (err) {
     res.status(500).json({ error: "Error al buscar usuario" });
@@ -188,6 +221,7 @@ exports.registrar = async (req, res) => {
     }
     
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al crear usuario" });
   }
 };
@@ -198,7 +232,8 @@ exports.registrar = async (req, res) => {
 //El userName no se modifica!
 exports.updateUsuario = async (req, res) => {
   try {
-    const id = req.params.id; // Usar el ID de la URL
+    const id = req.user.id //id del token
+    //const id = req.params.id; // Usar el ID de la URL
     const datosAActualizar = { ...req.body };
     //que no se guarde el userName
     delete datosAActualizar.userName;
@@ -228,24 +263,42 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-//Falta chequear si existe el userName
 exports.updatePassword = async (req, res) => {
-  try {
-    // Capturar el userName del token
-    const userName = req.usuario.userName; 
-    const {pass} = req.body; 
+    try {
+        //obtiene el id a traves del token
+        const id = req.user.id
+        const { pass } = req.body; 
+        
+        if (!pass) {
+            return res.status(400).json({ error: "Debe ingresar la nueva contraseña" });
+        }
 
-    if(!pass){
-        res.status(400).json({ error: "Debe ingresar una contraseña" });
-    } 
-    else {
-        Usuario.save(req.params.id, req.body, { new: true });
-        res.json({"mensaje": "Contraseña actualizada correctamente", Usuario});
+        const datosAActualizar = { pass }; // Objeto solo con el campo 'pass'
+
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(
+            id, 
+            datosAActualizar, 
+            { 
+                new: true,
+                runValidators: true, // Ejecuta validaciones del modelo antes de actualizar
+                // **CLAVE:** Excluir el campo 'pass' de la respuesta
+                select: '-pass -__v' 
+            }
+        );
+
+        if (usuarioActualizado) {
+            // El usuario fue encontrado y actualizado. Lo devolvemos sin la contraseña.
+            res.json({ message: "Contraseña actualizada correctamente" });
+        } else {
+            // No se encontró ningún usuario con ese ID
+            res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+    } catch (err) {
+        // En caso de errores de validación de Mongoose, el 500 se activa.
+        console.error("Error en updatePassword:", err); 
+        res.status(500).json({ error: "Error al actualizar usuario" });
     }
-
-  } catch (err) {
-    res.status(500).json({ error: "Error al actualizar usuario" });
-  }
 };
 
 exports.deleteUsuario = async (req, res) => {
@@ -270,5 +323,55 @@ exports.deleteUsuario = async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+};
+
+exports.getMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    //const juegos = await usuario.MisJuegos(idUsuario); // Buscar juegos creados por el usuario
+    res.json(juegos);
+  } catch (err) {
+    console.error("Error al obtener los juegos del usuario:", err);
+    res.status(500).json({ error: "Error al obtener los juegos del usuario" });
+  }
+};
+
+exports.agregarMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    const { juegos } = req.body; // todos los juegos en el json
+
+    const flag = juegosServices.verificarExistenciaJuegos(juegos);
+    //true: existen todos false:alguno no existe
+    if (!flag) {
+      res.status(400).json({ error: "Algunos juegos no existen" });
+    }else{
+      // Lógica para agregar los juegos a la lista de juegos del usuario
+          const juegosAgregados = await usuario.agregarJuegos(idUsuario, juegos);
+          res.json(juegosAgregados);
+    }
+
+  } catch (err) {
+    console.error("Error al agregar juego a mis juegos:", err);
+    res.status(500).json({ error: "Error al agregar juego a mis juegos" });
+  }
+};
+
+exports.eliminarJuegoDeMisJuegos = async (req, res) => {
+  try {
+    const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
+    const { juegoId } = req.body; // Obtener el ID del juego a eliminar
+
+    if (!juegoId) {
+      return res.status(400).json({ error: "Falta el ID del juego" });
+    }
+
+    // Lógica para eliminar el juego de la lista de juegos del usuario
+    const juegoEliminado = await usuario.eliminarJuego(idUsuario, juegoId);
+    res.json(juegoEliminado);
+  } catch (err) {
+    console.error("Error al eliminar juego de mis juegos:", err);
+    res.status(500).json({ error: "Error al eliminar juego de mis juegos" });
   }
 };

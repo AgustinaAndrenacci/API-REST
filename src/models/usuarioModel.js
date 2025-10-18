@@ -55,6 +55,7 @@ const msjSchema = new mongoose.Schema({
   body:{ type: String },
   });
 */
+
 const usuarioSchema = new mongoose.Schema(
   {
     userName: { type: String, required: true, trim: true },
@@ -66,7 +67,16 @@ const usuarioSchema = new mongoose.Schema(
     telefono: { type: String },
     mail: { type: String, required: true, trim: true },
     direccion: { type: String, required: false, trim: true },
-    //misJuegos {vector}
+    //Creo un vector misJuegos que tiene juego(modelo)
+    misJuegos: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
+        nombre: { type: String, required: true },
+        imagen: { type: String, default: "" },
+      }
+    ],
+    
+
     //inbox: { type: [msjSchema], default: [] },
     //msjEnviados: { type: [msjSchema], default: [] }
   },

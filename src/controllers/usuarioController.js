@@ -326,11 +326,18 @@ exports.deleteUsuario = async (req, res) => {
   }
 };
 
+//MisJuegos----------------------------------------------------------------------------------------
 exports.getMisJuegos = async (req, res) => {
   try {
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
-    //const juegos = await usuario.MisJuegos(idUsuario); // Buscar juegos creados por el usuario
-    res.json(juegos);
+    
+    
+    // 1. Busca el usuario por su ID trae el campo misJuegos
+    const usuario = await Usuario.findById(idUsuario, 'misJuegos');
+
+    // 2. Devuelve el array de juegos
+    // usuario.misJuegos contendrá el array de subdocumentos
+    res.json(usuario.misJuegos);
   } catch (err) {
     console.error("Error al obtener los juegos del usuario:", err);
     res.status(500).json({ error: "Error al obtener los juegos del usuario" });
@@ -342,15 +349,16 @@ exports.agregarMisJuegos = async (req, res) => {
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
     const { juegos } = req.body; // todos los juegos en el json
 
-    const flag = juegosServices.verificarExistenciaJuegos(juegos);
+    //FUNCION NUEVA
+    //const flag = juegosServices.verificarExistenciaJuegos(juegos);
     //true: existen todos false:alguno no existe
-    if (!flag) {
-      res.status(400).json({ error: "Algunos juegos no existen" });
-    }else{
-      // Lógica para agregar los juegos a la lista de juegos del usuario
-          const juegosAgregados = await usuario.agregarJuegos(idUsuario, juegos);
-          res.json(juegosAgregados);
-    }
+
+    //if (!flag) {
+      //res.status(400).json({ error: "Algunos juegos no existen" });
+    //}else{
+      const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: juegos } } }, { new: true });
+      res.json(juegosActualizados);
+    //}
 
   } catch (err) {
     console.error("Error al agregar juego a mis juegos:", err);
@@ -361,15 +369,28 @@ exports.agregarMisJuegos = async (req, res) => {
 exports.eliminarJuegoDeMisJuegos = async (req, res) => {
   try {
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
-    const { juegoId } = req.body; // Obtener el ID del juego a eliminar
+    const { idJuego } = req.params; // Obtener el ID del juego a eliminar
 
-    if (!juegoId) {
-      return res.status(400).json({ error: "Falta el ID del juego" });
+    if (!idJuego) {
+      res.status(400).json({ error: "Falta el ID del juego" });
+    }
+    else{
+      //con findByIdAndDelete
+      const usuarioActualizado = await Usuario.findByIdAndUpdate(
+            idUsuario, 
+            { 
+                // $pull encuentra y elimina el juego en misJuegos
+                $pull: { 
+                    misJuegos: { _id: idJuego } 
+                } 
+            },
+            { new: true } // Devuelve el documento después de la modificación
+        );
+
+      res.status(200).json({ message: "Juego eliminado correctamente" });
+  
     }
 
-    // Lógica para eliminar el juego de la lista de juegos del usuario
-    const juegoEliminado = await usuario.eliminarJuego(idUsuario, juegoId);
-    res.json(juegoEliminado);
   } catch (err) {
     console.error("Error al eliminar juego de mis juegos:", err);
     res.status(500).json({ error: "Error al eliminar juego de mis juegos" });

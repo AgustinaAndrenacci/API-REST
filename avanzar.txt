@@ -72,17 +72,20 @@ Usuario-Jornada y Usuario-Encuentro
 Chequear que usuarios se pueden borrar y ver la relacion con jornada,encuentro
 
 
-//AGUS*-*-*-
-ver cuando se cambian los datos, ej: se modifica tal dato de usuario
 
 
 Hacer:
-misJuegos (añadir propiedad a los usuarios)
+//AGUS*-*-*-
+ver cuando se cambian los datos, ej: se modifica tal dato de usuario
+
+OK misJuegos (añadir propiedad a los usuarios)
+OK funciones para misJuegos
+
 
 jornada(juegoteka): cuando creo la jornada, automaticamente se colocan en la propiedad jornada.juegosDisponibles, el vector usuario(juegoteka).misJuegos 
 
 endpoint jornada:juegos SACAR
-
+Modificar agregar a mis juegos, jornada juego, jornada encuentro///
 jornada: estado
 enum: suspendido, cancelado, activo
 

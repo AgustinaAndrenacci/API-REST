@@ -5,14 +5,13 @@ Hacer sin apuro:
 -Agregar: console.error("Error en el login",err); es para que nos muestre a nosotros por consola
 
 Hacer si o si:
--cambiar la ip en mongo atlas por la de render
 -diccionario para los middlewares
 -ver cuando se cambian los datos, ej: se modifica tal dato de usuario
 
 
 MEET
--ver que compile
--ver que funcionen correctamente los endpoint (pasar ok, pasar id erroneo,pasar campos incompletos)
+-ver que funcionen correctamente los endpoint lado bonito
+-Mañana lo demas (pasar ok, pasar id erroneo,pasar campos incompletos)
 -Modificar los siguientes que son compartidos:
     /Jornada-encuentro
     /Jornada-juegosDisponibles

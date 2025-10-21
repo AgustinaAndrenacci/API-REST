@@ -43,6 +43,8 @@ exports.deleteUsuario = (req, res) => {
 */
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuarioModel");
+const Juego = require("./juegoController");
+const juegoModel = require("../models/juegoModel");
 
 exports.getAllUsuarios = async (req, res) => {
   try {
@@ -262,7 +264,53 @@ exports.updateUsuario = async (req, res) => {
     res.status(500).json({ error: "Error al actualizar usuario" });
   }
 };
+exports.updatePassword = async (req, res) => {
+    try {
+        const id = req.user.id; // ID del usuario a través del token
+        const { passVieja, passNueva } = req.body;
 
+        // valido los datos ingresados
+        if (!passVieja || !passNueva) {
+            res.status(400).json({ error: "Debe ingresar la contraseña actual y la nueva contraseña" });
+        }else{
+          // Busco el usuario
+          const user = await Usuario.findById(id); 
+
+          //Comparo la contraseña antigua
+          if (user.pass !== passVieja) {
+              res.status(401).json({ error: "La contraseña actual es incorrecta" });
+          }else{
+            //chequeo que la pass nueva no sea igual que la anterior
+            if (user.pass === passNueva) {
+              res.status(400).json({ error: "La nueva contraseña no puede ser igual a la anterior" });
+            }else{
+              //actualizo la nueva contraseña
+              user.pass = passNueva;
+
+            // Guardo
+            const usuarioActualizado = await user.save();
+
+            // 6. Respuesta
+            res.json({ message: "Contraseña actualizada correctamente" });
+
+          }}
+          
+          
+        }
+
+        
+    } catch (err) {
+        // En caso de errores de validación de Mongoose o de la base de datos.
+        console.error("Error en updatePassword:", err); 
+        
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ error: err.message });
+        }
+
+        res.status(500).json({ error: "Error al actualizar la contraseña" });
+    }
+};
+/*
 exports.updatePassword = async (req, res) => {
     try {
         //obtiene el id a traves del token
@@ -299,7 +347,7 @@ exports.updatePassword = async (req, res) => {
         console.error("Error en updatePassword:", err); 
         res.status(500).json({ error: "Error al actualizar usuario" });
     }
-};
+};*/
 
 exports.deleteUsuario = async (req, res) => {
   try {
@@ -348,32 +396,29 @@ exports.agregarMisJuegos = async (req, res) => {
   try {
     //de a uno se suben
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
-    const { idJuego } = req.params; // Obtener el ID del juego desde los parámetros
+    const  {idJuego}  = req.params; // Obtener el ID del juego desde los parámetros
 
-    // Verificar que se envió al menos un juego
-    if (!idJuego) {
-      return res.status(400).json({ error: "Debe ingresar el id del juego" });
-    }
-
-    //FUNCION NUEVA - decir que paso un id, verifica si existe y me pasa el juego en un json
-    //const flag = juegosServices.verificarExistenciaJuegos(juegos);
-    //true: existen todos false:alguno no existe
-
-    //if (!flag) {
-      //res.status(400).json({ error: "El juego no existe" });
-    //}else{
-      //Obtengo el juego
-      //const juego = await juegosServices.getJuegoById(idJuego);
-
+    //chequeo que existe el juego en la bd
+    //const juegoNuevo = await Juego.getJuegoById(idJuego);
+    //necesito un service
+    const juegoNuevo = await juegoModel.findById(idJuego);
+   // res.json( juegoNuevo );
+      
+    if (juegoNuevo){
+      //busco el usuario
+      const user = await Usuario.findById(idUsuario);
       //Chequeo que el id no exista en el vector
-      const juegoExiste = usuario.misJuegos.some(juego => juego.id.toString() === idJuego);
+      const juegoExiste = user.misJuegos.some(juego => juego._id.toString() === idJuego);
       if (juegoExiste) {
         res.status(400).json({ error: "El juego ya se encuentra en misJuegos" });
       }else{
-        const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: [juego] } } }, { new: true });
+        const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: [juegoNuevo] } } }, { new: true });
         res.json(juegosActualizados);
       }
-      //}
+    }else{
+      res.status(404).json({ error: "Juego no encontrado" });
+    }
+
   } catch (err) {
     console.error("Error al agregar juego a mis juegos:", err);
     res.status(500).json({ error: "Error al agregar juego a mis juegos" });
@@ -385,36 +430,22 @@ exports.eliminarJuegoDeMisJuegos = async (req, res) => {
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
     const { idJuego } = req.params; // Obtener el ID del juego a eliminar
 
-    if (!idJuego) {
-      res.status(400).json({ error: "Falta el ID del juego" });
-    }
-    else{
-      //chequear que el id exista en el vector
-      const usuario = await Usuario.findById(idUsuario);
-      
-      const juegoExiste = usuario.misJuegos.some(juego => juego.id.toString() === idJuego);
+    //busco al usuario
+    const user = await Usuario.findById(idUsuario);
+  
+    //chequear que el id exista en el vector
+    const juegoExiste = user.misJuegos.some(juego => juego._id.toString() === idJuego);
 
     if (!juegoExiste) {
       // Si el juego no está, notificamos y terminamos
       res.status(404).json({ error: "El juego no está en tu lista de 'misJuegos'." });
     }else{
-      const usuarioActualizado = await Usuario.findByIdAndUpdate(
-            idUsuario, 
-            { 
-                // $pull encuentra y elimina el juego en misJuegos
-                $pull: { 
-                    misJuegos: { id: idJuego } 
-                } 
-            },
-            { new: true } // Devuelve el documento después de la modificación
-        );
-
-        res.json(usuarioActualizado.misJuegos);
-     
+      const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $pull: { misJuegos: { _id: idJuego } } } , { new: true });
+      res.json(juegosActualizados);
     }
-  }
+
   } catch (err) {
-    console.error("Error al eliminar juego de mis juegos:", err);
+    console.error(err);
     res.status(500).json({ error: "Error al eliminar juego de mis juegos" });
   }
 };

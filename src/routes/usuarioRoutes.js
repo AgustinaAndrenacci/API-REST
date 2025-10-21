@@ -20,7 +20,7 @@ router.put("/cambiarPassword",autenticarToken, usuarioController.updatePassword)
 //router.delete("/:id",autenticarToken, usuarioController.deleteUsuario);
 //misJuegos
 router.get("/misJuegos",autenticarToken, usuarioController.getMisJuegos);
-router.put("/misJuegos",autenticarToken, usuarioController.agregarMisJuegos);
+router.put("/misJuegos/:idJuego",autenticarToken, usuarioController.agregarMisJuegos);
 router.delete("/misJuegos/:idJuego",autenticarToken, usuarioController.eliminarJuegoDeMisJuegos);
 
 

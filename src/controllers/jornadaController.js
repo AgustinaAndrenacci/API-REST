@@ -46,8 +46,10 @@ exports.deleteJornada = (req, res) => {
 
 const Jornada = require("../models/jornadaModel");
 const Usuario = require('../models/usuarioModel');
+const jornadaService = require("../services/jornadaService");
 const encuentro = require("./encuentroController");
 const usuario = require("./usuarioController");
+const encuentroService = require('../services/encuentroService');
 
 exports.getAllJornadas = async (req, res) => {
   try {
@@ -95,14 +97,49 @@ exports.createJornada = async (req, res) => {
   }
 };
 
+// src/controllers/jornadaController.js
 exports.updateJornada = async (req, res) => {
   try {
-    const jornadaActualizada = await Jornada.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    jornadaActualizada
-      ? res.json(jornadaActualizada) //true
-      : res.status(404).json({ error: "Jornada no encontrada" }); //false
+    // 1. Desestructuración limpia del ID
+    const { id } = req.params;
+    const bodyJson = req.body;
+
+    // 2. CORRECCIÓN: Usar el ID como string
+    const jornadaExistente = await Jornada.findById(id);
+    
+    if (!jornadaExistente) {
+      // 3. Usar return
+      return res.status(404).json({ error: "Jornada no encontrada" });
+    }
+    
+    // 4. Se llama al servicio, que lanzará un error si la validación falla
+    // Si falla, el flujo salta inmediatamente al bloque 'catch'
+    const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
+
+    // 5. CORRECCIÓN: Actualizar con los datos validados (solo el body)
+    const jornadaActualizada = await Jornada.findByIdAndUpdate(
+      id, 
+      datosParaActualizar, // Solo pasamos los campos del body
+      { new: true, runValidators: true }
+    );
+    
+    // Check de seguridad
+    if (!jornadaActualizada) {
+        return res.status(500).json({ error: "Fallo interno al actualizar la jornada." });
+    }
+
+    return res.json(jornadaActualizada);
+
   } catch (err) {
-    res.status(500).json({ error: "Error al actualizar jornada" });
+    // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
+    // Se asume que cualquier error lanzado desde validarJornada es un 400
+    if (err.message.includes('capacidad no puede ser menor')) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    // Para cualquier otro error (Mongoose, servidor, etc.)
+    console.error("Error detallado al actualizar jornada:", err);
+    return res.status(500).json({ error: "Error al actualizar jornada", detalle: err.message });
   }
 };
 
@@ -116,15 +153,14 @@ exports.updateJornadaEncuentros = async (req, res) => {
     else{//push: actualiza y no pisa
       //crear el encuentro en la bd
       //json encuentros
-      
-      //añado el createdBy en encuentros
-      encuentros.createdBy = req.user.id; //json
-      
-      //const encuentroConId = await encuentroService.create(encuentros);
-      
-      //añadir encuentroConId a la jornada
 
-      const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
+      //añado el createdBy en encuentros
+      const encuentroConId = await encuentroService.create({encuentros});
+
+      //validar que se ingresaron todos los datos
+
+      //añadir encuentroConId a la jornada
+      //const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
       jornadaActualizada
         ? res.json(jornadaActualizada) //true

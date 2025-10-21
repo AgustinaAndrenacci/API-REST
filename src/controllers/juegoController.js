@@ -1,5 +1,6 @@
 // src/controllers/juegoController.js
 
+const { showErrorMessage } = require("../errorHandler");
 const Juego = require("../models/juegoModel");
 
 exports.getAllJuegos = async (req, res) => {
@@ -7,7 +8,7 @@ exports.getAllJuegos = async (req, res) => {
     const juegos = await Juego.find();
     res.json(juegos);
   } catch (err){
-    res.status(500).json({ error: "Error al obtener lista de juegos" });
+    showErrorMessage(500, "No se obtuvo la lista de juegos");
   }
 };
 
@@ -16,9 +17,9 @@ exports.getJuegoById = async (req, res) => {
     const juego = await Juego.findById(req.params.id); //lo trae del modelo
     juego //ternario IF
     ? res.json(juego) //true
-    : res.status(404).json({ error: "Juego no encontrado" }); //false
+    : showErrorMessage(404, "Juego no encontrado"); //false
   } catch (err){
-    res.status(500).json({ error: "Error al obtener juego" });
+    showErrorMessage(500, "Error al obtener juego");
   }
 };
 

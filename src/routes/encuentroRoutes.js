@@ -19,8 +19,8 @@ router.get ("/", encuentroController.getAllEncuentros);
  
 
 // C - Crear un nuevo encuentro--> ojo, solo desde UPDATE Jornada
-router.post("/torneo", encuentroController.createEncuentro);
-router.post("/desafio", encuentroController.createEncuentro);
+//router.post("/torneo", encuentroController.createEncuentro);
+//router.post("/desafio", encuentroController.createEncuentro);
 
 // R  -Leer un encuentro, Read
 //      get all 
@@ -54,8 +54,6 @@ router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentr
 
 
 /////
-
-
 
 
 

@@ -68,7 +68,7 @@ exports.getEncuentrosByEstado = async (req, res) => {
 
 exports.getByCreador = async (req, res) => {
   try {
-    const idCreador = req.params.creadorId || req.query.creadorId || req.body.creadorId;
+    const idCreador = req.params.id || req.query.id || req.body.id;
     if (!idCreador) return res.status(400).json({ error: "creadorId requerido." });
     const data = await encuentroService.getByCreador(idCreador);
     return res.json(data);

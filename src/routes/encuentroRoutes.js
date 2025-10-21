@@ -33,10 +33,10 @@ router.get ("/:id",autenticarToken, encuentroController.getEncuentroById);
 //router.get("/desafio/:id", encuentroController.getEncuentroById);
 
 /////
-router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
 router.get("/:tipo/ganador/:id", encuentroController.getByGanador);
 router.get("/:tipo/participante/:id", encuentroController.getByJugador);
 router.get("/:tipo/organizador/:id", encuentroController.getByCreador);
+router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
 ////
 
 // U - Update, Actualizar un encuentro existente

@@ -248,11 +248,14 @@ async function getByEstado(estado) {
  */
 async function getByJugador(idJugador) {
   if (!idJugador) throw new Error("getByJugador: idJugador requerido.");
+
   const data = await Encuentro.find({
-    $or: [{ "jugadores.id_jugador": idJugador }, { "jugadores": idJugador }],
+    "jugadores.id_jugador": idJugador
   }).lean();
+
   return data;
 }
+
 
 /**
  * Crear un nuevo encuentro.

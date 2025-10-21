@@ -8,7 +8,7 @@ exports.getAllJuegos = async (req, res) => {
     const juegos = await Juego.find();
     res.json(juegos);
   } catch (err){
-    showErrorMessage(500, "No se obtuvo la lista de juegos");
+    showErrorMessage(res, 500, "No se obtuvo la lista de juegos");
   }
 };
 
@@ -17,9 +17,9 @@ exports.getJuegoById = async (req, res) => {
     const juego = await Juego.findById(req.params.id); //lo trae del modelo
     juego //ternario IF
     ? res.json(juego) //true
-    : showErrorMessage(404, "Juego no encontrado"); //false
+    : showErrorMessage(res, 404, "Juego no encontrado"); //false
   } catch (err){
-    showErrorMessage(500, "Error al obtener juego");
+    showErrorMessage(res, 500, "Error al obtener juego");
   }
 };
 

@@ -52,9 +52,9 @@ exports.deleteJuego = async (req, res) => {
     const juegoBorrado = await Juego.findByIdAndDelete(req.params.id); //lo trae del modelo
     juegoBorrado //ternario IF
     ? res.json(juegoBorrado) //true
-    : res.status(404).json({ error: "Juego no encontrado" });
+    : showErrorMessage(res, 404, "Juego no encontrado, que triste no?");
   } catch (err){
-    res.status(500).json({ error: "Error al borrar juego" });
+    showErrorMessage(res, 500, "Error al borrar juego");
   }
 };
 
@@ -63,9 +63,9 @@ exports.getJuegoPorNombre = async (req, res) => {
     const juegoBuscado = await Juego.findOne({ titulo: req.params.nombre}); //lo trae del modelo
     juegoBuscado //ternario IF
     ? res.json(juegoBuscado) //true
-    : res.status(404).json({ error: "Juego no encontrado o no existe" });
+    : showErrorMessage(res, 404, "Juego no encontrado, que triste no?");
   } catch (err){
-    res.status(500).json({ error: "Error al buscar juego" });
+    showErrorMessage(res, 500, "Error al buscar juego");
   }
 }
 
@@ -78,9 +78,9 @@ exports.getJuegosParaXJugadores = async (req, res) => {
     });
     juegos.length > 0 //ternario IF
     ? res.json(juegos) //true
-    : res.status(404).json({ error: `No existen juegos para ${cantidad} jugadores`});
+    : showErrorMessage(res, 404, `No existen juegos para ${cantidad} jugadores`);
   } catch (err){
-    res.status(500).json({ error: "Error al buscar juegos"});
+    showErrorMessage(res, 500, "Error al buscar juegos");
   }
 }
 

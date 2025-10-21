@@ -10,17 +10,27 @@
 
 module.exports = { showErrorMessage }; */
 
-const showErrorMessage = (httpErrorCode = 500, message = "") => {
-  const code = Number(httpErrorCode) || 500;
+/*function showErrorMessage (httpErrorCode, message){
+  console.log(httpErrorCode, message);
+  res.status(httpErrorCode).json({ error: message });
   const imageUrl = `https://http.cat/${code}.jpg`;
   const errorPayload = {
-    status: code,
+    status: httpErrorCode,
     message: String(message),
     imageUrl
   };
-  console.log("[errorHandler]", errorPayload);
-  return errorPayload;
+  console.log("Json con el error (para el front)", errorPayload);
+}; */
+
+const showErrorMessage = (res, httpErrorCode, message) => {
+  const imageUrl = `https://http.cat/${httpErrorCode}.jpg`;
+  const payload = {
+    status: httpErrorCode,
+    message: String(message),
+    imageUrl
+  };
+  console.log("[errorHandler]", payload);
+  return res.status(httpErrorCode).json(payload); /* Esta linea va a modificarse con el front, capaz */
 };
-// ...existing code...
 
 module.exports = { showErrorMessage };

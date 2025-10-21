@@ -70,8 +70,8 @@ const usuarioSchema = new mongoose.Schema(
     //Creo un vector misJuegos que tiene juego(modelo)
     misJuegos: [
       {
-        _id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
-        nombre: { type: String, required: true },
+        id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
+        titulo: { type: String, required: true },
         imagen: { type: String, default: "" },
       }
     ],

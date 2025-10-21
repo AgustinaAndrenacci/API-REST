@@ -346,20 +346,34 @@ exports.getMisJuegos = async (req, res) => {
 
 exports.agregarMisJuegos = async (req, res) => {
   try {
+    //de a uno se suben
     const idUsuario = req.user.id; // Obtener el ID del usuario desde el token
-    const { juegos } = req.body; // todos los juegos en el json
+    const { idJuego } = req.params; // Obtener el ID del juego desde los parámetros
 
-    //FUNCION NUEVA
+    // Verificar que se envió al menos un juego
+    if (!idJuego) {
+      return res.status(400).json({ error: "Debe ingresar el id del juego" });
+    }
+
+    //FUNCION NUEVA - decir que paso un id, verifica si existe y me pasa el juego en un json
     //const flag = juegosServices.verificarExistenciaJuegos(juegos);
     //true: existen todos false:alguno no existe
 
     //if (!flag) {
-      //res.status(400).json({ error: "Algunos juegos no existen" });
+      //res.status(400).json({ error: "El juego no existe" });
     //}else{
-      const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: juegos } } }, { new: true });
-      res.json(juegosActualizados);
-    //}
+      //Obtengo el juego
+      //const juego = await juegosServices.getJuegoById(idJuego);
 
+      //Chequeo que el id no exista en el vector
+      const juegoExiste = usuario.misJuegos.some(juego => juego.id.toString() === idJuego);
+      if (juegoExiste) {
+        res.status(400).json({ error: "El juego ya se encuentra en misJuegos" });
+      }else{
+        const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: [juego] } } }, { new: true });
+        res.json(juegosActualizados);
+      }
+      //}
   } catch (err) {
     console.error("Error al agregar juego a mis juegos:", err);
     res.status(500).json({ error: "Error al agregar juego a mis juegos" });
@@ -375,22 +389,30 @@ exports.eliminarJuegoDeMisJuegos = async (req, res) => {
       res.status(400).json({ error: "Falta el ID del juego" });
     }
     else{
-      //con findByIdAndDelete
+      //chequear que el id exista en el vector
+      const usuario = await Usuario.findById(idUsuario);
+      
+      const juegoExiste = usuario.misJuegos.some(juego => juego.id.toString() === idJuego);
+
+    if (!juegoExiste) {
+      // Si el juego no está, notificamos y terminamos
+      res.status(404).json({ error: "El juego no está en tu lista de 'misJuegos'." });
+    }else{
       const usuarioActualizado = await Usuario.findByIdAndUpdate(
             idUsuario, 
             { 
                 // $pull encuentra y elimina el juego en misJuegos
                 $pull: { 
-                    misJuegos: { _id: idJuego } 
+                    misJuegos: { id: idJuego } 
                 } 
             },
             { new: true } // Devuelve el documento después de la modificación
         );
 
-      res.status(200).json({ message: "Juego eliminado correctamente" });
-  
+        res.json(usuarioActualizado.misJuegos);
+     
     }
-
+  }
   } catch (err) {
     console.error("Error al eliminar juego de mis juegos:", err);
     res.status(500).json({ error: "Error al eliminar juego de mis juegos" });

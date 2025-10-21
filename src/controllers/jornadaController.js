@@ -71,14 +71,26 @@ exports.getJornadaById = async (req, res) => {
 
 exports.createJornada = async (req, res) => {
   try {
+    //ID del usuario por el token
+    const id = req.user.id;
+    
+
     const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
     if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
-      return res.status(400).json({ error: "Faltan campos obligatorios" }); //false
+      res.status(400).json({ error: "Faltan campos obligatorios" }); //false
     }
-    const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles});
-    await nuevaJornada.save();
-    res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true
+    else{
+      //Guardo en juegosDisponibles lo que tiene la jornada en Usuario.misJuegos
+      // Usamos .lean() para obtener un objeto JS simple y luego accedemos a la propiedad misJuegos.
+      const juegosDisponibles = await Usuario.findById(id).select('misJuegos').lean();
+
+      const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles });
+      await nuevaJornada.save();
+      res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true
+    }
+    
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al crear jornada" });
   }
 };
@@ -235,7 +247,7 @@ exports.updateJornadaEstado = async (req, res) => {
     const id = req.params.id; // Usar el ID de la URL
     const { estado } = req.body;
     if (!estado) {
-      res.status(400).json({ error: "Faltan campos obligatorios" });
+      res.status(400).json({ error: "Falta ingresar el estado" });
     }
     else{
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { estado } , { new: true, runValidators: true });

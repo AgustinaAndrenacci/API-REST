@@ -80,7 +80,7 @@ exports.getByCreador = async (req, res) => {
 
 exports.getByGanador = async (req, res) => {
   try {
-    const idGanador = req.params.ganadorId || req.query.ganadorId || req.body.ganadorId;
+    const idGanador = req.params.id || req.query.id || req.body.id;
     if (!idGanador) return res.status(400).json({ error: "ganadorId requerido." });
     const data = await encuentroService.getByGanador(idGanador);
     return res.json(data);
@@ -104,7 +104,7 @@ exports.getByJuego = async (req, res) => {
 
 exports.getByJugador = async (req, res) => {
   try {
-    const idJugador = req.params.jugadorId || req.query.jugadorId || req.body.jugadorId;
+    const idJugador = req.params.id || req.query.id || req.body.id;
     if (!idJugador) return res.status(400).json({ error: "jugadorId requerido." });
     const data = await encuentroService.getByJugador(idJugador);
     return res.json(data);

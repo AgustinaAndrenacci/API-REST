@@ -115,6 +115,7 @@ exports.getByJugador = async (req, res) => {
 };
 
 // POST /encuentro
+/*
 exports.createEncuentro = async (req, res) => {
   try {
     const payload = {... req.body};
@@ -130,7 +131,7 @@ exports.createEncuentro = async (req, res) => {
     if (/no encontrado|no existe|no encontrado/i.test(msg)) return res.status(404).json({ error: msg });
     return res.status(400).json({ error: msg });
   }
-};
+};*/
 
 // PUT /encuentros/:id
 exports.updateEncuentro = async (req, res) => {

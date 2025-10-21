@@ -8,6 +8,9 @@ const usuarioRoutes = require("./routes/usuarioRoutes");
 const jornadaRoutes = require("./routes/jornadaRoutes");
 const encuentroRoutes = require("./routes/encuentroRoutes");
 const juegosRoutes = require("./routes/juegoRoutes");
+const mensajeRoutes = require("./routes/mensajeRoutes");///AGREGO para mensaje(fede 19.10)
+
+
 const connectDB = require("./config/db");
 
 dotenv.config(); // carga variables de entorno.env 
@@ -24,6 +27,7 @@ app.use("/usuarios", usuarioRoutes);
 app.use("/jornadas", jornadaRoutes);
 app.use("/encuentros", encuentroRoutes);
 app.use("/juegos", juegosRoutes);
+app.use("/mensajes", mensajeRoutes); ///AGREGO para mensaje(fede 19.10)
 
 // Inicio del server
 const PORT = process.env.PORT;

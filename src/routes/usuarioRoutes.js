@@ -2,10 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const usuarioController = require("../controllers/usuarioController");
-const {autenticarToken,isJuegoteka} = require("../middlewares/authMiddleware");
+//const {autenticarToken,isJuegoteka} = require("../middlewares/authMiddleware");
 const {isAdmin} = require("../middlewares/isAdmin");
 const {isJugadorMiddleware} = require("../middlewares/isJugadorMiddleware");
 const {isMe} = require("../middlewares/isMeMiddleware");
+const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware")
 
   
 // CRUD

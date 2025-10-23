@@ -1,6 +1,6 @@
 const express = require("express");
 const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware")
-const {isRemitente, isDestinatario} = require("../middlewares/mensajeMiddleware.js")
+const {isRemitente, isDestinatario,isRemitenteOrDestinatario} = require("../middlewares/mensajeMiddleware.js")
 
 const {
   getAllMensajes,
@@ -21,6 +21,6 @@ router.post("/", autenticarToken,crearMensaje);
 router.put("/:id", autenticarToken,actualizarMensaje);
 
 //agregar middleware isRemitente o isDestinatario
-router.delete("/:id", autenticarToken,eliminarMensaje);
+router.delete("/:id", autenticarToken, isRemitenteOrDestinatario, eliminarMensaje);
 
 module.exports = router;

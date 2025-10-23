@@ -331,8 +331,8 @@ async function update(id, updates = {}) {
   }
 
   // 4) Opcional: evitar actualizar si encuentro está en estado que no permite cambios (ej: 'cerrado')
-  if (encuentro.estado && String(encuentro.estado).toLowerCase() === "cerrado") {
-    throw new Error("No se puede modificar un encuentro en estado 'cerrado'.");
+  if (encuentro.estado && String(encuentro.estado).toLowerCase() === "finalizado") {
+    throw new Error("No se puede modificar un encuentro en estado 'finalizado'.");
   }
 
   // Efectuar la actualización

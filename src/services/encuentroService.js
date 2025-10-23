@@ -317,7 +317,7 @@ async function update(id, updates = {}) {
     verificarCapacidadDisponible(capacidadFinal, updates.jugadores.length);
   }
 
-  // 2) Si se actualiza el juego
+  // 2) Si se actualiza el juego verifica que el juego exista
   if (updates.juego !== undefined) {
     const idJuego = updates.juego && (updates.juego.id_juego || updates.juego._id || updates.juego);
     if (idJuego) await verificarJuegoExistente(idJuego);

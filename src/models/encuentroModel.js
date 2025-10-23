@@ -39,7 +39,7 @@ const encuentroSchema = new mongoose.Schema(
     createdBy: { type: [organizadorSchema], required: true },
     tipo: { type: String, required: true },
     capacidad: { type: Number, required: true },
-    juego: { type: [juegoSchema], default: [] },
+    juego: { type: [juegoSchema], required: true },
     jugadores: { type: [jugadorSchema], default: [] },
     ganador: { type: [jugadorSchema], default: [] },//podria ser default: null para un solo ganador pero neh
     estado: { 

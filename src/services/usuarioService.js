@@ -46,6 +46,14 @@ const formatoJsonUsuario = (usuario) => {
   };
 };
 
+const formatoJsonJuegoteka = (usuario) => {
+  return {
+    id: usuario._id,
+    nombre: usuario.nombre,
+    direccion: usuario.direccion
+  };
+};
+
 //updateMisJuegos
 const updateMisJuegos = async (id, juegos) => {
   const usuario = await Usuario.findByIdAndUpdate(id, { misJuegos: juegos }, { new: true });
@@ -106,6 +114,7 @@ module.exports = {
   updateMisJuegos,
   createMisJuegos,
   deleteMisJuegos,
-  estadosValidos
+  estadosValidos,
+  formatoJsonJuegoteka
   //findUserForJornada
 };

@@ -55,7 +55,7 @@ const jornadaSchema = new mongoose.Schema(
     fechaHora: { type: Date, required: true },
     precioInscripcion: { type: Number, default: 0 }, //0 si no se ingresa
     capacidad: { type: Number, required: true },
-    estado: { type: String, enum: ["suspendido", "cancelado", "activo"], default: "activo" },
+    estado: { type: String, enum: ["suspendido", "cancelado", "activo", "finalizado"], default: "activo" },
     Juegoteka: { //true
       id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
       nombre: { type: String, required: true },

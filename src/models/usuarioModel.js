@@ -66,7 +66,7 @@ const usuarioSchema = new mongoose.Schema(
     foto: { type: String },
     telefono: { type: String },
     mail: { type: String, required: true, trim: true },
-    direccion: { type: String, required: false, trim: true },
+    direccion: { type: String, required: true, trim: true },
     //Creo un vector misJuegos que tiene juego(modelo)
     misJuegos: [
       {

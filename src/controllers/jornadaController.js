@@ -30,9 +30,13 @@ exports.createJornada = async (req, res) => {
   try {
     //ID del usuario por el token
     const id = req.user.id;
-    const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
+    const { nombre, fechaHora, precioInscripcion, capacidad, juegosDisponibles } = req.body;
     
-    if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
+    //const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
+    
+    if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !juegosDisponibles) {
+     
+    //if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
       showErrorMessage(res, 400, "Faltan campos obligatorios");
     }
     else{
@@ -47,6 +51,10 @@ exports.createJornada = async (req, res) => {
         titulo: juego.titulo,
         imagen: juego.imagen
       }));
+
+      //creo el json de juegoteka
+      const Juegoteka = usuarioService.formatoJsonJuegoteka(user);
+      
       const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles: juegosParaGuardar });
       await nuevaJornada.save();
       res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true

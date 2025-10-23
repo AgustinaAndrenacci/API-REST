@@ -98,8 +98,8 @@ exports.login = async (req, res) => {
 
 exports.registrar = async (req, res) => {
   try {
-    const { userName, pass, rol, nombre, apellido, foto, telefono, mail } = req.body;
-    if (!userName || !pass || !rol || !nombre || !apellido || !mail || !telefono) {
+    const { userName, pass, rol, nombre, apellido, direccion, foto, telefono, mail } = req.body;
+    if (!userName || !pass || !rol || !nombre || !apellido || !mail || !telefono || !direccion) {
       showErrorMessage(res, 400, "Faltan campos obligatorios");
     }
     else{
@@ -116,7 +116,7 @@ exports.registrar = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashPass = await bcrypt.hash(pass, salt);
 
-        const nuevoUsuario = new Usuario({ userName, pass: hashPass, rol, nombre, apellido, foto, telefono, mail });
+        const nuevoUsuario = new Usuario({ userName, pass: hashPass, rol, nombre, apellido, direccion,foto, telefono, mail });
         //await nuevoUsuario.save();
         const newUsuario = await usuarioService.createUsuario(nuevoUsuario);
         res.status(200).json({

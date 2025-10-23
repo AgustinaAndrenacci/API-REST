@@ -116,13 +116,13 @@ exports.updateJornadaEncuentros = async (req, res) => {
       //json encuentros
 
       //añado el createdBy en encuentros
-      //const encuentroConId = await encuentroService.create({encuentros});
+      const encuentroConId = await encuentroService.create({encuentros});
 
       //validar que se ingresaron todos los datos
 
       //añadir encuentroConId a la jornada
       
-      const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
+      //const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
 
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
       jornadaActualizada

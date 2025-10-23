@@ -106,4 +106,5 @@ module.exports = {
   updateJornada,
   createJornada,
   estadosValidos,
+  borrarEncuentroDeJornada
 };

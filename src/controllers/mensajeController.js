@@ -3,13 +3,43 @@ const mensajeService = require("../services/mensajeService");
 
 const getAllMensajes = async (req, res) => {
   try {
-    const mensajes = await mensajeService.obtenerMensajes();
+    const mensajes = await mensajeService.getMensajes();
     res.json(mensajes);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener los mensajes" });
   }
 };
 
+// mensajes paginados 
+
+const getMensajesPorRemitente = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const mensajes = await mensajeService.getMensajesPorRemitente(id, page, limit);
+    res.json(mensajes);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const getMensajesPorDestinatario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const mensajes = await mensajeService.getMensajesPorDestinatario(id, page, limit);
+    res.json(mensajes);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
+/*
  const getMensajesPorRemitente = async (req, res) => {
   try {
     const mensajes = await mensajeService.obtenerMensajesPorRemitente(req.params.id);
@@ -27,6 +57,9 @@ const getAllMensajes = async (req, res) => {
     res.status(500).json({ error: "Error al obtener los mensajes del destinatario" });
   }
 };
+
+*/
+
 
  const crearMensaje = async (req, res) => {
   try {

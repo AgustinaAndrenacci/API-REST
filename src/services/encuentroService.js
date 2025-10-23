@@ -317,7 +317,7 @@ async function update(id, updates = {}) {
     verificarCapacidadDisponible(capacidadFinal, updates.jugadores.length);
   }
 
-  // 2) Si se actualiza el juego
+  // 2) Si se actualiza el juego verifica que el juego exista
   if (updates.juego !== undefined) {
     const idJuego = updates.juego && (updates.juego.id_juego || updates.juego._id || updates.juego);
     if (idJuego) await verificarJuegoExistente(idJuego);
@@ -331,8 +331,8 @@ async function update(id, updates = {}) {
   }
 
   // 4) Opcional: evitar actualizar si encuentro está en estado que no permite cambios (ej: 'cerrado')
-  if (encuentro.estado && String(encuentro.estado).toLowerCase() === "cerrado") {
-    throw new Error("No se puede modificar un encuentro en estado 'cerrado'.");
+  if (encuentro.estado && String(encuentro.estado).toLowerCase() === "finalizado") {
+    throw new Error("No se puede modificar un encuentro en estado 'finalizado'.");
   }
 
   // Efectuar la actualización
@@ -345,6 +345,7 @@ async function update(id, updates = {}) {
 /**
  * deleteById - elimina un encuentro por id
  */
+/*
 async function deleteById(id) {
   if (!id) throw new Error("deleteById: id requerido.");
   if (!mongoose.isValidObjectId(id)) throw new Error("ID inválido.");
@@ -352,6 +353,31 @@ async function deleteById(id) {
   if (!deleted) throw new Error(`Encuentro no encontrado: ${id}`);
   return { message: "Eliminado", id: String(deleted._id) };
 }
+*/
+async function deleteById(id) {
+  if (!id) throw new Error("deleteById: id requerido.");
+  if (!mongoose.isValidObjectId(id)) throw new Error("ID inválido.");
+
+  // Buscamos el encuentro antes de borrarlo para saber qué jornada lo contiene
+  const encuentro = await Encuentro.findById(id).exec();
+  if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
+
+  // Borramos el encuentro
+  const deleted = await Encuentro.findByIdAndDelete(id).exec();
+
+  // Si el encuentro pertenece a una jornada, actualizamos la jornada
+  if (encuentro.jornada) {
+    try {
+      await jornadaService.borrarEncuentroDeJornada(encuentro.jornada, id);
+    } catch (err) {
+      console.error(`Error actualizando jornada ${encuentro.jornada}:`, err.message);
+      // Podés decidir si lanzar el error o solo loguearlo
+    }
+  }
+
+  return { message: "Encuentro eliminado", id: String(deleted._id) };
+}
+
 
 /**
  * Export: métodos públicos del service.

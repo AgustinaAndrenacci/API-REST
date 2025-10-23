@@ -12,3 +12,6 @@ exports.verificarExistenciaJuego = async (req, res) => {
         showErrorMessage(500, "Error al buscar juego");
     }
 }
+
+module.exports = {verificarExistenciaJuego}
+//incorporar logicas de busqueda (por ejemplo Juego.findById()) en el service para usarse en el controller

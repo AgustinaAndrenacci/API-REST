@@ -46,6 +46,7 @@ router.put("/:id", autenticarToken,isCreator, encuentroController.updateEncuentr
 
 
 // D - delete
+//CORREGIR, UNA SOLA RUTA; CON ISCREATOR!!!
 router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
 router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); 
 

@@ -14,8 +14,9 @@
  */
 
 const encuentroService = require("../services/encuentroService");
+const { showErrorMessage } = require("../errorHandler");
 
-// Helper para mapear errores a códigos HTTP
+/*// Helper para mapear errores a códigos HTTP
 function mapErrorToStatus(err) {
   const msg = (err && err.message) || "";
   // reglas simples: si mensaje contiene 'no encontrado' o 'no existe' -> 404
@@ -24,7 +25,7 @@ function mapErrorToStatus(err) {
   if (/inválid|invalid|requerido|obligatorio|no encontrado/i.test(msg)) return 400;
   // default 400 para errores de validación y 500 para otros
   return 400;
-}
+}*/
 
 // GET / (o rutas /torneo, /desafio)
 exports.getAllEncuentros = async (req, res) => {
@@ -37,8 +38,12 @@ exports.getAllEncuentros = async (req, res) => {
     const data = await encuentroService.getAll(filtro);
     return res.json(data);
   } catch (err) {
+    /*
     const status = mapErrorToStatus(err) || 500;
     return res.status(status).json({ error: err.message });
+    */
+   return handleControllerError(res, err, "Error al obtener encuentros");
+  
   }
 };
 
@@ -49,9 +54,10 @@ exports.getEncuentroById = async (req, res) => {
     return res.json(encuentro);
   } catch (err) {
     const msg = err.message || "";
-    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-    return res.status(400).json({ error: msg });
-  }
+   // if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+  // return res.status(400).json({ error: msg });
+    return handleControllerError(res, err, "Error al obtener encuentros por ID");
+    }
 };
 
 exports.getEncuentrosByEstado = async (req, res) => {
@@ -61,8 +67,10 @@ exports.getEncuentrosByEstado = async (req, res) => {
     const data = await encuentroService.getByEstado(estado);
     return res.json(data);
   } catch (err) {
-    const status = mapErrorToStatus(err);
-    return res.status(status).json({ error: err.message });
+    //const status = mapErrorToStatus(err);
+    //return res.status(status).json({ error: err.message });
+    return handleControllerError(res, err, "Error al obtener encuentros por estoado");
+  
   }
 };
 
@@ -85,8 +93,10 @@ exports.getByGanador = async (req, res) => {
     const data = await encuentroService.getByGanador(idGanador);
     return res.json(data);
   } catch (err) {
-    const status = mapErrorToStatus(err);
-    return res.status(status).json({ error: err.message });
+    //const status = mapErrorToStatus(err);
+    //return res.status(status).json({ error: err.message });
+    return handleControllerError(res, err, "Error al obtener encuentros por ganador");
+  
   }
 };
 
@@ -97,9 +107,10 @@ exports.getByJuego = async (req, res) => {
     const data = await encuentroService.getByJuego(idJuego);
     return res.json(data);
   } catch (err) {
-    const status = mapErrorToStatus(err);
-    return res.status(status).json({ error: err.message });
-  }
+   // const status = mapErrorToStatus(err);
+  //return res.status(status).json({ error: err.message });
+  return handleControllerError(res, err, "Error al obtener encuentros por juego");
+    }
 };
 
 exports.getByJugador = async (req, res) => {
@@ -109,8 +120,10 @@ exports.getByJugador = async (req, res) => {
     const data = await encuentroService.getByJugador(idJugador);
     return res.json(data);
   } catch (err) {
-    const status = mapErrorToStatus(err);
-    return res.status(status).json({ error: err.message });
+    //const status = mapErrorToStatus(err);
+    //return res.status(status).json({ error: err.message });
+    return handleControllerError(res, err, "Error al obtener encuentros por Jugador");
+  
   }
 };
 
@@ -141,9 +154,11 @@ exports.updateEncuentro = async (req, res) => {
     const updated = await encuentroService.update(id, updates);
     return res.json(updated);
   } catch (err) {
-    const msg = err.message || "";
-    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-    return res.status(400).json({ error: msg });
+   // const msg = err.message || "";
+    //if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+    //return res.status(400).json({ error: msg });
+    return handleControllerError(res, err, "Error al obtener encuentros por ganador");
+  
   }
 };
 
@@ -155,8 +170,10 @@ exports.deleteEncuentro = async (req, res) => {
     return res.json(result);
   } catch (err) {
     const msg = err.message || "";
-    if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-    return res.status(400).json({ error: msg });
+    //if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
+    //return res.status(400).json({ error: msg });
+    return handleControllerError(res, err, "Error al borrar encuentro");
+  
   }
 };
 

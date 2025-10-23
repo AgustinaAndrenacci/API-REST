@@ -15,7 +15,7 @@ const {isCreator} = require("../middlewares/isCreatorMiddleware");
 
 //Rutas Generales
 
-router.get ("/", encuentroController.getAllEncuentros);
+router.get ("/", autenticarToken,encuentroController.getAllEncuentros);
  
 
 // C - Crear un nuevo encuentro--> ojo, solo desde UPDATE Jornada
@@ -24,23 +24,23 @@ router.get ("/", encuentroController.getAllEncuentros);
 
 // R  -Leer un encuentro, Read
 //      get all 
-router.get("/torneo", encuentroController.getAllEncuentros);
-router.get("/desafio", encuentroController.getAllEncuentros);
+router.get("/torneo",autenticarToken, encuentroController.getAllEncuentros);
+router.get("/desafio",autenticarToken, encuentroController.getAllEncuentros);
 
 //      get byID
-router.get ("/:id", encuentroController.getEncuentroById);
+router.get ("/:id",autenticarToken, encuentroController.getEncuentroById);
 //router.get("/torneo/:id", encuentroController.getEncuentroById);
 //router.get("/desafio/:id", encuentroController.getEncuentroById);
 
 /////
+router.get("/:tipo/ganador/:id", encuentroController.getByGanador);
+router.get("/:tipo/participante/:id", encuentroController.getByJugador);
+router.get("/:tipo/organizador/:id", encuentroController.getByCreador);
 router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
-router.get("/:tipo/ganador/:id_jugador", encuentroController.getByGanador);
-router.get("/:tipo/participante/:id_jugador", encuentroController.getByJugador);
-router.get("/:tipo/organizador/:id_jugador", encuentroController.getByCreador);
 ////
 
 // U - Update, Actualizar un encuentro existente
-router.put(":id", autenticarToken,isCreator, encuentroController.updateEncuentro);
+router.put("/:id", autenticarToken,isCreator, encuentroController.updateEncuentro);
 
 //crear nueva ruta de Update solo para updetear parricipantes , no necesita ser creador.
 

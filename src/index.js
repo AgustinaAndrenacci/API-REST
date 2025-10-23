@@ -9,7 +9,7 @@ const jornadaRoutes = require("./routes/jornadaRoutes");
 const encuentroRoutes = require("./routes/encuentroRoutes");
 const juegosRoutes = require("./routes/juegoRoutes");
 const mensajeRoutes = require("./routes/mensajeRoutes");///AGREGO para mensaje(fede 19.10)
-
+const { showErrorMessage } = require("./errorHandler");
 
 const connectDB = require("./config/db");
 
@@ -28,6 +28,10 @@ app.use("/jornadas", jornadaRoutes);
 app.use("/encuentros", encuentroRoutes);
 app.use("/juegos", juegosRoutes);
 app.use("/mensajes", mensajeRoutes); ///AGREGO para mensaje(fede 19.10)
+
+app.use((req, res) => {
+  return showErrorMessage(res, 404, "Suponiamos que charly iba a hacer esto");
+});
 
 // Inicio del server
 const PORT = process.env.PORT;

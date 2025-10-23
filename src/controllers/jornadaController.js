@@ -5,6 +5,7 @@ const encuentro = require("./encuentroController");
 const usuario = require("./usuarioController");
 const encuentroService = require('../services/encuentroService');
 const usuarioService = require('../services/usuarioService');
+const { showErrorMessage } = require("../errorHandler");
 
 exports.getAllJornadas = async (req, res) => {
   try {
@@ -107,16 +108,18 @@ exports.updateJornada = async (req, res) => {
 exports.updateJornadaEncuentros = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    const { encuentros } = req.body; //uno solo
-    if (!encuentros) { 
-      showErrorMessage(res, 400, "Faltan campos obligatorios");
+    //const { encuentros } = req.body; //uno solo
+    const encuentro = { ...req.body };
+    console.log("Encuentros a agregar:", { encuentro });
+    if (!encuentro) { 
+      showErrorMessage(res, 400, "Faltan campos obligatoriossssssss");
     }
     else{//push: actualiza y no pisa
       //crear el encuentro en la bd
       //json encuentros
 
       //añado el createdBy en encuentros
-      const encuentroConId = await encuentroService.create({encuentros});
+     const encuentroConId = await encuentroService.create(encuentro);
 
       //validar que se ingresaron todos los datos
 
@@ -124,14 +127,16 @@ exports.updateJornadaEncuentros = async (req, res) => {
       
       //const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
 
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentroConId } }, { new: true, runValidators: true });
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
         : showErrorMessage(res, 404, "Jornada no encontrada"); //false
 
+//(res, 401, "hola");
     }
 
     } catch (err) {
+      console.error("Error detallado al actualizar jornada:", err);
     showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };

@@ -281,10 +281,10 @@ async function create(payload) {
   }
 
   //  - capacidad: si payload.capacidad está definida y hay jugadores, validar
-  if (typeof payload.capacidad === "number") {
+  /*if (typeof payload.capacidad === "number") {
     const cantidadJugadores = payload.jugadores ? payload.jugadores.length : 0;
     verificarCapacidadDisponible(payload.capacidad, cantidadJugadores);
-  }
+  }*/
 
   // crear y devolver
   const nuevo = new Encuentro(payload);

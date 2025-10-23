@@ -1,59 +1,14 @@
-// src/controllers/usuarioController.js
-
-//CAMBIAR LO DE LOS ERRORES!!!!
-
-/*
-const Jornada = require("../models/jornadaModel");
-
-exports.getAllJornadas = (req, res) => {
-  res.json(Jornada.getAll());
-};
-
-exports.getJornadaById = (req, res) => {
-  const id = parseInt(req.params.id);
-  const jornada = Jornada.getById(id); //lo trae del modelo
-  jornada //ternario IF
-    ? res.json(jornada) //true
-    : res.status(404).json({ error: "Jornada no encontrada" }); //false
-};
-
-exports.createJornada = (req, res) => {
-  const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
-  !nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles
-    ? res.status(400).json({ error: "Faltan campos obligatorios" }) //false
-    : res.status(201).json(Jornada.create({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles })); //true
-};
-
-exports.updateJornada = (req, res) => {
-  const id = parseInt(req.params.id);
-  const actualizada = Jornada.update(id, req.body);
-  actualizada
-    ? res.json(actualizada) //true
-    : res.status(404).json({ error: "Jornada no encontrada" }); //false
-};
-
-exports.deleteJornada = (req, res) => {
-  const id = parseInt(req.params.id);
-  const eliminada = Jornada.remove(id);
-  eliminada
-    ? res.json({ message: "Jornada eliminada" }) //true
-    : res.status(404).json({ error: "Jornada no encontrada" }); //false
-};
-
-*/
-
-
-
 const Jornada = require("../models/jornadaModel");
 const Usuario = require('../models/usuarioModel');
 const jornadaService = require("../services/jornadaService");
 const encuentro = require("./encuentroController");
 const usuario = require("./usuarioController");
 const encuentroService = require('../services/encuentroService');
+const usuarioService = require('../services/usuarioService');
 
 exports.getAllJornadas = async (req, res) => {
   try {
-    const jornadas = await Jornada.find();
+    const jornadas = await jornadaService.getAllJornadas();
     res.json(jornadas);
   } catch (err) {
     res.status(500).json({ error: "Error al obtener jornadas" });
@@ -62,7 +17,7 @@ exports.getAllJornadas = async (req, res) => {
 
 exports.getJornadaById = async (req, res) => {
   try {
-    const jornada = await Jornada.findById(req.params.id);
+    const jornada = await jornadaService.getJornadaById(req.params.id);
     jornada
       ? res.json(jornada) //true
       : res.status(404).json({ error: "Jornada no encontrada" }); //false
@@ -75,18 +30,24 @@ exports.createJornada = async (req, res) => {
   try {
     //ID del usuario por el token
     const id = req.user.id;
-    
-
     const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
+    
     if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
       res.status(400).json({ error: "Faltan campos obligatorios" }); //false
     }
     else{
       //Guardo en juegosDisponibles lo que tiene la jornada en Usuario.misJuegos
       // Usamos .lean() para obtener un objeto JS simple y luego accedemos a la propiedad misJuegos.
-      const juegosDisponibles = await Usuario.findById(id).select('misJuegos').lean();
-
-      const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles });
+      const user = await usuarioService.getUsuarioById(id);
+      const juegosDisponibles = user.misJuegos;
+      //en juegosDisponibles viene con _id y en jornada lo guardo con id
+      const juegosParaGuardar = juegosDisponibles.map(juego => ({
+        //_id: juego._id,
+        id: juego._id,
+        titulo: juego.titulo,
+        imagen: juego.imagen
+      }));
+      const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles: juegosParaGuardar });
       await nuevaJornada.save();
       res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true
     }
@@ -97,45 +58,38 @@ exports.createJornada = async (req, res) => {
   }
 };
 
-// src/controllers/jornadaController.js
 exports.updateJornada = async (req, res) => {
   try {
-    // 1. Desestructuración limpia del ID
-    const { id } = req.params;
-    const bodyJson = req.body;
+    const { id } = req.params; //id de la jornada
+    const bodyJson = req.body; //body a modificar
+    //encuentros no
+    delete bodyJson.encuentros;
 
-    // 2. CORRECCIÓN: Usar el ID como string
-    const jornadaExistente = await Jornada.findById(id);
+    const jornadaExistente = await jornadaService.getJornadaById(id);
     
     if (!jornadaExistente) {
-      // 3. Usar return
-      return res.status(404).json({ error: "Jornada no encontrada" });
-    }
+      res.status(404).json({ error: "Jornada no encontrada" });
+    }else{
+      //chequea la capacidad
+      const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
     
-    // 4. Se llama al servicio, que lanzará un error si la validación falla
-    // Si falla, el flujo salta inmediatamente al bloque 'catch'
-    const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
-
-    // 5. CORRECCIÓN: Actualizar con los datos validados (solo el body)
-    const jornadaActualizada = await Jornada.findByIdAndUpdate(
-      id, 
-      datosParaActualizar, // Solo pasamos los campos del body
-      { new: true, runValidators: true }
-    );
-    
-    // Check de seguridad
-    if (!jornadaActualizada) {
-        return res.status(500).json({ error: "Fallo interno al actualizar la jornada." });
+      // actualizar
+      const jornadaActualizada = await jornadaService.updateJornada(
+        id, 
+        datosParaActualizar, 
+        { new: true, runValidators: true }
+      );
+      
+      res.json(jornadaActualizada);
     }
+    } catch (err) {
+      //no hay otra forma?
 
-    return res.json(jornadaActualizada);
-
-  } catch (err) {
-    // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
-    // Se asume que cualquier error lanzado desde validarJornada es un 400
-    if (err.message.includes('capacidad no puede ser menor')) {
-      return res.status(400).json({ error: err.message });
-    }
+      // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
+      // Se asume que cualquier error lanzado desde validarJornada es un 400
+    /*  if (err.message.includes('capacidad no puede ser menor')) {
+        return res.status(400).json({ error: err.message });
+      }*/
 
     // Para cualquier otro error (Mongoose, servidor, etc.)
     console.error("Error detallado al actualizar jornada:", err);
@@ -173,38 +127,41 @@ exports.updateJornadaEncuentros = async (req, res) => {
   }
 };
 
-//Un jugador se inscribe en la jornada, no un conjunto
+//El jugador logueado se inscribe en la jornada, no un conjunto
 exports.updateJornadaJugador = async (req, res) => {
   try {
       const idJornada = req.params.id; // Usar el ID de la URL
       const idJugador = req.user.id; // Usar el ID del token 
 
-      const datosJugador = await usuario.findUserForJornada(idJugador);
+      const user = await usuarioService.getUsuarioById(idJugador);
 
       //push: actualiza y no pisa
+      //busca la jornada
       const jornada = await Jornada.findById(idJornada);
       
       if (jornada) {
         //verifico que el usuario no este anotado
         const usuarioYaAnotado = jornada.jugadoresInscriptos.find(jugador => String(jugador.id) === String(idJugador));
+        
         if (usuarioYaAnotado) {
           res.status(400).json({ error: "El jugador ya está anotado en la jornada" });
         }else{
           //verifico que la cantidad de jugadores no supere la capacidad
           const cantidadJugadores = jornada.jugadoresInscriptos.length;
+
           if (cantidadJugadores + 1 > jornada.capacidad) {
             res.status(400).json({ error: "Capacidad máxima superada" });
           }
           else{
             const jornadaActualizada = await Jornada.findByIdAndUpdate(
               idJornada, 
-              {// Se agrega el objeto de jugador directamente, no dentro de un array
+              {
               $push: { 
                   jugadoresInscriptos: {
                       id: idJugador,
-                      userName: datosJugador.userName,
-                      nombre: datosJugador.nombre,
-                      apellido: datosJugador.apellido
+                      userName: user.userName,
+                      nombre: user.nombre,
+                      apellido: user.apellido
                   } 
               } 
               }, { new: true, runValidators: true });
@@ -216,128 +173,35 @@ exports.updateJornadaJugador = async (req, res) => {
       }
     } catch (err) {
     
-  console.error("Error detallado al actualizar jornada:", err); 
+        console.error("Error detallado al actualizar jornada:", err); 
         res.status(500).json({ error: "Error al actualizar jornada" });
         }
 };
 
-//viejo
-exports.updateJornadaJugadores = async (req, res) => {
-  try {
-    const id = req.params.id; // Usar el ID de la URL
-    const { jugadorInscripto } = req.body;
-    if (!jugadorInscripto) {
-      res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
-    else{//push: actualiza y no pisa
-      //verifico que la cantidad de jugadores no supere la capacidad
-      const jornada = await Jornada.findById(id);
-      if (jornada) {
-        const cantidadJugadores = jornada.jugadoresInscriptos.length;
-        if (cantidadJugadores + 1 > jornada.capacidad) {
-          res.status(400).json({ error: "Capacidad máxima superada" });
-        }
-        else{
-          const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { jugadoresInscriptos: jugadorInscripto } }, { new: true, runValidators: true });
-          res.json(jornadaActualizada) //true
-          }
-      }
-      else{
-        res.status(404).json({ error: "Jornada no encontrada" }); //false
-      }
-
-    }
-    
-
-    } catch (err) {
-    res.status(500).json({ error: "Error al actualizar jornada" });
-  }
-};
-/*
-exports.updateJornadaJuegos = async (req, res) => {
-  try {
-    //directamente carga todos los de misJuegos
-    const id = req.params.id; // Usar el ID de la URL
-    const juegosDisponibles = await usuarioController.getMisJuegos();
-    if (!juegosDisponibles) {
-      res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
-    else{//push: actualiza y no pisa   
-
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { juegosDisponibles } }, { new: true, runValidators: true });
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : res.status(404).json({ error: "Jornada no encontrada" }); //false
-
-    }
-
-    } catch (err) {
-    res.status(500).json({ error: "Error al actualizar jornada" });
-  }
-};*/
-
-//reformular
-
 exports.updateJornadaEstado = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    const { estado } = req.body;
+    const { estado } = req.body; //nuevo estado
+
     if (!estado) {
       res.status(400).json({ error: "Falta ingresar el estado" });
     }
     else{
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { estado } , { new: true, runValidators: true });
+      //verifico que el estado sea una de las opciones del enum que se encuentra en jornadaModel
+      const estadosValidos = await jornadaService.estadosValidos(estado);
+
+      if (!estadosValidos) {
+        res.status(400).json({ error: "El estado ingresado es inválido"});
+      }else{
+      const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
         : res.status(404).json({ error: "Jornada no encontrada" }); //false
-
-    }
+    }}
 
     } catch (err) {
+      console.error("Error detallado al actualizar jornada:", err);
     res.status(500).json({ error: "Error al actualizar jornada" });
-  }
-};
-
-exports.deleteJornada = async (req, res) => {
-  try {
-    const jornadaEliminada = await Jornada.findByIdAndDelete(req.params.id);
-    if(jornadaEliminada){
-      res.json({ message: "Jornada eliminada", jornadaEliminada }); //true
-      //borrar todos los encuentros asociados a la jornada
-      eliminarEncuentrosPorJornada(jornadaEliminada);
-    }
-    else{
-      res.status(404).json({ error: "Jornada no encontrada" }); //false
-    }
-  } catch (err) {
-    res.status(500).json({ error: "Error al eliminar jornada" });
-  }
-};
-
-exports.countJugadoresEnJornada = async (req, res) => {
-  try {
-    const id = req.params.id; // Usar el ID de la URL
-    const jornada = await Jornada.findById(id);
-    if (!jornada) {
-      res.status(404).json({ error: "Jornada no encontrada" });
-    }
-    else{
-      const cantidadJugadores = jornada.jugadoresInscriptos.length;
-      //res.json({ cantidadJugadores });
-    }
-    return cantidadJugadores;
-  } catch (err) {
-    res.status(500).json({ error: "Error al contar jugadores en la jornada" });
-  }
-};
-
-exports.eliminarEncuentrosPorJornada = async (jornadaEliminada) => {
-  try {
-        jornadaEliminada.encuentros.forEach(async (encuentroId) => {
-        await encuentro.deleteEncuentro(encuentroId);
-      });
-  } catch (err) {
-    console.error(err);
   }
 };
 
@@ -356,13 +220,4 @@ exports.crearEncuentrosPorJornada = async (encuentroJson) => {
   }
 };
 
-exports.validarJugadoresInscriptos = async (jugadoresInscriptos) => {
-  try {
-    logConsole("Validando jugadores inscriptos:");
-    const jugadoresExistentes = await Usuario.find({ userName: { $in: jugadoresInscriptos } });
-    const jugadoresNoExistentes = jugadoresInscriptos.filter(userName => !jugadoresExistentes.some(usuario => usuario.userName === userName));
-    return jugadoresNoExistentes;
-  } catch (err) {
-    console.error(err);
-  }
-};
+

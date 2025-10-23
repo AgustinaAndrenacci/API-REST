@@ -65,7 +65,7 @@ const jornadaSchema = new mongoose.Schema(
       {
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
         titulo: { type: String, required: true },
-        imagen: { type: String }
+        imagen: { type: String, default: "" },
       }
     ],
     jugadoresInscriptos: [ //false

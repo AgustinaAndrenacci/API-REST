@@ -53,6 +53,20 @@ const updateJornada = async (id, data) => {
   }
 };
 
+//borrarEncuentroDeJornada
+const borrarEncuentroDeJornada = async (idJornada, idEncuentro) => {
+  try {
+    const jornadaActualizada = await jornadaService.findByIdAndUpdate(
+      idJornada,
+      { $pull: { encuentros: { id: idEncuentro } } },
+      { new: true }
+    );
+    return jornadaActualizada;
+  } catch (error) {
+    throw new Error("Error al borrar encuentro de jornada");
+  }
+};
+
 //create
 const createJornada = async (data) => {
   try {

@@ -14,8 +14,8 @@ const juegoSchema = new mongoose.Schema({
 
 const jugadorSchema = new mongoose.Schema({
   id_jugador: { type: String },
-  nombre: { type: String },
-  apellido:{ type: String },
+  //nombre: { type: String },
+  //apellido:{ type: String },
   UserName :{ type: String },
   estado: { 
       type: String, 

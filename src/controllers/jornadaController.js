@@ -11,7 +11,7 @@ exports.getAllJornadas = async (req, res) => {
     const jornadas = await jornadaService.getAllJornadas();
     res.json(jornadas);
   } catch (err) {
-    res.status(500).json({ error: "Error al obtener jornadas" });
+    showErrorMessage(res, 500, "Error al obtener jornadas");
   }
 };
 
@@ -20,9 +20,9 @@ exports.getJornadaById = async (req, res) => {
     const jornada = await jornadaService.getJornadaById(req.params.id);
     jornada
       ? res.json(jornada) //true
-      : res.status(404).json({ error: "Jornada no encontrada" }); //false
+      : showErrorMessage(res, 404, "Jornada no encontrada"); //false
   } catch (err) {
-    res.status(500).json({ error: "Error al buscar jornada" });
+    showErrorMessage(res, 500, "Error al buscar jornada");
   }
 };
 
@@ -33,7 +33,7 @@ exports.createJornada = async (req, res) => {
     const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
     
     if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
-      res.status(400).json({ error: "Faltan campos obligatorios" }); //false
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
     }
     else{
       //Guardo en juegosDisponibles lo que tiene la jornada en Usuario.misJuegos
@@ -54,7 +54,7 @@ exports.createJornada = async (req, res) => {
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Error al crear jornada" });
+    showErrorMessage(res, 500, "Error al crear jornada");
   }
 };
 
@@ -68,7 +68,7 @@ exports.updateJornada = async (req, res) => {
     const jornadaExistente = await jornadaService.getJornadaById(id);
     
     if (!jornadaExistente) {
-      res.status(404).json({ error: "Jornada no encontrada" });
+      showErrorMessage(res, 404, "Jornada no encontrada");
     }else{
       //chequea la capacidad
       const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
@@ -83,8 +83,6 @@ exports.updateJornada = async (req, res) => {
       res.json(jornadaActualizada);
     }
     } catch (err) {
-      //no hay otra forma?
-
       // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
       // Se asume que cualquier error lanzado desde validarJornada es un 400
     /*  if (err.message.includes('capacidad no puede ser menor')) {
@@ -93,7 +91,7 @@ exports.updateJornada = async (req, res) => {
 
     // Para cualquier otro error (Mongoose, servidor, etc.)
     console.error("Error detallado al actualizar jornada:", err);
-    return res.status(500).json({ error: "Error al actualizar jornada", detalle: err.message });
+    showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
 
@@ -102,7 +100,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
     const id = req.params.id; // Usar el ID de la URL
     const { encuentros } = req.body; //uno solo
     if (!encuentros) { 
-      res.status(400).json({ error: "Faltan campos obligatorios" });
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
     }
     else{//push: actualiza y no pisa
       //crear el encuentro en la bd
@@ -118,12 +116,12 @@ exports.updateJornadaEncuentros = async (req, res) => {
       const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentrosConId } }, { new: true, runValidators: true });
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
-        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
 
     }
 
     } catch (err) {
-    res.status(500).json({ error: "Error al actualizar jornada" });
+    showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
 
@@ -144,13 +142,13 @@ exports.updateJornadaJugador = async (req, res) => {
         const usuarioYaAnotado = jornada.jugadoresInscriptos.find(jugador => String(jugador.id) === String(idJugador));
         
         if (usuarioYaAnotado) {
-          res.status(400).json({ error: "El jugador ya está anotado en la jornada" });
+          showErrorMessage(res, 400, "El jugador ya está anotado en la jornada");
         }else{
           //verifico que la cantidad de jugadores no supere la capacidad
           const cantidadJugadores = jornada.jugadoresInscriptos.length;
 
           if (cantidadJugadores + 1 > jornada.capacidad) {
-            res.status(400).json({ error: "Capacidad máxima superada" });
+            showErrorMessage(res, 400, "Capacidad máxima superada");
           }
           else{
             const jornadaActualizada = await Jornada.findByIdAndUpdate(
@@ -169,12 +167,12 @@ exports.updateJornadaJugador = async (req, res) => {
             }
       }}
       else{
-        res.status(404).json({ error: "Jornada no encontrada" }); //false
+        showErrorMessage(res, 404, "Jornada no encontrada");
       }
     } catch (err) {
-    
-        console.error("Error detallado al actualizar jornada:", err); 
-        res.status(500).json({ error: "Error al actualizar jornada" });
+
+        console.error("Error detallado al actualizar jornada:", err);
+        showErrorMessage(res, 500, "Error al actualizar jornada");
         }
 };
 
@@ -184,24 +182,24 @@ exports.updateJornadaEstado = async (req, res) => {
     const { estado } = req.body; //nuevo estado
 
     if (!estado) {
-      res.status(400).json({ error: "Falta ingresar el estado" });
+      showErrorMessage(res, 400, "Falta ingresar el estado");
     }
     else{
       //verifico que el estado sea una de las opciones del enum que se encuentra en jornadaModel
       const estadosValidos = await jornadaService.estadosValidos(estado);
 
       if (!estadosValidos) {
-        res.status(400).json({ error: "El estado ingresado es inválido"});
+        showErrorMessage(res, 400, "El estado ingresado es inválido");
       }else{
       const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
       jornadaActualizada
         ? res.json(jornadaActualizada) //true
-        : res.status(404).json({ error: "Jornada no encontrada" }); //false
+        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
     }}
 
     } catch (err) {
       console.error("Error detallado al actualizar jornada:", err);
-    res.status(500).json({ error: "Error al actualizar jornada" });
+      showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
 

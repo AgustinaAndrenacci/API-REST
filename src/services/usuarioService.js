@@ -74,6 +74,16 @@ const deleteMisJuegos = async (idUsuario, idJuego) => {
   return juegosActualizados;
 };
 
+const estadosValidos = async (estado) => {
+  try {
+    const estadosValidos = Usuario.schema.paths.rol.options.enum;
+    return (estadosValidos.includes(estado) && estado !== "administrador");
+    //includes: verifica si el estado recibido está en la lista de estados válidos
+  } catch (error) {
+    throw new Error("Error al validar estados");
+  }
+};
+
 //----------------------------------------------------------------------
 /*exports.findUserForJornada = async (id) => {
     try {
@@ -96,5 +106,6 @@ module.exports = {
   updateMisJuegos,
   createMisJuegos,
   deleteMisJuegos,
+  estadosValidos
   //findUserForJornada
 };

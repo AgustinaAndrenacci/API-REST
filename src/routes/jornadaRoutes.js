@@ -9,7 +9,7 @@ const {autenticarToken} = require("../middlewares/authMiddleware");
 router.get("/", jornadaController.getAllJornadas);
 router.get("/:id", jornadaController.getJornadaById);
 //router.get("/countJugadoresEnJornada/:id", jornadaController.countJugadoresEnJornada);
-router.post("/",autenticarToken, jornadaController.createJornada);
+router.post("/create",autenticarToken, jornadaController.createJornada);
 router.put("/:id",autenticarToken, jornadaController.updateJornada);
 router.put("/updateEncuentros/:id",autenticarToken, jornadaController.updateJornadaEncuentros);
 //router.put("/updateJuegos/:id",autenticarToken, jornadaController.updateJornadaJuegos);

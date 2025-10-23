@@ -4,6 +4,7 @@ const Usuario = require("../models/usuarioModel");
 const usuarioService = require("../services/usuarioService");
 //const Juego = require("./juegoController");
 const juegoModel = require("../models/juegoModel");
+const { showErrorMessage } = require("../errorHandler");
 
 exports.getAllUsuarios = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ exports.getAllUsuarios = async (req, res) => {
     //muestra sin la password
     res.json(usuarios.map(usuarioService.formatoJsonUsuario));
   } catch (err) {
-    res.status(500).json({ error: "Error al obtener usuarios" });
+    showErrorMessage(res, 500, "Error al obtener usuarios");
   }
 };
 
@@ -20,9 +21,9 @@ exports.getUsuarioById = async (req, res) => {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
     usuario
       ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
-      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+      : showErrorMessage(res, 404, "Usuario no encontrado"); 
   } catch (err) {
-    res.status(500).json({ error: "Error al buscar usuario" });
+    showErrorMessage(res, 500, "Error al buscar usuario");
   }
 };
 
@@ -32,9 +33,9 @@ exports.getUsuarioByUsername = async (req, res) => {
     const usuario = await usuarioService.getUsuarioByUsername(userName);
     usuario
       ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
-      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+      : showErrorMessage(res, 404, "Usuario no encontrado"); //false
   } catch (err) {
-    res.status(500).json({ error: "Error al buscar usuario" });
+    showErrorMessage(res, 500, "Error al buscar usuario");
   }
 };
 
@@ -44,9 +45,9 @@ exports.getPerfil = async (req, res) => {
     const usuario = await usuarioService.getUsuarioById(req.user.id);
     usuario
       ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
-      : res.status(404).json({ error: "Usuario no encontrado" }); //false
+      : showErrorMessage(res, 404, "Usuario no encontrado"); //false
   } catch (err) {
-    res.status(500).json({ error: "Error al buscar usuario" });
+    showErrorMessage(res, 500, "Error al buscar usuario");
   }
 };
 
@@ -59,7 +60,7 @@ exports.login = async (req, res) => {
     //busco usuario
     const usuario = await usuarioService.getUsuarioByUsername({userName});
     if(!usuario){
-      res.status(404).json({ error: "Username incorrecto" });
+      showErrorMessage(res, 404, "Username incorrecto");
     }
     else{
       //verificar contra (comparo hash)
@@ -68,7 +69,7 @@ exports.login = async (req, res) => {
       
       const isMatch = await bcrypt.compare(pass,usuario.pass);
       if (!isMatch){
-        res.status(404).json({ error: "Contraseña incorrecta" });
+        showErrorMessage(res, 404, "Contraseña incorrecta");
       }
       else{
 
@@ -91,7 +92,7 @@ exports.login = async (req, res) => {
     }
   } catch (err) {
     console.error("Error en el login", err); //NUEVO
-    res.status(500).json({ error: "Error al buscar usuario" });
+    showErrorMessage(res, 500, "Error al buscar usuario");
   }
 };
 
@@ -99,13 +100,18 @@ exports.registrar = async (req, res) => {
   try {
     const { userName, pass, rol, nombre, apellido, foto, telefono, mail } = req.body;
     if (!userName || !pass || !rol || !nombre || !apellido || !mail || !telefono) {
-      res.status(400).json({ error: "Faltan campos obligatorios" }); //false
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
     }
     else{
       //Chequeo si existe el username
       const usuarioConUserNameIgual = await usuarioService.getUsuarioByUsername({userName});
 
       if(!usuarioConUserNameIgual){
+        //Chequeo si el rol es válido
+        const rolValido = await usuarioService.estadosValidos(rol);
+        if (!rolValido) {
+          showErrorMessage(res, 400, "Rol inválido");
+        }else{
         // Hashear la contraseña
         const salt = await bcrypt.genSalt(10);
         const hashPass = await bcrypt.hash(pass, salt);
@@ -113,19 +119,20 @@ exports.registrar = async (req, res) => {
         const nuevoUsuario = new Usuario({ userName, pass: hashPass, rol, nombre, apellido, foto, telefono, mail });
         //await nuevoUsuario.save();
         const newUsuario = await usuarioService.createUsuario(nuevoUsuario);
-        res.status(201).json({
+        res.status(200).json({
           message: "Usuario creado con éxito",
           usuario: usuarioService.formatoJsonUsuario(newUsuario)
         }); //true
-      }
-      else{ 
-        res.status(400).json({ error: "El username ya existe" }); //false
+      }}
+      
+      else {
+        showErrorMessage(res, 400, "El username ya existe");
       }
     }
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Error al crear usuario" });
+    showErrorMessage(res, 500, "Error al crear usuario");
   }
 };
 
@@ -147,11 +154,11 @@ exports.updateUsuario = async (req, res) => {
     }
     else
     {
-      res.status(404).json({ error: "Usuario no encontrado" });
+      showErrorMessage(res, 404, "Usuario no encontrado");
     }
 
   } catch (err) {
-    res.status(500).json({ error: "Error al actualizar usuario" });
+    showErrorMessage(res, 500, "Error al actualizar usuario");
   }
 };
 
@@ -162,7 +169,7 @@ exports.updatePassword = async (req, res) => {
 
         // valido los datos ingresados
         if (!passVieja || !passNueva) {
-            res.status(400).json({ error: "Debe ingresar la contraseña actual y la nueva contraseña" });
+            showErrorMessage(res, 400, "Debe ingresar la contraseña actual y la nueva contraseña");
         }else{
           // Busco el usuario
           const user = await usuarioService.getUsuarioById(id);
@@ -170,12 +177,12 @@ exports.updatePassword = async (req, res) => {
           //Comparo la contraseña antigua
           const isMatch = await bcrypt.compare(passVieja, user.pass);
           if (!isMatch) {
-              res.status(401).json({ error: "La contraseña actual es incorrecta" });
+              showErrorMessage(res, 401, "La contraseña actual es incorrecta");
           }else{
             //chequeo que la pass nueva no sea igual que la anterior
             const isMatchNueva = await bcrypt.compare(passNueva, user.pass);
             if (isMatchNueva) {
-              res.status(400).json({ error: "La nueva contraseña no puede ser igual a la anterior" });
+              showErrorMessage(res, 400, "La nueva contraseña no puede ser igual a la anterior");
             }else{
               //actualizo la nueva contraseña
               const salt = await bcrypt.genSalt(10);
@@ -191,7 +198,7 @@ exports.updatePassword = async (req, res) => {
 
         }   
     } catch (err) {
-        res.status(500).json({ error: "Error al actualizar la contraseña" });
+        showErrorMessage(res, 500, "Error al actualizar la contraseña");
     }
 };
 
@@ -203,10 +210,10 @@ exports.deleteUsuario = async (req, res) => {
       res.json(usuarioService.formatoJsonUsuario(usuarioEliminado));
     }
     else{
-      res.status(404).json({ error: "Usuario no encontrado" });
+      showErrorMessage(res, 404, "Usuario no encontrado");
     }
   } catch (err) {
-    res.status(500).json({ error: "Error al eliminar usuario" });
+    showErrorMessage(res, 500, "Error al eliminar usuario");
   }
 };
 
@@ -224,7 +231,7 @@ exports.getMisJuegos = async (req, res) => {
 
   } catch (err) {
     console.error("Error al obtener los juegos del usuario:", err);
-    res.status(500).json({ error: "Error al obtener los juegos del usuario" });
+    showErrorMessage(res, 500, "Error al obtener los juegos del usuario");
   }
 };
 
@@ -246,18 +253,18 @@ exports.agregarMisJuegos = async (req, res) => {
       //Chequeo que el id no exista en el vector
       const juegoExiste = user.misJuegos.some(juego => juego._id.toString() === idJuego);
       if (juegoExiste) {
-        res.status(400).json({ error: "El juego ya se encuentra en misJuegos" });
+        showErrorMessage(res, 400, "El juego ya se encuentra en misJuegos");
       }else{
         const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: [juegoNuevo] } } }, { new: true });
         res.json(juegosActualizados);
       }
     }else{
-      res.status(404).json({ error: "Juego no encontrado" });
+      showErrorMessage(res, 404, "Juego no encontrado");
     }
 
   } catch (err) {
     console.error("Error al agregar juego a mis juegos:", err);
-    res.status(500).json({ error: "Error al agregar juego a mis juegos" });
+    showErrorMessage(res, 500, "Error al agregar juego a mis juegos");
   }
 };
 
@@ -274,13 +281,13 @@ exports.eliminarJuegoDeMisJuegos = async (req, res) => {
 
     if (!juegoExiste) {
       // Si el juego no está, notificamos y terminamos
-      res.status(404).json({ error: "El juego no está en tu lista de 'misJuegos'." });
+      showErrorMessage(res, 404, "El juego no está en tu lista de 'misJuegos'.");
     }else{
       const juegosActualizados = await usuarioService.deleteMisJuegos(idUsuario, idJuego);
       res.json(juegosActualizados);
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Error al eliminar juego de mis juegos" });
+    showErrorMessage(res, 500, "Error al eliminar juego de mis juegos");
   }
 };

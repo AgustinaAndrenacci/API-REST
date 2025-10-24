@@ -114,10 +114,17 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
  */
 async function verificarJuegoExistente(idJuego) {
   if (!idJuego) throw new Error("verificarJuegoExistente: idJuego requerido.");
-  if (!Juego) {
-    throw new Error("Modelo Juego no disponible: crear archivo models/juegoModel.js o ajustar require.");
+
+  if (!Juego) throw new Error("Modelo Juego no disponible");
+
+  let objectId;
+  try {
+    objectId = new mongoose.Types.ObjectId(idJuego);
+  } catch {
+    throw new Error(`ID de juego inválido: ${idJuego}`);
   }
-  const existe = await Juego.exists({ _id: idJuego });
+
+  const existe = await Juego.exists({ _id: objectId });
   if (!existe) throw new Error(`Juego no encontrado: ${idJuego}`);
 }
 
@@ -266,31 +273,65 @@ async function getByJugador(idJugador) {
 async function create(payload) {
   if (!payload) throw new Error("create: payload requerido.");
 
-  // Validaciones que podemos hacer antes de guardar:
-  //  - si hay jugadores: verificar existencia
+  // Validar jugadores
   if (payload.jugadores && Array.isArray(payload.jugadores) && payload.jugadores.length > 0) {
     const ids = payload.jugadores.map((j) => j.id_jugador || j._id || j);
     await verificarJugadoresExistentes(ids);
   }
 
-  //  - si hay juego: verificar existencia
+  // Validar juego
   if (payload.juego) {
-    // Si juego viene como objeto con id_juego, preferimos eso; si viene como _id usamos ese.
-    const idJuego = payload.juego.id_juego || payload.juego._id || payload.juego;
-    if (idJuego) await verificarJuegoExistente(idJuego);
+    // Soportar array o un solo objeto
+let juegoId;
+let juegoInfo;
+
+if (Array.isArray(payload.juego) && payload.juego.length > 0) {
+  juegoId = payload.juego[0].id_juego || payload.juego[0]._id;
+  juegoInfo = {
+    nombre: payload.juego[0].nombre,
+    imagen: payload.juego[0].imagen,
+  };
+} else if (typeof payload.juego === "object" && (payload.juego.id_juego || payload.juego._id)) {
+  juegoId = payload.juego.id_juego || payload.juego._id;
+  juegoInfo = {
+    nombre: payload.juego.nombre,
+    imagen: payload.juego.imagen,
+  };
+} else if (typeof payload.juego === "string") {
+  juegoId = payload.juego;
+  // Buscar en la BD para traer nombre e imagen
+  const juegoBD = await Juego.findById(juegoId).lean();
+  if (!juegoBD) throw new Error("Juego no encontrado");
+  juegoInfo = {
+    nombre: juegoBD.titulo,
+    imagen: juegoBD.imagen,
+  };
+} else {
+  throw new Error("Juego inválido");
+}
+    ////
+        if (!mongoose.isValidObjectId(juegoId)) throw new Error("ID de juego inválido");
+    await verificarJuegoExistente(juegoId);
+
+    // Sobrescribimos payload.juego para que Mongoose lo entienda
+    payload.juego = {
+      id_juego: juegoId,
+      ...juegoInfo,
+    };
   }
 
-  //  - capacidad: si payload.capacidad está definida y hay jugadores, validar
+  // Validar capacidad
   if (typeof payload.capacidad === "number") {
     const cantidadJugadores = payload.jugadores ? payload.jugadores.length : 0;
     verificarCapacidadDisponible(payload.capacidad, cantidadJugadores);
   }
 
-  // crear y devolver
+  // Crear y devolver
   const nuevo = new Encuentro(payload);
   const saved = await nuevo.save();
   return saved.toObject();
 }
+
 
 /**
  * update - actualiza un encuentro con validaciones estrictas.

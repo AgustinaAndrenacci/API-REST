@@ -74,8 +74,8 @@ const jornadaSchema = new mongoose.Schema(
         //Usar referencia para no tener problema en el modificar
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
         userName: { type: String, required: true },
-        nombre: { type: String, required: true },
-        apellido: { type: String, required: true }
+        //nombre: { type: String, required: true },
+        //apellido: { type: String, required: true }
       }
     ],
     /* F:permiso

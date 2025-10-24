@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Usuario = require("../models/usuarioModel");
 const usuarioService = require("../services/usuarioService");
+//const juegoService = require("../services/juegosService");
 //const Juego = require("./juegoController");
 const juegoModel = require("../models/juegoModel");
 const { showErrorMessage } = require("../errorHandler");
@@ -242,6 +243,12 @@ exports.agregarMisJuegos = async (req, res) => {
     const  {idJuego}  = req.params; // Obtener el ID del juego desde los parámetros
 
     //chequeo que existe el juego en la bd
+    //const juegoExisteEnBd = await juegoService.verificarExistenciaJuego(idJuego);
+    
+    if (!juegoExisteEnBd) {
+      showErrorMessage(res, 404, "El juego no existe");
+    }
+
     //const juegoNuevo = await Juego.getJuegoById(idJuego);
     //necesito un service
     const juegoNuevo = await juegoModel.findById(idJuego);

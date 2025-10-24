@@ -121,7 +121,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
       //json encuentros
 
       //añado el createdBy en encuentros
-      //const encuentroConId = await encuentroService.create({encuentros});
+     const encuentroConId = await encuentroService.create(encuentro);
 
       //validar que se ingresaron todos los datos
 
@@ -141,6 +141,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
         ? res.json(jornadaActualizada) //true
         : showErrorMessage(res, 404, "Jornada no encontrada"); //false
 
+//(res, 401, "hola");
     }
 
     } catch (err) {

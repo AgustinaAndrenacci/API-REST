@@ -165,7 +165,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
     }
 
     // 1. Crear el encuentro
-    const encuentroCreado = await crearEncuentrosPorJornada(encuentroData);
+    const encuentroCreado = await crearEncuentrosPorJornada(encuentroData, req);
 
     // 2. Agregar el encuentro a la jornada
     const jornadaActualizada = await Jornada.findByIdAndUpdate(
@@ -177,7 +177,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
     if (!jornadaActualizada) {
       return showErrorMessage(res, 404, "Jornada no encontrada");
     }
-
+    //console.log(encuentroCreado);
     res.json(jornadaActualizada);
 
   } catch (err) {
@@ -283,8 +283,16 @@ exports.updateJornadaEstado = async (req, res) => {
 };*/
 
 //F :permiso, de nuevo
-const crearEncuentrosPorJornada = async (encuentroData) => {
- // console.log(" Creando encuentro con datos:", encuentroData);
+const crearEncuentrosPorJornada = async (encuentroData,req) => {
+// console.log(" Creando encuentro con datos:", encuentroData);
+//console.log(encuentroData);
+//console.log(req.user.userName);
+
+  encuentroData.createdBy = [{
+    idUsuario: req.user._id,
+    userName: req.user.userName,
+    tipo: req.user.rol
+  }];
   try {
     const encuentroCreado = await encuentroService.create(encuentroData);
     //console.log("Encuentro creado:", encuentroCreado._id);

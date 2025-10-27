@@ -17,7 +17,9 @@
  * Nota: ajustar require() si los modelos están en otra ruta o con otro nombre.
  */
 
+
 const Encuentro = require("../models/encuentroModel");
+const { crearMensaje } = require("./mensajeService");
 
 let Jornada, Usuario, Juego; // cargamos con try para dar mensajes claros si faltan.
 
@@ -52,28 +54,43 @@ const mongoose = require("mongoose");
  * @param {String[]} idsJugadores - array de ids (string/ObjectId)
  * @throws {Error} con mensaje descriptivo si falta alguno
  */
-async function verificarJugadoresExistentes(idsJugadores = []) {
+async function verificarJugadoresExistentes(idsJugadores) {
   if (!Array.isArray(idsJugadores)) {
     throw new Error("verificarJugadoresExistentes: se esperaba un arreglo de ids de jugadores.");
   }
 
-  if (idsJugadores.length === 0) return; // OK: no hay jugadores a verificar
+  if (idsJugadores.length === 0) return;
 
   if (!Usuario) {
-    throw new Error("Modelo Usuario no disponible: crear archivo models/usuarioModel.js o ajustar require.");
+    throw new Error("Modelo Usuario no disponible.");
   }
 
-  // Normalizar a ObjectId cuando sea posible
-  const ids = idsJugadores.map((id) => (mongoose.isValidObjectId(id) ? id : id));
+  // Limpiamos y validamos IDs
+  const idsValidos = [];
+  const idsInvalidos = [];
+  idsJugadores.forEach((id) => {
+    const cleanId = String(id).trim();  // quitar espacios
+    if (mongoose.isValidObjectId(cleanId)) {
+      idsValidos.push(cleanId);
+    } else {
+      idsInvalidos.push(cleanId);
+    }
+    console.log("Verificando ID:", cleanId);
+  });
 
-  // Consulta: buscar cuantos usuarios coinciden
-  const encontrados = await Usuario.countDocuments({ _id: { $in: ids } }).exec();
-  if (encontrados !== ids.length) {
-    // Buscamos cuáles faltan para dar un mensaje útil
-    const usuarios = await Usuario.find({ _id: { $in: ids } }).select("_id").lean();
-    const encontradosSet = new Set(usuarios.map((u) => String(u._id)));
-    const faltantes = ids.filter((id) => !encontradosSet.has(String(id)));
-    throw new Error(`Jugadores no encontrados: ${faltantes.join(", ")}`);
+  if (idsInvalidos.length > 0) {
+    console.warn("IDs inválidos detectados:", idsInvalidos);
+  }
+
+
+  // Consulta solo con los válidos
+  const encontrados = await Usuario.countDocuments({ _id: { $in: idsValidos } }).exec();
+ 
+  if (encontrados !== idsValidos.length) {
+    const usuarios = await Usuario.find({ _id: { $in: idsValidos } }).select("_id").lean();
+    //const encontradosSet = new Set(usuarios.map((u) => String(u._id)));
+    //const faltantes = idsValidos.filter((id) => !encontradosSet.has(String(id)));
+    //throw new Error(`Jugadores no encontrados: ${faltantes.join(", ")}`);
   }
 }
 
@@ -86,20 +103,21 @@ async function verificarNoRepetidosEnEncuentro(encuentroId, idsJugadores = []) {
   const encuentro = await Encuentro.findById(encuentroId);
   if (!encuentro) throw new Error(`Encuentro ${encuentroId} no encontrado.`);
 
-  const repetidos = idsJugadores.filter(id => encuentro.participantes.includes(id));
+  const participantes = encuentro.participantes || []; // <-- aquí
+  const repetidos = idsJugadores.filter(id => participantes.includes(id));
+
   if (repetidos.length > 0) {
     throw new Error(`Los siguientes jugadores ya están inscriptos en el encuentro: ${repetidos.join(", ")}`);
   }
 }
-
 /**
  * Verifica que los jugadores estén inscriptos en la jornada asociada.
  */
 async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
-  const jornada = await Jornada.findById(jornadaId).populate("jugadores", "_id");
+  const jornada = await Jornada.findById(jornadaId).populate("jugadoresInscriptos", "_id");
   if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
 
-  const jornadaJugadores = new Set(jornada.jugadores.map(j => String(j._id)));
+  const jornadaJugadores = new Set(jornada.jugadoresInscriptos.map(j => String(j._id)));
   const noInscritos = idsJugadores.filter(id => !jornadaJugadores.has(String(id)));
   if (noInscritos.length > 0) {
     throw new Error(`Los siguientes jugadores no pertenecen a la jornada: ${noInscritos.join(", ")}`);
@@ -338,6 +356,7 @@ if (Array.isArray(payload.juego) && payload.juego.length > 0) {
  * - id: id del encuentro a actualizar
  * - updates: objeto con campos a modificar (p. ej. jugadores, juego, capacidad, estado)
  */
+
 async function update(id, updates = {}) {
   // Obtener encuentro o tirar error si no existe
   const encuentro = await getEncuentroOrThrow(id);
@@ -348,14 +367,39 @@ async function update(id, updates = {}) {
     if (!Array.isArray(updates.jugadores)) {
       throw new Error("El campo jugadores debe ser un arreglo.");
     }
-    const ids = updates.jugadores.map((j) => j.id_jugador || j._id || j);
+    //console.log()
+    const ids = updates.jugadores.map((j) => j.id_jugador?.toString() || j._id?.toString() || j.toString());
+    
     await verificarJugadoresExistentes(ids);
-    await verificarNoRepetidosEnEncuentro(encuentroId, payload.jugadores);
-    await verificarJugadoresEnJornada(payload.jornada, payload.jugadores);
+    await verificarNoRepetidosEnEncuentro(id, updates.jugadores);
+    
+    
+    const jornada = await Jornada.findOne({ encuentros: encuentro._id }).lean();
+const idJornada = jornada._id;
+await verificarJugadoresEnJornada(idJornada, updates.jugadores);
+    //await verificarJugadoresEnJornada(encuentro.jornada, updates.jugadores); 
 
     // verificar capacidad (usar la capacidad resultante: si también se actualiza capacidad, usala; sino la actual)
     const capacidadFinal = typeof updates.capacidad === "number" ? updates.capacidad : encuentro.capacidad;
     verificarCapacidadDisponible(capacidadFinal, updates.jugadores.length);
+ 
+   // -------------------------------
+    // Crear mensaje para cada jugador agregado
+const creadorNombre = encuentro.createdBy[0].userName || "El creador";
+console.log(encuentro)
+const nombreJuego = encuentro.juego[0].nombre || "el encuentro";
+const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
+    for (const jugadorId of ids) {
+      const mensajeData = {
+        remitente: creadorId,
+        destinatario: jugadorId,
+         contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
+        tipo: "notificacionEncuentro",
+      };
+      await crearMensaje(mensajeData);
+    }
+     //console.log(encuentro)
+    // -------------------------------
   }
 
   // 2) Si se actualiza el juego verifica que el juego exista

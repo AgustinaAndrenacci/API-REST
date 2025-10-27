@@ -109,7 +109,7 @@ exports.getByJuego = async (req, res) => {
   } catch (err) {
    // const status = mapErrorToStatus(err);
   //return res.status(status).json({ error: err.message });
-  return handleControllerError(res, err, "Error al obtener encuentros por juego");
+  return handleControllerError(res, 500 , "Error al obtener encuentros por juego");
     }
 };
 
@@ -154,11 +154,8 @@ exports.updateEncuentro = async (req, res) => {
     const updated = await encuentroService.update(id, updates);
     return res.json(updated);
   } catch (err) {
-   // const msg = err.message || "";
-    //if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-    //return res.status(400).json({ error: msg });
-    return handleControllerError(res, err, "Error al actualizar Encuentro");
-  
+    // Mostramos el mensaje real del error si existe
+    return showErrorMessage(res, 500, err.message || "Error al actualizar Encuentro");
   }
 };
 

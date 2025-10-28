@@ -439,31 +439,52 @@ async function deleteById(id) {
   return { message: "Eliminado", id: String(deleted._id) };
 }
 */
+
 async function deleteById(id) {
   if (!id) throw new Error("deleteById: id requerido.");
   if (!mongoose.isValidObjectId(id)) throw new Error("ID inválido.");
 
-  // Buscamos el encuentro antes de borrarlo para saber qué jornada lo contiene
+  // Buscar el encuentro
   const encuentro = await Encuentro.findById(id).exec();
   if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
 
-  // Borramos el encuentro
+  // Eliminar el encuentro
   const deleted = await Encuentro.findByIdAndDelete(id).exec();
 
-  // Si el encuentro pertenece a una jornada, actualizamos la jornada
-  if (encuentro.jornada) {
-    try {
-      await jornadaService.borrarEncuentroDeJornada(encuentro.jornada, id);
-    } catch (err) {
-      console.error(`Error actualizando jornada ${encuentro.jornada}:`, err.message);
-      // Podés decidir si lanzar el error o solo loguearlo
+  //  Eliminar referencia del encuentro en TODAS las jornadas
+  await Jornada.updateMany(
+    { encuentros: id },
+    { $pull: { encuentros: id } }
+  );
+
+  // Enviar mensajes de cancelación a los jugadores inscritos
+  try {
+    if (Array.isArray(encuentro.jugadores) && encuentro.jugadores.length > 0) {
+      const creadorId =
+        encuentro.createdBy?.[0]?.idUsuario || encuentro.createdBy?.idUsuario || null;
+
+      if (creadorId) {
+        for (const jugador of encuentro.jugadores) {
+          const jugadorId = jugador.id_jugador || jugador._id || jugador;
+          const mensajeData = {
+            remitente: creadorId,
+            destinatario: jugadorId,
+            contenido: `El encuentro "${encuentro.nombre}" ha sido cancelado.`,
+            tipo: "notificacionEncuentro",
+          };
+          const nuevoMensaje = new Mensaje(mensajeData);
+          await nuevoMensaje.save();
+        }
+      } else {
+        console.warn("No se pudo determinar el creador del encuentro para enviar mensajes.");
+      }
     }
+  } catch (msgErr) {
+    console.error("Error al crear mensajes de cancelación:", msgErr.message);
   }
 
   return { message: "Encuentro eliminado", id: String(deleted._id) };
 }
-
-
 /**
  * Export: métodos públicos del service.
  *

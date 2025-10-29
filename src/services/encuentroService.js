@@ -19,6 +19,7 @@
 
 
 const Encuentro = require("../models/encuentroModel");
+const Mensaje = require('../models/mensajeModel');
 const { crearMensaje } = require("./mensajeService");
 
 let Jornada, Usuario, Juego; // cargamos con try para dar mensajes claros si faltan.
@@ -443,14 +444,16 @@ await verificarJugadoresEnJornada(idJornada, updates.jugadores);
  
    // -------------------------------
     // Crear mensaje para cada jugador agregado
-const creadorNombre = encuentro.createdBy[0].userName || "El creador";
-console.log(encuentro)
+  
+const creadorNombre = encuentro.createdBy[0].userName || "Otro Usuario";
+//console.log(encuentro)
 const nombreJuego = encuentro.juego[0].nombre || "el encuentro";
 const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
     for (const jugadorId of ids) {
+      const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
       const mensajeData = {
         remitente: creadorId,
-        destinatario: jugadorId,
+        destinatario: destinatarioId,
          contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
         tipo: "notificacionEncuentro",
       };
@@ -522,11 +525,16 @@ async function deleteById(id) {
 
       if (creadorId) {
         for (const jugador of encuentro.jugadores) {
+           
           const jugadorId = jugador.id_jugador || jugador._id || jugador;
+          const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
+          const nombreJuego = encuentro.juego?.[0]?.nombre || "el encuentro";
+          const organizadorNombre = encuentro.createdBy?.[0]?.userName || "el creador";
+
           const mensajeData = {
             remitente: creadorId,
-            destinatario: jugadorId,
-            contenido: `El encuentro  de "${encuentro.juego}" organizado por "${encuentro.createdBy.userName}" ha sido cancelado.`,
+            destinatario: destinatarioId,
+            contenido:`El encuentro de "${nombreJuego}" organizado por "${creadorNombre}" ha sido cancelado.`,
             tipo: "notificacionEncuentro",
           };
           const nuevoMensaje = new Mensaje(mensajeData);

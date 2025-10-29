@@ -17,7 +17,10 @@
  * Nota: ajustar require() si los modelos están en otra ruta o con otro nombre.
  */
 
+
 const Encuentro = require("../models/encuentroModel");
+const Mensaje = require('../models/mensajeModel');
+const { crearMensaje } = require("./mensajeService");
 
 let Jornada, Usuario, Juego; // cargamos con try para dar mensajes claros si faltan.
 
@@ -52,28 +55,45 @@ const mongoose = require("mongoose");
  * @param {String[]} idsJugadores - array de ids (string/ObjectId)
  * @throws {Error} con mensaje descriptivo si falta alguno
  */
-async function verificarJugadoresExistentes(idsJugadores = []) {
+async function verificarJugadoresExistentes(idsJugadores) {
   if (!Array.isArray(idsJugadores)) {
     throw new Error("verificarJugadoresExistentes: se esperaba un arreglo de ids de jugadores.");
   }
 
-  if (idsJugadores.length === 0) return; // OK: no hay jugadores a verificar
+  if (idsJugadores.length === 0) return;
 
   if (!Usuario) {
-    throw new Error("Modelo Usuario no disponible: crear archivo models/usuarioModel.js o ajustar require.");
+    throw new Error("Modelo Usuario no disponible.");
   }
 
-  // Normalizar a ObjectId cuando sea posible
-  const ids = idsJugadores.map((id) => (mongoose.isValidObjectId(id) ? id : id));
+  // Limpiamos y validamos IDs
+  const idsValidos = [];
+  const idsInvalidos = [];
+  idsJugadores.forEach((id) => {
+    const cleanId = String(id).trim();  // quitar espacios
+    if (mongoose.isValidObjectId(cleanId)) {
+      idsValidos.push(cleanId);
+    } else {
+      idsInvalidos.push(cleanId);
+    }
+    console.log("Verificando ID:", cleanId);
+   
+    
+  });
 
-  // Consulta: buscar cuantos usuarios coinciden
-  const encontrados = await Usuario.countDocuments({ _id: { $in: ids } }).exec();
-  if (encontrados !== ids.length) {
-    // Buscamos cuáles faltan para dar un mensaje útil
-    const usuarios = await Usuario.find({ _id: { $in: ids } }).select("_id").lean();
-    const encontradosSet = new Set(usuarios.map((u) => String(u._id)));
-    const faltantes = ids.filter((id) => !encontradosSet.has(String(id)));
-    throw new Error(`Jugadores no encontrados: ${faltantes.join(", ")}`);
+  if (idsInvalidos.length > 0) {
+    console.warn("IDs inválidos detectados:", idsInvalidos);
+  }
+
+
+  // Consulta solo con los válidos
+  const encontrados = await Usuario.countDocuments({ _id: { $in: idsValidos } }).exec();
+ 
+  if (encontrados !== idsValidos.length) {
+    const usuarios = await Usuario.find({ _id: { $in: idsValidos } }).select("_id").lean();
+    //const encontradosSet = new Set(usuarios.map((u) => String(u._id)));
+    //const faltantes = idsValidos.filter((id) => !encontradosSet.has(String(id)));
+    //throw new Error(`Jugadores no encontrados: ${faltantes.join(", ")}`);
   }
 }
 
@@ -86,25 +106,82 @@ async function verificarNoRepetidosEnEncuentro(encuentroId, idsJugadores = []) {
   const encuentro = await Encuentro.findById(encuentroId);
   if (!encuentro) throw new Error(`Encuentro ${encuentroId} no encontrado.`);
 
-  const repetidos = idsJugadores.filter(id => encuentro.participantes.includes(id));
+  const participantes = encuentro.participantes || []; // <-- aquí
+  const repetidos = idsJugadores.filter(id => participantes.includes(id));
+
   if (repetidos.length > 0) {
     throw new Error(`Los siguientes jugadores ya están inscriptos en el encuentro: ${repetidos.join(", ")}`);
   }
 }
-
 /**
  * Verifica que los jugadores estén inscriptos en la jornada asociada.
  */
-async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
-  const jornada = await Jornada.findById(jornadaId).populate("jugadores", "_id");
-  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
 
-  const jornadaJugadores = new Set(jornada.jugadores.map(j => String(j._id)));
-  const noInscritos = idsJugadores.filter(id => !jornadaJugadores.has(String(id)));
-  if (noInscritos.length > 0) {
-    throw new Error(`Los siguientes jugadores no pertenecen a la jornada: ${noInscritos.join(", ")}`);
+
+/*
+async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
+  const jornada = await Jornada.findById(jornadaId)
+    .populate("jugadores", "_id nombre")
+    .populate("encuentros", "_id nombre")
+    .exec();
+
+  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
+  if (!Array.isArray(jornada.jugadores))
+    throw new Error("Estructura de jornada inválida o sin jugadores definidos.");
+
+  const idsValidos = [];
+  const idsInvalidos = [];
+
+  idsJugadores.forEach((id) => {
+    const cleanId = String(id).trim();
+    console.log("Verificando ID:", cleanId);
+
+    if (mongoose.isValidObjectId(cleanId)) {
+      idsValidos.push(cleanId);
+    } else {
+      idsInvalidos.push(cleanId);
+    }
+  });
+
+  // 🔍 Validar duplicados en jornada
+  const repetidos = idsValidos.filter((id) =>
+    jornada.jugadores.some((j) => j && j._id && j._id.equals(id))
+  );
+
+  if (repetidos.length > 0) {
+    throw new Error(
+      `Los siguientes jugadores ya están registrados en la jornada: ${repetidos.join(", ")}`
+    );
+  }
+
+  return { idsValidos, idsInvalidos };
+}
+  */
+
+async function verificarJugadoresEnJornada(jornadaId, idsJugadores = [], encuentroActualId = null) {
+  if (!jornadaId) return; // Si no hay jornada asociada, no hacemos nada
+  if (!Array.isArray(idsJugadores) || idsJugadores.length === 0) return;
+
+  // Buscar todos los encuentros de la jornada
+  const encuentros = await Encuentro.find({ 
+    jornada: jornadaId,
+    _id: { $ne: encuentroActualId } // excluimos el encuentro que estamos editando
+  }).lean();
+
+  // Recorrer jugadores y verificar si ya están en algún encuentro
+  const conflictos = [];
+  for (const jugadorId of idsJugadores) {
+    const yaInscripto = encuentros.some(e =>
+      e.jugadores?.some(j => j.id_jugador === jugadorId)
+    );
+    if (yaInscripto) conflictos.push(jugadorId);
+  }
+
+  if (conflictos.length > 0) {
+    throw new Error(`Los siguientes jugadores ya están en otro encuentro de la jornada: ${conflictos.join(", ")}`);
   }
 }
+
 
 
 
@@ -114,10 +191,17 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
  */
 async function verificarJuegoExistente(idJuego) {
   if (!idJuego) throw new Error("verificarJuegoExistente: idJuego requerido.");
-  if (!Juego) {
-    throw new Error("Modelo Juego no disponible: crear archivo models/juegoModel.js o ajustar require.");
+
+  if (!Juego) throw new Error("Modelo Juego no disponible");
+
+  let objectId;
+  try {
+    objectId = new mongoose.Types.ObjectId(idJuego);
+  } catch {
+    throw new Error(`ID de juego inválido: ${idJuego}`);
   }
-  const existe = await Juego.exists({ _id: idJuego });
+
+  const existe = await Juego.exists({ _id: objectId });
   if (!existe) throw new Error(`Juego no encontrado: ${idJuego}`);
 }
 
@@ -266,37 +350,72 @@ async function getByJugador(idJugador) {
 async function create(payload) {
   if (!payload) throw new Error("create: payload requerido.");
 
-  // Validaciones que podemos hacer antes de guardar:
-  //  - si hay jugadores: verificar existencia
+  // Validar jugadores
   if (payload.jugadores && Array.isArray(payload.jugadores) && payload.jugadores.length > 0) {
     const ids = payload.jugadores.map((j) => j.id_jugador || j._id || j);
     await verificarJugadoresExistentes(ids);
   }
 
-  //  - si hay juego: verificar existencia
+  // Validar juego
   if (payload.juego) {
-    // Si juego viene como objeto con id_juego, preferimos eso; si viene como _id usamos ese.
-    const idJuego = payload.juego.id_juego || payload.juego._id || payload.juego;
-    if (idJuego) await verificarJuegoExistente(idJuego);
+    // Soportar array o un solo objeto
+let juegoId;
+let juegoInfo;
+
+if (Array.isArray(payload.juego) && payload.juego.length > 0) {
+  juegoId = payload.juego[0].id_juego || payload.juego[0]._id;
+  juegoInfo = {
+    nombre: payload.juego[0].nombre,
+    imagen: payload.juego[0].imagen,
+  };
+} else if (typeof payload.juego === "object" && (payload.juego.id_juego || payload.juego._id)) {
+  juegoId = payload.juego.id_juego || payload.juego._id;
+  juegoInfo = {
+    nombre: payload.juego.nombre,
+    imagen: payload.juego.imagen,
+  };
+} else if (typeof payload.juego === "string") {
+  juegoId = payload.juego;
+  // Buscar en la BD para traer nombre e imagen
+  const juegoBD = await Juego.findById(juegoId).lean();
+  if (!juegoBD) throw new Error("Juego no encontrado");
+  juegoInfo = {
+    nombre: juegoBD.titulo,
+    imagen: juegoBD.imagen,
+  };
+} else {
+  throw new Error("Juego inválido");
+}
+    ////
+        if (!mongoose.isValidObjectId(juegoId)) throw new Error("ID de juego inválido");
+    await verificarJuegoExistente(juegoId);
+
+    // Sobrescribimos payload.juego para que Mongoose lo entienda
+    payload.juego = {
+      id_juego: juegoId,
+      ...juegoInfo,
+    };
   }
 
-  //  - capacidad: si payload.capacidad está definida y hay jugadores, validar
-  /*if (typeof payload.capacidad === "number") {
+  // Validar capacidad
+  if (typeof payload.capacidad === "number") {
     const cantidadJugadores = payload.jugadores ? payload.jugadores.length : 0;
     verificarCapacidadDisponible(payload.capacidad, cantidadJugadores);
-  }*/
+  }
 
-  // crear y devolver
+  // Crear y devolver
   const nuevo = new Encuentro(payload);
   const saved = await nuevo.save();
   return saved.toObject();
 }
+
 
 /**
  * update - actualiza un encuentro con validaciones estrictas.
  * - id: id del encuentro a actualizar
  * - updates: objeto con campos a modificar (p. ej. jugadores, juego, capacidad, estado)
  */
+
 async function update(id, updates = {}) {
   // Obtener encuentro o tirar error si no existe
   const encuentro = await getEncuentroOrThrow(id);
@@ -307,14 +426,41 @@ async function update(id, updates = {}) {
     if (!Array.isArray(updates.jugadores)) {
       throw new Error("El campo jugadores debe ser un arreglo.");
     }
-    const ids = updates.jugadores.map((j) => j.id_jugador || j._id || j);
+    //console.log()
+    const ids = updates.jugadores.map((j) => j.id_jugador?.toString() || j._id?.toString() || j.toString());
+    
     await verificarJugadoresExistentes(ids);
-    await verificarNoRepetidosEnEncuentro(encuentroId, payload.jugadores);
-    await verificarJugadoresEnJornada(payload.jornada, payload.jugadores);
+    await verificarNoRepetidosEnEncuentro(id, updates.jugadores);
+    
+    
+    const jornada = await Jornada.findOne({ encuentros: encuentro._id }).lean();
+const idJornada = jornada._id;
+await verificarJugadoresEnJornada(idJornada, updates.jugadores);
+    //await verificarJugadoresEnJornada(encuentro.jornada, updates.jugadores); 
 
     // verificar capacidad (usar la capacidad resultante: si también se actualiza capacidad, usala; sino la actual)
     const capacidadFinal = typeof updates.capacidad === "number" ? updates.capacidad : encuentro.capacidad;
     verificarCapacidadDisponible(capacidadFinal, updates.jugadores.length);
+ 
+   // -------------------------------
+    // Crear mensaje para cada jugador agregado
+  
+const creadorNombre = encuentro.createdBy[0].userName || "Otro Usuario";
+//console.log(encuentro)
+const nombreJuego = encuentro.juego[0].nombre || "el encuentro";
+const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
+    for (const jugadorId of ids) {
+      const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
+      const mensajeData = {
+        remitente: creadorId,
+        destinatario: destinatarioId,
+         contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
+        tipo: "notificacionEncuentro",
+      };
+      await crearMensaje(mensajeData);
+    }
+     //console.log(encuentro)
+    // -------------------------------
   }
 
   // 2) Si se actualiza el juego verifica que el juego exista
@@ -354,31 +500,56 @@ async function deleteById(id) {
   return { message: "Eliminado", id: String(deleted._id) };
 }
 */
+
 async function deleteById(id) {
   if (!id) throw new Error("deleteById: id requerido.");
   if (!mongoose.isValidObjectId(id)) throw new Error("ID inválido.");
 
-  // Buscamos el encuentro antes de borrarlo para saber qué jornada lo contiene
+  // Buscar el encuentro
   const encuentro = await Encuentro.findById(id).exec();
   if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
 
-  // Borramos el encuentro
+  // Eliminar el encuentro
   const deleted = await Encuentro.findByIdAndDelete(id).exec();
 
-  // Si el encuentro pertenece a una jornada, actualizamos la jornada
-  if (encuentro.jornada) {
-    try {
-      await jornadaService.borrarEncuentroDeJornada(encuentro.jornada, id);
-    } catch (err) {
-      console.error(`Error actualizando jornada ${encuentro.jornada}:`, err.message);
-      // Podés decidir si lanzar el error o solo loguearlo
+  //  Eliminar referencia del encuentro en TODAS las jornadas
+  await Jornada.updateMany(
+    { encuentros: id },
+    { $pull: { encuentros: id } }
+  );
+
+  // Enviar mensajes de cancelación a los jugadores inscritos
+  try {
+    if (Array.isArray(encuentro.jugadores) && encuentro.jugadores.length > 0) {
+      const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
+
+      if (creadorId) {
+        for (const jugador of encuentro.jugadores) {
+           
+          const jugadorId = jugador.id_jugador || jugador._id || jugador;
+          const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
+          const nombreJuego = encuentro.juego?.[0]?.nombre || "el encuentro";
+          const organizadorNombre = encuentro.createdBy?.[0]?.userName || "el creador";
+
+          const mensajeData = {
+            remitente: creadorId,
+            destinatario: destinatarioId,
+            contenido:`El encuentro de "${nombreJuego}" organizado por "${creadorNombre}" ha sido cancelado.`,
+            tipo: "notificacionEncuentro",
+          };
+          const nuevoMensaje = new Mensaje(mensajeData);
+          await nuevoMensaje.save();
+        }
+      } else {
+        console.warn("No se pudo determinar el creador del encuentro para enviar mensajes.");
+      }
     }
+  } catch (msgErr) {
+    console.error("Error al crear mensajes de cancelación:", msgErr.message);
   }
 
   return { message: "Encuentro eliminado", id: String(deleted._id) };
 }
-
-
 /**
  * Export: métodos públicos del service.
  *

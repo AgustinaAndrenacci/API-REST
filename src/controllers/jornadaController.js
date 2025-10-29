@@ -5,7 +5,8 @@ const encuentro = require("./encuentroController");
 const usuario = require("./usuarioController");
 const encuentroService = require('../services/encuentroService');
 const usuarioService = require('../services/usuarioService');
-const { showErrorMessage } = require("../errorHandler");
+const { showErrorMessage } = require("../errorHandler"); //F:agrego require para mostrar errores por showErrMsj
+
 
 exports.getAllJornadas = async (req, res) => {
   try {
@@ -104,44 +105,87 @@ exports.updateJornada = async (req, res) => {
     showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
-
+/*
 exports.updateJornadaEncuentros = async (req, res) => {
   try {
-    const id = req.params.id; // Usar el ID de la URL
-    const encuentro = { ...req.body };
-
-      if (!encuentro) { 
-        showErrorMessage(res, 400, "Faltan campos obligatorios");
-      }
-      else{//push: actualiza y no pisa
-
-        //chequea si existe la jornada
-        const jornadaExistente = await jornadaService.getJornadaById(id);
-        if (!jornadaExistente) {
-          showErrorMessage(res, 404, "Jornada no encontrada");
-        } else {
-
-           //Si el estado es "Activo" se puede modificar, sino no
-          const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
-            if (!tieneEstadoActivo) {
-              showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
-            }else{
+        const id = req.params.id; // Usar el ID de la URL
+    const encuentroData = req.body; //uno solo
+     
+    if (!encuentroData) 
+      {
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
+      }else{
+      
+       //push: actualiza y no pisa
+      //crear el encuentro en la bd
+      //json encuentros
 
             //añado el createdBy en encuentros
             const encuentroConId = await encuentroService.create(encuentro);
 
-            //update
-            const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentroConId } }, { new: true, runValidators: true });
-            res.json(jornadaActualizada) //true
-              
-            }
-      }
+      //validar que se ingresaron todos los datos
+
+      //añadir encuentroConId a la jornada
+     
+      const encuentrosConId = await crearEncuentrosPorJornada(encuentroData);
+
+      const jornadaActualizada = await Jornada.findByIdAndUpdate(
+      id,
+      { $push: { encuentros: encuentroConId._id } },
+      { new: true, runValidators: true }
+    )
+    
+    //const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { $each: encuentrosConId} }, { new: true, runValidators: true });
+      
+      jornadaActualizada
+        ? res.json(jornadaActualizada) //true
+        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
+
+//(res, 401, "hola");
     }
     } catch (err) {
-      console.error("Error detallado al actualizar jornada:", err);
-    showErrorMessage(res, 500, "Error al actualizar jornada");
+     
+    showErrorMessage(res, 500, "Error al actualizar jornada :)");
+  }
+};*/
+
+///////////////////////////////////////////////////////////
+//
+//  F: meto mano aqui, permiso, dejo la anterior comentada arriba
+//
+//////////////////////////////////////////////////////////
+exports.updateJornadaEncuentros = async (req, res) => {
+  try {
+    const idJornada = req.params.id;
+    const encuentroData = req.body;
+
+    if (!encuentroData) {
+      return showErrorMessage(res, 400, "Faltan campos obligatorios");
+    }
+
+    // 1. Crear el encuentro
+    const encuentroCreado = await crearEncuentrosPorJornada(encuentroData, req);
+
+    // 2. Agregar el encuentro a la jornada
+    const jornadaActualizada = await Jornada.findByIdAndUpdate(
+      idJornada,
+      { $push: { encuentros: encuentroCreado._id } }, // solo guardamos el id
+      { new: true, runValidators: true }
+    );
+
+    if (!jornadaActualizada) {
+      return showErrorMessage(res, 404, "Jornada no encontrada");
+    }
+    //console.log(encuentroCreado);
+    res.json(jornadaActualizada);
+
+  } catch (err) {
+    console.error("Error al actualizar jornada:", err.message);
+    showErrorMessage(res, 500, "Error al actualizar jornada :)");
   }
 };
+///////////////////////////////////////////////////////////////////////////////////////////
+//hasta aca :)
 
 //El jugador logueado se inscribe en la jornada, no un conjunto
 exports.updateJornadaJugador = async (req, res) => {
@@ -238,20 +282,39 @@ exports.updateJornadaEstado = async (req, res) => {
   }
 };
 
-
-exports.crearEncuentrosPorJornada = async (encuentroJson) => {
+/*exports.crearEncuentrosPorJornada = async (encuentroJson) => {
   //me falta el id que se crea una vez en createEncuentro
+ console.log("1");
   try {
-      encuentroJson.forEach(async (encuentroData) => {
-      const encuentroConId = await encuentro.createEncuentro(encuentroData);
+      async (encuentroJson) => {
+      const encuentroConId = await encuentro.createEncuentro(encuentroJson);
       //crear un vector con encuentroConId
       encuentrosConId.push(encuentroConId);
 
       return encuentrosConId;
-    });
+    };
   } catch (err) {
     console.error(err);
   }
+};*/
+
+//F :permiso, de nuevo
+const crearEncuentrosPorJornada = async (encuentroData,req) => {
+// console.log(" Creando encuentro con datos:", encuentroData);
+//console.log(encuentroData);
+//console.log(req.user.userName);
+
+  encuentroData.createdBy = [{
+    idUsuario: req.user._id,
+    userName: req.user.userName,
+    tipo: req.user.rol
+  }];
+  try {
+    const encuentroCreado = await encuentroService.create(encuentroData);
+    //console.log("Encuentro creado:", encuentroCreado._id);
+    return encuentroCreado; // retorna el objeto completo
+  } catch (err) {
+    console.error(" Error en crearEncuentrosPorJornada:", err.message);
+    throw err;
+  }
 };
-
-

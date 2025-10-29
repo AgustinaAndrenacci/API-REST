@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose; //                    F 
 
 const jornadaSchema = new mongoose.Schema(
   {
@@ -28,11 +29,20 @@ const jornadaSchema = new mongoose.Schema(
         //apellido: { type: String, required: true }
       }
     ],
-    encuentros: [ //que sea por referencia
+    /* F:permiso
+    //
+    encuentros: [ //false
       {
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Encuentro", required: true },
-      }
-    ]
+        tipo: { type: String, required: true },
+        estado: { 
+          type: String, 
+          enum: ["Pendiente", "En proceso", "Finalizado", "Abierto", "Cerrado"], 
+          required: true 
+          }
+              }
+    ]*/
+   encuentros: [{ type: Schema.Types.ObjectId, ref: 'Encuentro' }]
   },
   { timestamps: true }
 );

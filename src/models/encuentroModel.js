@@ -16,7 +16,7 @@ const jugadorSchema = new mongoose.Schema({
   id_jugador: { type: String },
   //nombre: { type: String },
   //apellido:{ type: String },
-  UserName :{ type: String },
+  userName :{ type: String },
   estado: { 
       type: String, 
       enum: ["pendiente", "confirmado"], 
@@ -26,22 +26,22 @@ const jugadorSchema = new mongoose.Schema({
 
 const organizadorSchema = new mongoose.Schema({
   id_usuario: { type: String },
-  UserName :{ type: String },
+  userName :{ type: String },
   tipo: { 
       type: String, 
-      enum: ["jugador", "juegoteca"],
+      enum: ["jugador", "juegoteka"],
       required: true}, 
 });
 
 
 const encuentroSchema = new mongoose.Schema(
   {
-    createdBy: { type: [organizadorSchema], required: true },
+    createdBy: { type: [organizadorSchema], required: true }, //abierto a la posibilidad de multiples orgs
     tipo: { type: String, required: true },
     capacidad: { type: Number, required: true },
     juego: { type: [juegoSchema], required: true },
-    jugadores: { type: [jugadorSchema], default: [] },
-    ganador: { type: [jugadorSchema], default: [] },
+    jugadores: { type: [jugadorSchema], default: [] }, 
+    ganador: { type: [jugadorSchema], default: [] },   //abierto a la posibilidad de mutliples ganadores
     estado: { 
       type: String, 
       enum: ["cancelado","pendiente", "en proceso", "finalizado"], 

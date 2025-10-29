@@ -71,7 +71,6 @@ exports.updateJornada = async (req, res) => {
   try {
     const { id } = req.params; //id de la jornada
     const bodyJson = req.body; //body a modificar
-
     //encuentros no
     delete bodyJson.encuentros;
 
@@ -80,6 +79,12 @@ exports.updateJornada = async (req, res) => {
     if (!jornadaExistente) {
       showErrorMessage(res, 404, "Jornada no encontrada");
     }else{
+      //Si el estado es "Activo" se puede modificar, sino no
+      const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
+      if (!tieneEstadoActivo) {
+        showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+      }else{
+
       //chequea la capacidad
       const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
     
@@ -91,13 +96,8 @@ exports.updateJornada = async (req, res) => {
       );
       
       res.json(jornadaActualizada);
-    }
+    }}
     } catch (err) {
-      // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
-      // Se asume que cualquier error lanzado desde validarJornada es un 400
-    /*  if (err.message.includes('capacidad no puede ser menor')) {
-        return res.status(400).json({ error: err.message });
-      }*/
 
     // Para cualquier otro error (Mongoose, servidor, etc.)
     console.error("Error detallado al actualizar jornada:", err);
@@ -108,33 +108,35 @@ exports.updateJornada = async (req, res) => {
 exports.updateJornadaEncuentros = async (req, res) => {
   try {
     const id = req.params.id; // Usar el ID de la URL
-    //const { encuentros } = req.body; //uno solo
     const encuentro = { ...req.body };
-    console.log("Encuentros a agregar:", { encuentro });
-    if (!encuentro) { 
-      showErrorMessage(res, 400, "Faltan campos obligatoriossssssss");
+
+      if (!encuentro) { 
+        showErrorMessage(res, 400, "Faltan campos obligatorios");
+      }
+      else{//push: actualiza y no pisa
+
+        //chequea si existe la jornada
+        const jornadaExistente = await jornadaService.getJornadaById(id);
+        if (!jornadaExistente) {
+          showErrorMessage(res, 404, "Jornada no encontrada");
+        } else {
+
+           //Si el estado es "Activo" se puede modificar, sino no
+          const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
+            if (!tieneEstadoActivo) {
+              showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+            }else{
+
+            //añado el createdBy en encuentros
+            const encuentroConId = await encuentroService.create(encuentro);
+
+            //update
+            const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentroConId } }, { new: true, runValidators: true });
+            res.json(jornadaActualizada) //true
+              
+            }
+      }
     }
-    else{//push: actualiza y no pisa
-      //crear el encuentro en la bd
-      //json encuentros
-
-      //añado el createdBy en encuentros
-     const encuentroConId = await encuentroService.create(encuentro);
-
-      //validar que se ingresaron todos los datos
-
-      //añadir encuentroConId a la jornada
-      
-      //const encuentrosConId = await crearEncuentrosPorJornada(encuentros);
-
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { encuentros: encuentroConId } }, { new: true, runValidators: true });
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
-
-//(res, 401, "hola");
-    }
-
     } catch (err) {
       console.error("Error detallado al actualizar jornada:", err);
     showErrorMessage(res, 500, "Error al actualizar jornada");
@@ -146,43 +148,46 @@ exports.updateJornadaJugador = async (req, res) => {
   try {
       const idJornada = req.params.id; // Usar el ID de la URL
       const idJugador = req.user.id; // Usar el ID del token 
-
       const user = await usuarioService.getUsuarioById(idJugador);
 
-      //push: actualiza y no pisa
       //busca la jornada
       const jornada = await Jornada.findById(idJornada);
       
       if (jornada) {
         //verifico que el usuario no este anotado
+
+        //Si el estado es "Activo" se puede modificar, sino no
+        const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(idJornada);
+        if (!tieneEstadoActivo) {
+          showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+        }else{
         const usuarioYaAnotado = jornada.jugadoresInscriptos.find(jugador => String(jugador.id) === String(idJugador));
         
         if (usuarioYaAnotado) {
           showErrorMessage(res, 400, "El jugador ya está anotado en la jornada");
         }else{
-          //verifico que la cantidad de jugadores no supere la capacidad
-          const cantidadJugadores = jornada.jugadoresInscriptos.length;
+            //verifico que la cantidad de jugadores no supere la capacidad
+            const cantidadJugadores = jornada.jugadoresInscriptos.length;
 
-          if (cantidadJugadores + 1 > jornada.capacidad) {
-            showErrorMessage(res, 400, "Capacidad máxima superada");
-          }
-          else{
-            const jornadaActualizada = await Jornada.findByIdAndUpdate(
-              idJornada, 
-              {
-              $push: { 
-                  jugadoresInscriptos: {
-                      id: idJugador,
-                      userName: user.userName,
-                      nombre: user.nombre,
-                      apellido: user.apellido
-                  } 
-              } 
-              }, { new: true, runValidators: true });
-            res.json(jornadaActualizada) //true
+            if (cantidadJugadores + 1 > jornada.capacidad) {
+              showErrorMessage(res, 400, "Capacidad máxima superada");
             }
-      }}
-      else{
+            else{
+              const jornadaActualizada = await Jornada.findByIdAndUpdate(
+                idJornada, 
+                {
+                $push: { 
+                    jugadoresInscriptos: {
+                        id: idJugador,
+                        userName: user.userName,
+                        //nombre: user.nombre,
+                       // apellido: user.apellido
+                    } 
+                } 
+                }, { new: true, runValidators: true });
+              res.json(jornadaActualizada) //true
+              }
+      }}} else{
         showErrorMessage(res, 404, "Jornada no encontrada");
       }
     } catch (err) {
@@ -203,21 +208,36 @@ exports.updateJornadaEstado = async (req, res) => {
     else{
       //verifico que el estado sea una de las opciones del enum que se encuentra en jornadaModel
       const estadosValidos = await jornadaService.estadosValidos(estado);
-
       if (!estadosValidos) {
         showErrorMessage(res, 400, "El estado ingresado es inválido");
       }else{
-      const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
-    }}
-
-    } catch (err) {
+      //jornada existe?
+      const jornadaExistente = await jornadaService.getJornadaById(id);
+      if (!jornadaExistente) {
+        showErrorMessage(res, 404, "Jornada no encontrada");
+      } else {
+        //Si el estado es "Activo" se puede modificar, sino no
+        const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
+        if (!tieneEstadoActivo) {
+          showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+        }else{
+            //update
+            const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
+            
+            //si se coloco cancelado, se eliminan los encuentros
+            if (jornadaActualizada.estado === "cancelado") {
+            //  jornadaActualizada = await jornadaService.eliminarEncuentrosDeJornada(id);
+            console.log("Se eliminaron los encuentros de la jornada:", jornadaActualizada);
+            }
+            
+            res.json(jornadaActualizada) 
+    }}}}}
+    catch (err) {
       console.error("Error detallado al actualizar jornada:", err);
       showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
+
 
 exports.crearEncuentrosPorJornada = async (encuentroJson) => {
   //me falta el id que se crea una vez en createEncuentro

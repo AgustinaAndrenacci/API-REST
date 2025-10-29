@@ -53,16 +53,46 @@ const updateJornada = async (id, data) => {
   }
 };
 
+//chequea si el estado de la jornada es cancelado
+const esEstadoCancelado = (jornada) => {
+  //const jornada = getJornadaById(id);
+  return jornada.estado === "cancelado";
+};
+
+//Estado:cancelado -> se eliminan todos los encuentros
+const eliminarEncuentrosDeJornada = async (idJornada) => {
+  try {
+    const jornada = await getJornadaById(idJornada);
+    if (jornada) {
+      //usa borrarEncuentroDeJornada para eliminar
+      jornada.encuentros.forEach(encuentro => {
+        borrarEncuentroDeJornada(idJornada, encuentro.id);
+      });
+    }
+    return jornada;
+  } catch (error) {
+    throw new Error("Error al eliminar encuentros de jornada");
+  }
+};
+
 //borrarEncuentroDeJornada
 const borrarEncuentroDeJornada = async (idJornada, idEncuentro) => {
   try {
-    const jornadaActualizada = await jornadaService.findByIdAndUpdate(
+    const jornadaActualizada = await updateJornada(
       idJornada,
-      { $pull: { encuentros: { id: idEncuentro } } },
+      { 
+        $pull: { 
+          encuentros: { _id: idEncuentro }
+        } 
+      },
       { new: true }
     );
+    
     return jornadaActualizada;
+    
   } catch (error) {
+    console.error("Error detallado al borrar encuentro de jornada:", error);
+    // Luego lanzar un error de negocio
     throw new Error("Error al borrar encuentro de jornada");
   }
 };
@@ -99,6 +129,16 @@ exports.validarJugadoresInscriptos = async (jugadoresInscriptos) => {
   }
 };*/
 
+const tieneEstadoActivo = async (id) => {
+  try {
+    const jornada = await getJornadaById(id);
+    return jornada.estado === "activo";
+  } catch (error) {
+    throw new Error("Error al verificar estado de jornada");
+  }
+};
+
+
 module.exports = {
   validarJornada,
   getAllJornadas,
@@ -106,5 +146,8 @@ module.exports = {
   updateJornada,
   createJornada,
   estadosValidos,
-  borrarEncuentroDeJornada
+  borrarEncuentroDeJornada,
+  tieneEstadoActivo,
+  eliminarEncuentrosDeJornada,
+  esEstadoCancelado
 };

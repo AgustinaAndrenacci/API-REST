@@ -2,8 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Usuario = require("../models/usuarioModel");
 const usuarioService = require("../services/usuarioService");
-//const juegoService = require("../services/juegosService");
-//const Juego = require("./juegoController");
+const juegoService = require("../services/juegosService");
 const juegoModel = require("../models/juegoModel");
 const { showErrorMessage } = require("../errorHandler");
 
@@ -243,11 +242,12 @@ exports.agregarMisJuegos = async (req, res) => {
     const  {idJuego}  = req.params; // Obtener el ID del juego desde los parámetros
 
     //chequeo que existe el juego en la bd
-    //const juegoExisteEnBd = await juegoService.verificarExistenciaJuego(idJuego);
-    
+    const juegoExisteEnBd = await juegoService.verificarExistenciaJuego(idJuego);
+    console.log("Juego existe en BD:", juegoExisteEnBd);
     if (!juegoExisteEnBd) {
       showErrorMessage(res, 404, "El juego no existe");
-    }
+    }else{
+
 
     //const juegoNuevo = await Juego.getJuegoById(idJuego);
     //necesito un service
@@ -268,7 +268,7 @@ exports.agregarMisJuegos = async (req, res) => {
     }else{
       showErrorMessage(res, 404, "Juego no encontrado");
     }
-
+  }
   } catch (err) {
     console.error("Error al agregar juego a mis juegos:", err);
     showErrorMessage(res, 500, "Error al agregar juego a mis juegos");

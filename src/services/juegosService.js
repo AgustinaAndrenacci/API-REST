@@ -1,7 +1,7 @@
 const { showErrorMessage } = require("../errorHandler");
 
 //verificar si existe 1 juego enviado por parametro (ID)
-exports.verificarExistenciaJuego = async (req, res) => {
+const verificarExistenciaJuego = async (req, res) => {
     const { id } = req.params;
     try {
         const juego = await Juego.findById(id);
@@ -13,5 +13,7 @@ exports.verificarExistenciaJuego = async (req, res) => {
     }
 }
 
-module.exports = {verificarExistenciaJuego}
+module.exports = {
+    verificarExistenciaJuego
+};
 //incorporar logicas de busqueda (por ejemplo Juego.findById()) en el service para usarse en el controller

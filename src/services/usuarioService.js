@@ -92,6 +92,8 @@ const estadosValidos = async (estado) => {
   }
 };
 
+
+
 //----------------------------------------------------------------------
 /*exports.findUserForJornada = async (id) => {
     try {

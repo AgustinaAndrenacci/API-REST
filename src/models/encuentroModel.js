@@ -44,7 +44,7 @@ const encuentroSchema = new mongoose.Schema(
     ganador: { type: [jugadorSchema], default: [] },
     estado: { 
       type: String, 
-      enum: ["pendiente", "en proceso", "finalizado"], 
+      enum: ["cancelado","pendiente", "en proceso", "finalizado"], 
       default: "pendiente"},
   },
 

@@ -76,6 +76,8 @@ async function verificarJugadoresExistentes(idsJugadores) {
       idsInvalidos.push(cleanId);
     }
     console.log("Verificando ID:", cleanId);
+   
+    
   });
 
   if (idsInvalidos.length > 0) {
@@ -113,16 +115,72 @@ async function verificarNoRepetidosEnEncuentro(encuentroId, idsJugadores = []) {
 /**
  * Verifica que los jugadores estén inscriptos en la jornada asociada.
  */
-async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
-  const jornada = await Jornada.findById(jornadaId).populate("jugadoresInscriptos", "_id");
-  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
 
-  const jornadaJugadores = new Set(jornada.jugadoresInscriptos.map(j => String(j._id)));
-  const noInscritos = idsJugadores.filter(id => !jornadaJugadores.has(String(id)));
-  if (noInscritos.length > 0) {
-    throw new Error(`Los siguientes jugadores no pertenecen a la jornada: ${noInscritos.join(", ")}`);
+
+/*
+async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
+  const jornada = await Jornada.findById(jornadaId)
+    .populate("jugadores", "_id nombre")
+    .populate("encuentros", "_id nombre")
+    .exec();
+
+  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
+  if (!Array.isArray(jornada.jugadores))
+    throw new Error("Estructura de jornada inválida o sin jugadores definidos.");
+
+  const idsValidos = [];
+  const idsInvalidos = [];
+
+  idsJugadores.forEach((id) => {
+    const cleanId = String(id).trim();
+    console.log("Verificando ID:", cleanId);
+
+    if (mongoose.isValidObjectId(cleanId)) {
+      idsValidos.push(cleanId);
+    } else {
+      idsInvalidos.push(cleanId);
+    }
+  });
+
+  // 🔍 Validar duplicados en jornada
+  const repetidos = idsValidos.filter((id) =>
+    jornada.jugadores.some((j) => j && j._id && j._id.equals(id))
+  );
+
+  if (repetidos.length > 0) {
+    throw new Error(
+      `Los siguientes jugadores ya están registrados en la jornada: ${repetidos.join(", ")}`
+    );
+  }
+
+  return { idsValidos, idsInvalidos };
+}
+  */
+
+async function verificarJugadoresEnJornada(jornadaId, idsJugadores = [], encuentroActualId = null) {
+  if (!jornadaId) return; // Si no hay jornada asociada, no hacemos nada
+  if (!Array.isArray(idsJugadores) || idsJugadores.length === 0) return;
+
+  // Buscar todos los encuentros de la jornada
+  const encuentros = await Encuentro.find({ 
+    jornada: jornadaId,
+    _id: { $ne: encuentroActualId } // excluimos el encuentro que estamos editando
+  }).lean();
+
+  // Recorrer jugadores y verificar si ya están en algún encuentro
+  const conflictos = [];
+  for (const jugadorId of idsJugadores) {
+    const yaInscripto = encuentros.some(e =>
+      e.jugadores?.some(j => j.id_jugador === jugadorId)
+    );
+    if (yaInscripto) conflictos.push(jugadorId);
+  }
+
+  if (conflictos.length > 0) {
+    throw new Error(`Los siguientes jugadores ya están en otro encuentro de la jornada: ${conflictos.join(", ")}`);
   }
 }
+
 
 
 
@@ -460,8 +518,7 @@ async function deleteById(id) {
   // Enviar mensajes de cancelación a los jugadores inscritos
   try {
     if (Array.isArray(encuentro.jugadores) && encuentro.jugadores.length > 0) {
-      const creadorId =
-        encuentro.createdBy?.[0]?.idUsuario || encuentro.createdBy?.idUsuario || null;
+      const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
 
       if (creadorId) {
         for (const jugador of encuentro.jugadores) {
@@ -469,7 +526,7 @@ async function deleteById(id) {
           const mensajeData = {
             remitente: creadorId,
             destinatario: jugadorId,
-            contenido: `El encuentro "${encuentro.nombre}" ha sido cancelado.`,
+            contenido: `El encuentro  de "${encuentro.juego}" organizado por "${encuentro.createdBy.userName}" ha sido cancelado.`,
             tipo: "notificacionEncuentro",
           };
           const nuevoMensaje = new Mensaje(mensajeData);

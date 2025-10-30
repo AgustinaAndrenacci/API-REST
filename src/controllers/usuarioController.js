@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Usuario = require("../models/usuarioModel");
 const usuarioService = require("../services/usuarioService");
+const jornadaService = require("../services/jornadaService");
 const juegoService = require("../services/juegosService");
 const juegoModel = require("../models/juegoModel");
 const { showErrorMessage } = require("../errorHandler");
@@ -60,7 +61,7 @@ exports.login = async (req, res) => {
     //busco usuario
     const usuario = await usuarioService.getUsuarioByUsername({userName});
     if(!usuario){
-      showErrorMessage(res, 404, "Username incorrecto");
+      showErrorMessage(res, 401, "Username incorrecto");
     }
     else{
       //verificar contra (comparo hash)
@@ -69,7 +70,7 @@ exports.login = async (req, res) => {
       
       const isMatch = await bcrypt.compare(pass,usuario.pass);
       if (!isMatch){
-        showErrorMessage(res, 404, "Contraseña incorrecta");
+        showErrorMessage(res, 401, "Contraseña incorrecta");
       }
       else{
 
@@ -149,7 +150,15 @@ exports.updateUsuario = async (req, res) => {
 
     const usuarioActualizado = await usuarioService.updateUsuarioById(id, datosAActualizar);
     if(usuarioActualizado)
-    {
+    {    
+        //Chequeo si hay datos del usuario a modificar en la jornada
+        const hayDatosAModificar = await usuarioService.hayDatosAModificarEnJornada(datosAActualizar);
+        if (hayDatosAModificar) {
+          //Se modifican todos los datos de Juegoteka en las jornadas activas
+          await jornadaService.modificaDatosEnJornadaActiva(usuarioActualizado);
+        }
+
+        //muestro json final
         res.json(usuarioService.formatoJsonUsuario(usuarioActualizado));
     }
     else
@@ -243,12 +252,9 @@ exports.agregarMisJuegos = async (req, res) => {
 
     //chequeo que existe el juego en la bd
     const juegoExisteEnBd = await juegoService.verificarExistenciaJuego(idJuego);
-    console.log("Juego existe en BD:", juegoExisteEnBd);
     if (!juegoExisteEnBd) {
       showErrorMessage(res, 404, "El juego no existe");
     }else{
-
-
     //const juegoNuevo = await Juego.getJuegoById(idJuego);
     //necesito un service
     const juegoNuevo = await juegoModel.findById(idJuego);

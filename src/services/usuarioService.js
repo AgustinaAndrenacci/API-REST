@@ -1,4 +1,5 @@
 //Genero los services que se utilizaran en controller
+const { MongoCryptCreateDataKeyError } = require("mongodb");
 const Usuario = require("../models/usuarioModel");
 
 //create
@@ -42,7 +43,8 @@ const formatoJsonUsuario = (usuario) => {
     apellido: usuario.apellido,
     foto: usuario.foto,
     telefono: usuario.telefono,
-    mail: usuario.mail
+    mail: usuario.mail,
+    direccion: usuario.direccion
   };
 };
 
@@ -92,18 +94,14 @@ const estadosValidos = async (estado) => {
   }
 };
 
-
-
-//----------------------------------------------------------------------
-/*exports.findUserForJornada = async (id) => {
-    try {
-        // Busca el usuario por ID y solo selecciona los campos necesarios para la inscripción
-        const usuario = await Usuario.findById(id, 'userName nombre apellido');
-        return usuario; // Retorna el objeto Mongoose o null/undefined si no lo encuentra
-    } catch (err) {
-        console.error("Error al buscar usuario para inscripción:", err);
-    }
-};*/
+const hayDatosAModificarEnJornada = async (body) => {
+  try {
+    //chequea si en el body hay nombre o direccion
+     return (body.nombre || body.direccion) ? true : false;
+  } catch (error) {
+    throw new Error("Error al validar estados");
+  }
+};
 
 //exporto
 module.exports = {
@@ -117,6 +115,6 @@ module.exports = {
   createMisJuegos,
   deleteMisJuegos,
   estadosValidos,
-  formatoJsonJuegoteka
-  //findUserForJornada
+  formatoJsonJuegoteka,
+  hayDatosAModificarEnJornada
 };

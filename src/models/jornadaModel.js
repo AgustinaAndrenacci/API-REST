@@ -22,26 +22,10 @@ const jornadaSchema = new mongoose.Schema(
     ],
     jugadoresInscriptos: [ //false
       {
-        //Usar referencia para no tener problema en el modificar
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
         userName: { type: String, required: true },
-        //nombre: { type: String, required: true },
-        //apellido: { type: String, required: true }
       }
     ],
-    /* F:permiso
-    //
-    encuentros: [ //false
-      {
-        id: { type: mongoose.Schema.Types.ObjectId, ref: "Encuentro", required: true },
-        tipo: { type: String, required: true },
-        estado: { 
-          type: String, 
-          enum: ["Pendiente", "En proceso", "Finalizado", "Abierto", "Cerrado"], 
-          required: true 
-          }
-              }
-    ]*/
    encuentros: [{ type: Schema.Types.ObjectId, ref: 'Encuentro' }]
   },
   { timestamps: true }

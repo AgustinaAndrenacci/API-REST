@@ -5,6 +5,9 @@
 
 // src/services/jornadaService.js
 const Jornada = require("../models/jornadaModel");
+const Encuentro = require("../models/encuentroModel");
+const encuentroService = require("./encuentroService");
+
 
 const validarJornada = (jornadaExistente, body) => {
 
@@ -43,6 +46,16 @@ const getJornadaById = async (id) => {
   }
 };
 
+//getByID
+const getJornadaByIdAndEncuentrosCompletos = async (id) => {
+  try {
+    const jornada = await Jornada.findById(id).populate("encuentros");
+    return jornada;
+  } catch (error) {
+    throw new Error("Error al obtener jornada");
+  }
+};
+
 //update
 const updateJornada = async (id, data) => {
   try {
@@ -61,19 +74,61 @@ const esEstadoCancelado = (jornada) => {
 
 //Estado:cancelado -> se eliminan todos los encuentros
 const eliminarEncuentrosDeJornada = async (idJornada) => {
+    try {
+        //busco la jornada
+        let jornadaActualizada = await getJornadaById(idJornada); 
+
+        //si hay encuentros, los borra
+        if (jornadaActualizada && jornadaActualizada.encuentros.length > 0) {
+
+            // Extraer solo los IDs de encuentro
+            const idsEncuentros = jornadaActualizada.encuentros.map(e => e._id || e); 
+
+            //borro de forma masiva - elimino todos los Encuentros cuyo _id esté en el array idsEncuentros
+            const resultadoDelete = await Encuentro.deleteMany({ 
+                _id: { $in: idsEncuentros } 
+            });
+            
+            // 3. Limpiar el array de referencias en la Jornada (con [] porque con push, map, daba error)
+            await Jornada.updateOne(
+                { _id: idJornada }, 
+                { $set: { encuentros: [] } } 
+            );
+
+        }
+        
+        return jornadaActualizada; // Retorna la jornada
+        
+    } catch (error) {
+        throw new Error(`Error al eliminar encuentros para la jornada ${idJornada}: ${error.message}`);
+    }
+};
+
+
+/*const eliminarEncuentrosDeJornada = async (idJornada) => {
   try {
     const jornada = await getJornadaById(idJornada);
     if (jornada) {
-      //usa borrarEncuentroDeJornada para eliminar
-      jornada.encuentros.forEach(encuentro => {
-        borrarEncuentroDeJornada(idJornada, encuentro.id);
+      const promesas = jornada.encuentros.map(encuentro => {
+       // return encuentroService.deleteById(String(encuentro.id));
+       //dame otra forma sin esa funcion
+       //borro el encuentro de la jornada
+       await Jornada.updateMany(
+        { encuentros: id },
+        { $pull: { encuentros: id } }
+      );
+       //Encuentro.findByIdAndDelete(encuentro.id);
       });
+      await Promise.all(promesas);
     }
     return jornada;
-  } catch (error) {
-    throw new Error("Error al eliminar encuentros de jornada");
+ } catch (error) {
+    // 💡 CAMBIO: Lanza el error original para ver su causa real.
+    // También puedes agregar el contexto, pero manteniendo el mensaje original.
+    throw new Error(`Error en deleteById al procesar jornada ${idJornada}: ${error.message}`); 
+    // O simplemente: throw error;
   }
-};
+};*/
 
 //borrarEncuentroDeJornada
 const borrarEncuentroDeJornada = async (idJornada, idEncuentro) => {
@@ -139,6 +194,36 @@ const tieneEstadoActivo = async (id) => {
 };
 
 
+const modificaDatosEnJornadaActiva = async (user) => {
+  try {
+    const resultado = await Jornada.updateMany(
+      { estado: "activo", "Juegoteka.id": user.id },
+      { $set: { "Juegoteka.nombre": user.nombre, "Juegoteka.direccion": user.direccion } }
+    );
+    
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+
+const crearEncuentrosPorJornada = async (encuentroData,req) => {
+  encuentroData.createdBy = [{
+    idUsuario: req.user._id,
+    userName: req.user.userName,
+    tipo: req.user.rol
+  }];
+  try {
+    const encuentroCreado = await encuentroService.create(encuentroData);
+    //console.log("Encuentro creado:", encuentroCreado._id);
+    return encuentroCreado; // retorna el objeto completo
+  } catch (err) {
+    console.error(" Error en crearEncuentrosPorJornada:", err.message);
+    throw err;
+  }
+};
+
 module.exports = {
   validarJornada,
   getAllJornadas,
@@ -149,5 +234,8 @@ module.exports = {
   borrarEncuentroDeJornada,
   tieneEstadoActivo,
   eliminarEncuentrosDeJornada,
-  esEstadoCancelado
+  esEstadoCancelado,
+  getJornadaByIdAndEncuentrosCompletos,
+  modificaDatosEnJornadaActiva,
+  crearEncuentrosPorJornada
 };

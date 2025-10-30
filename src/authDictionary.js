@@ -5,26 +5,28 @@ diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "
     "/juegos/delete/:id": "juegoteka",
 
     // RUTAS DE usuarioRoutes.js
-    "/usuarios": "",
-    "/usuarios/": "",
-    "/usuarios/registrar": "",
-    "/usuarios/login": "",
-    "/usuarios/getPerfil": "",
-    "/usuarios/getId/:id": "",
-    "/usuarios/getUsername/:userName": "",
-    "/usuarios/cambiarPassword": "",
-    "/usuarios/update/:id": "",
-    "/usuarios/:id": "",
+    //"/usuarios/": "", //todos
+    //"/usuarios/edit": "", //todos
+   // "/usuarios/registrar": "", //todos
+    //"/usuarios/login": "", //todos
+   // "/usuarios/getPerfil": "", //todos
+   // "/usuarios/getId/:id": "", //todos
+    //"/usuarios/getUsername/:userName": "", //todos
+   // "/usuarios/cambiarPassword": "", //todos
+   //Tienen los dos siguientes: isNotAdmin 
+   //"/usuarios/misJuegos": "", //juegoteka,jugador
+   // "/usuarios/misJuegos/:idJuego": "", //juegoteka,jugador
+
+
 
     // RUTAS DE jornadaRoutes.js
-    "/jornadas": "",
-    "/jornadas/": "",
-    "/jornadas/:id": "",
-    "/jornadas/countJugadoresEnJornada/:id": "",
-    "/jornadas/updateEncuentros/:id": "",
-    "/jornadas/updateJuegos/:id": "",
-    "/jornadas/inscripcion/:id": "",
-    "/jornadas/updateEstado/:id": "",
+    //"/jornadas/": "", //todos
+    //"/jornadas/:id": "", //todos
+    //"/jornadas/create": "", //juegoteka NO ADMIN
+    "/jornadas/edit/:id": "juegoteka", //juegoteka - ADMIN
+   // "/jornadas/updateEncuentros/:id": "", //jugador, juegoteka NO ADMIN
+    //"/jornadas/inscripcion/:id": "", //jugador NO ADMIN
+    "/jornadas/updateEstado/:id": "juegoteka", //juegoteka - ADMIN
 
   // RUTAS DE encuentroRoutes.js
     "/encuentros": "",

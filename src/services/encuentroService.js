@@ -239,6 +239,18 @@ async function getEncuentroOrThrow(id) {
   return encuentro;
 }
 
+
+/**
+ * Verifica que un id encuentro exista; devuelve el documento si existe, 
+ * devuelve {} si no existe
+ */
+
+async function getEncuentroOrEmpty(id) {
+  if (!id || !mongoose.isValidObjectId(id)) return {};
+  const encuentro = await Encuentro.findById(id);
+  return encuentro || {};
+}
+
 /**
  * Método interno: elimina todos los encuentros referenciados por una jornada.
  * USO: pensado para ser invocado por jornadaService o scripts administrativos.
@@ -283,7 +295,9 @@ async function getAll(filtro = {}) {
 }
 
 async function getById(id) {
-  return await getEncuentroOrThrow(id);
+     return await getEncuentroOrThrow(id);
+   
+ // return await getEncuentroOrEmpty(id);
 }
 
 /**

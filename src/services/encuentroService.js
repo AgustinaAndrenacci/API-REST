@@ -158,29 +158,37 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
 }
   */
 
-async function verificarJugadoresEnJornada(jornadaId, idsJugadores = [], encuentroActualId = null) {
+async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
   if (!jornadaId) return; // Si no hay jornada asociada, no hacemos nada
   if (!Array.isArray(idsJugadores) || idsJugadores.length === 0) return;
 
-  // Buscar todos los encuentros de la jornada
-  const encuentros = await Encuentro.find({ 
-    jornada: jornadaId,
-    _id: { $ne: encuentroActualId } // excluimos el encuentro que estamos editando
-  }).lean();
+  // Buscar la jornada con sus encuentros y jugadores
+  const jornada = await Jornada.findById(jornadaId)
+    .populate({
+      path: 'encuentros',
+      select: 'jugadores', // solo necesitamos los jugadores
+    })
+    .lean();
 
-  // Recorrer jugadores y verificar si ya están en algún encuentro
-  const conflictos = [];
-  for (const jugadorId of idsJugadores) {
-    const yaInscripto = encuentros.some(e =>
-      e.jugadores?.some(j => j.id_jugador === jugadorId)
-    );
-    if (yaInscripto) conflictos.push(jugadorId);
-  }
+  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
 
-  if (conflictos.length > 0) {
-    throw new Error(`Los siguientes jugadores ya están en otro encuentro de la jornada: ${conflictos.join(", ")}`);
+  const jugadoresInscripto = new Set();
+
+  // Recorrer todos los encuentros de la jornada
+  jornada.encuentros.forEach(encuentro => {
+    (encuentro.jugadores || []).forEach(j => {
+      jugadoresInscripto.add(j.id_jugador?.toString() || j._id?.toString());
+    });
+  });
+
+  // Verificar que todos los jugadores pasados estén inscritos
+  const noInscritos = idsJugadores.filter(jId => !jugadoresInscripto.has(jId.toString()));
+
+  if (noInscritos.length > 0) {
+    throw new Error(`Los siguientes jugadores no están inscriptos en la jornada: ${noInscritos.join(", ")}`);
   }
 }
+
 
 
 
@@ -431,9 +439,97 @@ if (Array.isArray(payload.juego) && payload.juego.length > 0) {
  */
 
 async function update(id, updates = {}) {
-  // Obtener encuentro o tirar error si no existe
-  const encuentro = await getEncuentroOrThrow(id);
+  // Obtener encuentro o retornar error si no existe
+  let encuentro = await getEncuentroOrThrow(id);
+  // Poblar la jornada para acceder a estado
   encuentro = await Encuentro.findById(id).populate('jornada');
+
+  // Validación: no se puede modificar si la jornada está cerrada
+  if (encuentro.jornada?.estado === 'cancelado' || encuentro.jornada?.estado === 'finalizado') {
+    throw new Error('La jornada está cerrada, no se puede modificar el encuentro');
+  }
+
+  // -------------------------------
+  // Actualización de jugadores
+  if (updates.jugadores !== undefined) {
+    if (!Array.isArray(updates.jugadores)) {
+      throw new Error("El campo jugadores debe ser un arreglo.");
+    }
+
+    // Obtener jugadores actuales
+    const jugadoresExistentes = (encuentro.jugadores || []).map(j => j.id_jugador.toString());
+
+    // Extraer IDs de los jugadores nuevos
+    const nuevos = updates.jugadores.map(j => 
+      j.id_jugador?.toString() || j._id?.toString() || j.toString()
+    );
+
+    // Combinar sin duplicados
+    const todosIds = [...new Set([...jugadoresExistentes, ...nuevos])];
+
+    // Validaciones
+    await verificarJugadoresExistentes(todosIds);
+    await verificarNoRepetidosEnEncuentro(id, todosIds);
+    await verificarJugadoresEnJornada(encuentro.jornada._id, todosIds);
+
+    // Verificar capacidad
+    const capacidadFinal = typeof updates.capacidad === "number" ? updates.capacidad : encuentro.capacidad;
+    verificarCapacidadDisponible(capacidadFinal, todosIds.length);
+
+    // Reconstruir array embebido para el schema
+    updates.jugadores = todosIds.map(id => ({ id_jugador: new mongoose.Types.ObjectId(id) }));
+
+    // Crear mensajes de notificación para los nuevos jugadores
+    const creadorNombre = encuentro.createdBy[0]?.userName || "Otro Usuario";
+    const nombreJuego = encuentro.juego[0]?.nombre || "el encuentro";
+    const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario);
+
+    for (const jugadorId of todosIds) {
+      const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
+      const mensajeData = {
+        remitente: creadorId,
+        destinatario: destinatarioId,
+        contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
+        tipo: "notificacionEncuentro",
+      };
+      await crearMensaje(mensajeData);
+    }
+  }
+
+  // -------------------------------
+  // Actualización de juego
+  if (updates.juego !== undefined) {
+    const idJuego = updates.juego?.id_juego || updates.juego?._id || updates.juego;
+    if (idJuego) await verificarJuegoExistente(idJuego);
+  }
+
+  // Validación de capacidad si solo se actualiza capacidad
+  if (updates.capacidad !== undefined && updates.jugadores === undefined) {
+    const cantidadActual = Array.isArray(encuentro.jugadores) ? encuentro.jugadores.length : 0;
+    verificarCapacidadDisponible(updates.capacidad, cantidadActual);
+  }
+
+  // Evitar actualizar encuentro finalizado
+  if (encuentro.estado && String(encuentro.estado).toLowerCase() === "finalizado") {
+    throw new Error("No se puede modificar un encuentro en estado 'finalizado'.");
+  }
+
+  // -------------------------------
+  // Efectuar actualización
+  const updated = await Encuentro.findByIdAndUpdate(id, updates, { new: true, runValidators: true }).exec();
+  if (!updated) throw new Error(`Error al actualizar encuentro ${id}`);
+  return updated.toObject();
+}
+
+
+
+
+/*
+async function update(id, updates = {}) {
+  // Obtener encuentro o tirar error si no existe
+  let encuentro = await getEncuentroOrThrow(id);
+  encuentro = await Encuentro.findById(id).populate('jornada');
+  console.log(encuentro);
 if (encuentro.jornada.estado === 'cancelado'|| encuentro.jornada.estado === 'finalizado') {
   return showErrorMessage(res, 400, 'La jornada está cerrada, no se puede modificar el encuentro');
 }
@@ -441,18 +537,40 @@ if (encuentro.jornada.estado === 'cancelado'|| encuentro.jornada.estado === 'fin
   // Validaciones:
   // 1) Si se actualizan jugadores (p. ej. updates.jugadores), verificar que existan
   if (updates.jugadores !== undefined) {
-    if (!Array.isArray(updates.jugadores)) {
-      throw new Error("El campo jugadores debe ser un arreglo.");
-    }
-    //console.log()
-    const ids = updates.jugadores.map((j) => j.id_jugador?.toString() || j._id?.toString() || j.toString());
-    
+  if (!Array.isArray(updates.jugadores)) {
+    throw new Error("El campo jugadores debe ser un arreglo.");
+  }
+
+  // Obtener el encuentro actual
+  const encuentroActual = await Encuentro.findById(id).lean();
+  const jugadoresExistentes = encuentroActual.jugadores || [];
+
+  // Combinar jugadores existentes con los nuevos (sin duplicar)
+  const nuevos = updates.jugadores.map((j) =>
+    j.id_jugador?.toString() || j._id?.toString() || j.toString()
+  );
+
+  const todos = [
+    ...jugadoresExistentes.map((j) => j.toString()),
+    ...nuevos,
+  ];
+
+  // Eliminar duplicados
+  const jugadoresFinales = [...new Set(todos)];
+
+  // Reasignar al objeto updates
+  updates.jugadores = jugadoresFinales;
+
+    const ids = updates.jugadores.filter((id) => mongoose.isValidObjectId(id));
+
+
+
     await verificarJugadoresExistentes(ids);
     await verificarNoRepetidosEnEncuentro(id, updates.jugadores);
     
     
     const jornada = await Jornada.findOne({ encuentros: encuentro._id }).lean();
-const idJornada = jornada._id;
+    const idJornada = jornada._id;
 await verificarJugadoresEnJornada(idJornada, updates.jugadores);
     //await verificarJugadoresEnJornada(encuentro.jornada, updates.jugadores); 
 
@@ -494,7 +612,7 @@ const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
     verificarCapacidadDisponible(updates.capacidad, cantidadActual);
   }
 
-  // 4) Opcional: evitar actualizar si encuentro está en estado que no permite cambios (ej: 'cerrado')
+  // 4) evitar actualizar si encuentro está en estado que no permite cambios (ej: 'cerrado')
   if (encuentro.estado && String(encuentro.estado).toLowerCase() === "finalizado") {
     throw new Error("No se puede modificar un encuentro en estado 'finalizado'.");
   }
@@ -505,6 +623,7 @@ const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario)
   if (!updated) throw new Error(`Error al actualizar encuentro ${id}`);
   return updated.toObject();
 }
+*/
 
 /**
  * deleteById - elimina un encuentro por id

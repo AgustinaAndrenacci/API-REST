@@ -160,7 +160,7 @@ exports.deleteEncuentro = async (req, res) => {
     //const msg = err.message || "";
     //if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
     //return res.status(400).json({ error: msg });
-    showErrorMessage(res, err, "Error al eliminar el encuentro");
+   showErrorMessage(res, err, "Error al eliminar el encuentro");
   
   }
 };

@@ -56,7 +56,7 @@ exports.getEncuentroById = async (req, res) => {
     const msg = err.message || "";
    // if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
   // return res.status(400).json({ error: msg });
- showErrorMessage(res, 404, err.message || "Jornada no encontrada");
+ showErrorMessage(res, 404, err.message || "encuentro no encontrado");
 
     }
 };

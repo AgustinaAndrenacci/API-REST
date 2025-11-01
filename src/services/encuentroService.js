@@ -433,6 +433,10 @@ if (Array.isArray(payload.juego) && payload.juego.length > 0) {
 async function update(id, updates = {}) {
   // Obtener encuentro o tirar error si no existe
   const encuentro = await getEncuentroOrThrow(id);
+  encuentro = await Encuentro.findById(id).populate('jornada');
+if (encuentro.jornada.estado === 'cancelado'|| encuentro.jornada.estado === 'finalizado') {
+  return showErrorMessage(res, 400, 'La jornada está cerrada, no se puede modificar el encuentro');
+}
 
   // Validaciones:
   // 1) Si se actualizan jugadores (p. ej. updates.jugadores), verificar que existan

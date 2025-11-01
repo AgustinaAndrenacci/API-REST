@@ -44,7 +44,7 @@ const encuentroSchema = new mongoose.Schema(
     ganador: { type: [jugadorSchema], default: [] },   //abierto a la posibilidad de mutliples ganadores
     estado: { 
       type: String, 
-      enum: ["pendiente", "en proceso", "finalizado"], 
+      enum: ["cancelado","pendiente", "en proceso", "finalizado"], 
       default: "pendiente"},
     jornada: {
     type: mongoose.Schema.Types.ObjectId,

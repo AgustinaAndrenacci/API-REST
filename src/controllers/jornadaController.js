@@ -19,7 +19,8 @@ exports.getAllJornadas = async (req, res) => {
 
 exports.getJornadaById = async (req, res) => {
   try {
-    const jornada = await jornadaService.getJornadaById(req.params.id);
+    const jornada = await jornadaService.getJornadaByIdAndEncuentrosCompletos(req.params.id);
+    //const jornada = await jornadaService.getJornadaById(req.params.id);
     jornada
       ? res.json(jornada) //true
       : showErrorMessage(res, 404, "Jornada no encontrada"); //false
@@ -59,7 +60,7 @@ exports.createJornada = async (req, res) => {
       
       const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles: juegosParaGuardar });
       await nuevaJornada.save();
-      res.status(201).json({ id: nuevaJornada.id, nuevaJornada }); //true
+      res.status(200).json({ id: nuevaJornada.id, nuevaJornada }); //true
     }
     
   } catch (err) {
@@ -72,7 +73,6 @@ exports.updateJornada = async (req, res) => {
   try {
     const { id } = req.params; //id de la jornada
     const bodyJson = req.body; //body a modificar
-
     //encuentros no
     delete bodyJson.encuentros;
 
@@ -81,6 +81,12 @@ exports.updateJornada = async (req, res) => {
     if (!jornadaExistente) {
       showErrorMessage(res, 404, "Jornada no encontrada");
     }else{
+      //Si el estado es "Activo" se puede modificar, sino no
+      const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
+      if (!tieneEstadoActivo) {
+        showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+      }else{
+
       //chequea la capacidad
       const datosParaActualizar = jornadaService.validarJornada(jornadaExistente, bodyJson);
     
@@ -92,144 +98,102 @@ exports.updateJornada = async (req, res) => {
       );
       
       res.json(jornadaActualizada);
-    }
+    }}
     } catch (err) {
-      // 6. Manejo de Errores: Verifica si es un error de validación (código 400)
-      // Se asume que cualquier error lanzado desde validarJornada es un 400
-    /*  if (err.message.includes('capacidad no puede ser menor')) {
-        return res.status(400).json({ error: err.message });
-      }*/
 
     // Para cualquier otro error (Mongoose, servidor, etc.)
     console.error("Error detallado al actualizar jornada:", err);
     showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
-/*
-exports.updateJornadaEncuentros = async (req, res) => {
-  try {
-        const id = req.params.id; // Usar el ID de la URL
-    const encuentroData = req.body; //uno solo
-     
-    if (!encuentroData) 
-      {
-      showErrorMessage(res, 400, "Faltan campos obligatorios");
-      }else{
-      
-       //push: actualiza y no pisa
-      //crear el encuentro en la bd
-      //json encuentros
 
-      //añado el createdBy en encuentros
-     const encuentroConId = await encuentroService.create(encuentro);
-
-      //validar que se ingresaron todos los datos
-
-      //añadir encuentroConId a la jornada
-     
-      const encuentrosConId = await crearEncuentrosPorJornada(encuentroData);
-
-      const jornadaActualizada = await Jornada.findByIdAndUpdate(
-      id,
-      { $push: { encuentros: encuentroConId._id } },
-      { new: true, runValidators: true }
-    )
-    
-    //const jornadaActualizada = await Jornada.findByIdAndUpdate(id, { $push: { $each: encuentrosConId} }, { new: true, runValidators: true });
-      
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
-
-//(res, 401, "hola");
-    }
-
-    } catch (err) {
-     
-    showErrorMessage(res, 500, "Error al actualizar jornada :)");
-  }
-};*/
-
-///////////////////////////////////////////////////////////
-//
-//  F: meto mano aqui, permiso, dejo la anterior comentada arriba
-//
-//////////////////////////////////////////////////////////
 exports.updateJornadaEncuentros = async (req, res) => {
   try {
     const idJornada = req.params.id;
     const encuentroData = req.body;
+    const { tipo,capacidad,juego} = req.body;
 
-    if (!encuentroData) {
-      return showErrorMessage(res, 400, "Faltan campos obligatorios");
+    if (!tipo || !capacidad || !juego ) {
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
+    }else{
+
+    //1) Chequea si existe la jornada
+    const jornadaExistente = await jornadaService.getJornadaById(idJornada);
+    if (!jornadaExistente) {
+      showErrorMessage(res, 404, "La jornada no existe");
+    } else {
+      //2) Si el estado es "Activo" se puede modificar, sino no
+      const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(idJornada);
+      if (!tieneEstadoActivo) {
+        showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+      }else{
+        //Crear el encuentro
+        const encuentroCreado = await jornadaService.crearEncuentrosPorJornada(encuentroData, req);
+
+        //Agregar el encuentro a la jornada
+        const jornadaActualizada = await Jornada.findByIdAndUpdate(
+          idJornada,
+          { $push: { encuentros: encuentroCreado._id } }, // solo guardamos el id
+          { new: true, runValidators: true }
+        );
+
+        //console.log(encuentroCreado);
+        res.json(jornadaActualizada);
+      }}
     }
-
-    // 1. Crear el encuentro
-    const encuentroCreado = await crearEncuentrosPorJornada(encuentroData, req);
-
-    // 2. Agregar el encuentro a la jornada
-    const jornadaActualizada = await Jornada.findByIdAndUpdate(
-      idJornada,
-      { $push: { encuentros: encuentroCreado._id } }, // solo guardamos el id
-      { new: true, runValidators: true }
-    );
-
-    if (!jornadaActualizada) {
-      return showErrorMessage(res, 404, "Jornada no encontrada");
-    }
-    //console.log(encuentroCreado);
-    res.json(jornadaActualizada);
-
   } catch (err) {
     console.error("Error al actualizar jornada:", err.message);
     showErrorMessage(res, 500, "Error al actualizar jornada :)");
   }
 };
 ///////////////////////////////////////////////////////////////////////////////////////////
-//hasta aca :)
+
 
 //El jugador logueado se inscribe en la jornada, no un conjunto
 exports.updateJornadaJugador = async (req, res) => {
   try {
       const idJornada = req.params.id; // Usar el ID de la URL
       const idJugador = req.user.id; // Usar el ID del token 
-
       const user = await usuarioService.getUsuarioById(idJugador);
 
-      //push: actualiza y no pisa
       //busca la jornada
       const jornada = await Jornada.findById(idJornada);
       
       if (jornada) {
         //verifico que el usuario no este anotado
+
+        //Si el estado es "Activo" se puede modificar, sino no
+        const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(idJornada);
+        if (!tieneEstadoActivo) {
+          showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+        }else{
         const usuarioYaAnotado = jornada.jugadoresInscriptos.find(jugador => String(jugador.id) === String(idJugador));
         
         if (usuarioYaAnotado) {
           showErrorMessage(res, 400, "El jugador ya está anotado en la jornada");
         }else{
-          //verifico que la cantidad de jugadores no supere la capacidad
-          const cantidadJugadores = jornada.jugadoresInscriptos.length;
+            //verifico que la cantidad de jugadores no supere la capacidad
+            const cantidadJugadores = jornada.jugadoresInscriptos.length;
 
-          if (cantidadJugadores + 1 > jornada.capacidad) {
-            showErrorMessage(res, 400, "Capacidad máxima superada");
-          }
-          else{
-            const jornadaActualizada = await Jornada.findByIdAndUpdate(
-              idJornada, 
-              {
-              $push: { 
-                  jugadoresInscriptos: {
-                      id: idJugador,
-                      userName: user.userName,
-                      nombre: user.nombre,
-                      apellido: user.apellido
-                  } 
-              } 
-              }, { new: true, runValidators: true });
-            res.json(jornadaActualizada) //true
+            if (cantidadJugadores + 1 > jornada.capacidad) {
+              showErrorMessage(res, 400, "Capacidad máxima superada");
             }
-      }}
-      else{
+            else{
+              const jornadaActualizada = await Jornada.findByIdAndUpdate(
+                idJornada, 
+                {
+                $push: { 
+                    jugadoresInscriptos: {
+                        id: idJugador,
+                        userName: user.userName,
+                        //nombre: user.nombre,
+                       // apellido: user.apellido
+                    } 
+                } 
+                }, { new: true, runValidators: true });
+              res.json(jornadaActualizada) //true
+              }
+      }}} else{
         showErrorMessage(res, 404, "Jornada no encontrada");
       }
     } catch (err) {
@@ -250,55 +214,35 @@ exports.updateJornadaEstado = async (req, res) => {
     else{
       //verifico que el estado sea una de las opciones del enum que se encuentra en jornadaModel
       const estadosValidos = await jornadaService.estadosValidos(estado);
-
       if (!estadosValidos) {
         showErrorMessage(res, 400, "El estado ingresado es inválido");
       }else{
-      const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
-      jornadaActualizada
-        ? res.json(jornadaActualizada) //true
-        : showErrorMessage(res, 404, "Jornada no encontrada"); //false
-    }}
-
-    } catch (err) {
+      //jornada existe?
+      const jornadaExistente = await jornadaService.getJornadaById(id);
+      if (!jornadaExistente) {
+        showErrorMessage(res, 404, "Jornada no encontrada");
+      } else {
+        //Si el estado es "Activo" se puede modificar, sino no
+        const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
+        if (!tieneEstadoActivo) {
+          showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
+        }else{
+            //update
+            //DESCOMENTAR
+            //const jornadaActualizada = await jornadaService.updateJornada(id, {estado});
+            let jornadaActualizada = await jornadaService.updateJornada(id, {estado});
+            
+            //si se coloco cancelado, se eliminan los encuentros
+            if (jornadaActualizada.estado === "cancelado") {
+            jornadaActualizada = await jornadaService.eliminarEncuentrosDeJornada(id);
+            console.log("Se eliminaron los encuentros de la jornada:", jornadaActualizada);
+            }
+            console.log("Jornada actualizada:", jornadaActualizada);
+            res.json(jornadaActualizada) 
+    }}}}}
+    catch (err) {
       console.error("Error detallado al actualizar jornada:", err);
       showErrorMessage(res, 500, "Error al actualizar jornada");
   }
 };
 
-/*exports.crearEncuentrosPorJornada = async (encuentroJson) => {
-  //me falta el id que se crea una vez en createEncuentro
- console.log("1");
-  try {
-      async (encuentroJson) => {
-      const encuentroConId = await encuentro.createEncuentro(encuentroJson);
-      //crear un vector con encuentroConId
-      encuentrosConId.push(encuentroConId);
-
-      return encuentrosConId;
-    };
-  } catch (err) {
-    console.error(err);
-  }
-};*/
-
-//F :permiso, de nuevo
-const crearEncuentrosPorJornada = async (encuentroData,req) => {
-// console.log(" Creando encuentro con datos:", encuentroData);
-//console.log(encuentroData);
-//console.log(req.user.userName);
-
-  encuentroData.createdBy = [{
-    idUsuario: req.user._id,
-    userName: req.user.userName,
-    tipo: req.user.rol
-  }];
-  try {
-    const encuentroCreado = await encuentroService.create(encuentroData);
-    //console.log("Encuentro creado:", encuentroCreado._id);
-    return encuentroCreado; // retorna el objeto completo
-  } catch (err) {
-    console.error(" Error en crearEncuentrosPorJornada:", err.message);
-    throw err;
-  }
-};

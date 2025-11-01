@@ -37,7 +37,7 @@ router.get("/:tipo/ganador/:id", encuentroController.getByGanador);
 router.get("/:tipo/participante/:id", encuentroController.getByJugador);
 router.get("/:tipo/organizador/:id", encuentroController.getByCreador);
 router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
-router.get("/:tipo/juego/:juego", encuentroController.getEncuentrosByEstado);
+router.get("/:tipo/juego/:juegoId", encuentroController.getByJuego);
 ////
 
 // U - Update, Actualizar un encuentro existente

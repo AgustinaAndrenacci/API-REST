@@ -92,11 +92,10 @@ async function getByGanador(idUsuario) {
  */
 async function getByJuego(idJuego) {
   if (!idJuego) throw new Error("getByJuego: idJuego requerido.");
-  // Intentamos buscar tanto por campo embebido como por referencia posible
   const data = await Encuentro.find({
-    $or: [{ "juego.id_juego": idJuego }, { "juego._id": idJuego }, { "juego": idJuego }],
+    "juego.id_juego": idJuego  
   }).lean();
-  return data;
+    return data;
 }
 
 /**

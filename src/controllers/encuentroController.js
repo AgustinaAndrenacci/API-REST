@@ -92,15 +92,18 @@ exports.getByGanador = async (req, res) => {
 };
 
 exports.getByJuego = async (req, res) => {
+  
   try {
     const idJuego = req.params.juegoId || req.query.juegoId || req.body.juegoId;
     if (!idJuego) return res.status(400).json({ error: "juegoId requerido." });
+   
     const data = await encuentroService.getByJuego(idJuego);
+     
     return res.json(data);
   } catch (err) {
    // const status = mapErrorToStatus(err);
   //return res.status(status).json({ error: err.message });
-   showErrorMessage(res, err, "Error al obtener encuentros por juego");
+   showErrorMessage(res, 404, "Error al obtener encuentros por juego");
     }
 };
 

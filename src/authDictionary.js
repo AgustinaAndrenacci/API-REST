@@ -33,17 +33,17 @@ diccionarioRutasYPermisos = {
     "/jornadas/updateEstado/:id": ["juegoteka", "administrador"], //juegoteka - ADMIN
 
   // RUTAS DE encuentroRoutes.js
-    "/encuentros": "",
-    "/encuentros/": "",
-    "/encuentros/torneo": "",
-    "/encuentros/desafio": "",
-    "/encuentros/:id": "",
-    "/encuentros/:tipo/estado/:estado": "",
-    "/encuentros/:tipo/ganador/:id_jugador": "",
-    "/encuentros/:tipo/participante/:id_jugador": "",
-    "/encuentros/:tipo/organizador/:id_jugador": "",
-    "/encuentros/torneo/:id": "",
-    "/encuentros/desafio/:id": ""
+    "/encuentros": [], //todos
+    "/encuentros/": [], //todos
+    "/encuentros/torneo": [], //todos
+    "/encuentros/desafio": [], //todos
+    "/encuentros/:id": [], //todos
+    "/encuentros/:tipo/estado/:estado": [], //todos
+    "/encuentros/:tipo/ganador/:id_jugador": [], //todos
+    "/encuentros/:tipo/participante/:id_jugador": [], //todos
+    "/encuentros/:tipo/organizador/:id_jugador": [], //todos
+    "/encuentros/torneo/:id": [], //todos
+    "/encuentros/desafio/:id": [], //todos
 };
 
 diccionarioRolesYTipos = {

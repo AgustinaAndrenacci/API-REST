@@ -8,7 +8,7 @@ const getAllMensajes = async (req, res) => {
   try {
     const mensajes = await mensajeService.getMensajes();
     res.json(mensajes);
-  } catch (error) {
+  } catch (err) {
     showErrorMessage(res, 500, "Error al obtener los mensajes");
     //res.status(500).json({ error: "Error al obtener los mensajes" });
   }
@@ -65,7 +65,7 @@ const getMensajesPorDestinatario = async (req, res) => {
   try {
     const mensaje = await mensajeService.crearMensaje(req.body);
     res.status(201).json(mensaje);
-  } catch (error) {
+  } catch (err) {
     showErrorMessage(res, 500, err.messaje||"Error al crear el mensaje");
     //res.status(500).json({ error: "Error al crear el mensaje" });
   }
@@ -75,7 +75,7 @@ const getMensajesPorDestinatario = async (req, res) => {
   try {
     const mensaje = await mensajeService.actualizarMensaje(req.params.id, req.body);
     res.json(mensaje);
-  } catch (error) {
+  } catch (err) {
     showErrorMessage(res, 500, err.messaje||"Error al actualizar el mensaje");
    // res.status(500).json({ error: "Error al actualizar el mensaje" });
   }
@@ -85,7 +85,7 @@ const eliminarMensaje = async (req, res) => {
   try {
     await mensajeService.eliminarMensaje(req.params.id);
     res.json({ mensaje: "Mensaje eliminado" });
-  } catch (error) {
+  } catch (err) {
     showErrorMessage(res, 500, err.messaje||"Error al eliminar el mensaje");
    // res.status(500).json({ error: "Error al eliminar el mensaje" });
   }

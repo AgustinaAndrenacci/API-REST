@@ -11,7 +11,12 @@ exports.getAllUsuarios = async (req, res) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
     //muestra sin la password
-    res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
+    //el admin puede ver con otro formato mas completo
+    if (req.user.rol === "administrador") {
+      res.json(usuarios.map(usuarioService.formatoJsonUsuarioPersonalizado));
+    } else {
+      res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
+    }
     //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
     console.error("Error al obtener usuarios", err);

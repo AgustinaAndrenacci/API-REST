@@ -10,7 +10,11 @@ const juegoSchema = new mongoose.Schema(
     reglamento: { type: String, required: true },
     cantJugadoresMax: { type: Number, required: true },
     cantJugadoresMin: { type: Number, required: true },
-    tiempoEstimado: { type: Number, required: true }
+    tiempoEstimado: { type: Number, required: true },
+    estado: { 
+      type: String, 
+      enum: ["activo", "eliminado"]
+    },
   }
 );
 

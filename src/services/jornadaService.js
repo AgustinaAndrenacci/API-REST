@@ -175,12 +175,18 @@ const modificaDatosEnJornadaActiva = async (user) => {
 
 
 
-const crearEncuentrosPorJornada = async (encuentroData,req) => {
+const crearEncuentrosPorJornada = async (encuentroData,jornadaId,req) => {
+
+  
   encuentroData.createdBy = [{
     idUsuario: req.user._id,
     userName: req.user.userName,
     tipo: req.user.rol
-  }];
+   }];
+ 
+   encuentroData.jornada = jornadaId;
+  
+
   try {
     const encuentroCreado = await encuentroService.create(encuentroData);
     //console.log("Encuentro creado:", encuentroCreado._id);

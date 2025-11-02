@@ -128,7 +128,8 @@ exports.updateJornadaEncuentros = async (req, res) => {
         showErrorMessage(res, 400, "La jornada no se puede modificar debido a que se encuentra cancelada o finalizada");
       }else{
         //Crear el encuentro
-        const encuentroCreado = await jornadaService.crearEncuentrosPorJornada(encuentroData, req);
+        const jornadaId = req.params.id;
+        const encuentroCreado = await jornadaService.crearEncuentrosPorJornada(encuentroData, jornadaId, req);
 
         //Agregar el encuentro a la jornada
         const jornadaActualizada = await Jornada.findByIdAndUpdate(

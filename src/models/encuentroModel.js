@@ -46,6 +46,11 @@ const encuentroSchema = new mongoose.Schema(
       type: String, 
       enum: ["cancelado","pendiente", "en proceso", "finalizado"], 
       default: "pendiente"},
+    jornada: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Jornada',
+    required: true
+  },
   },
 
 

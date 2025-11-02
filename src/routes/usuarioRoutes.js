@@ -12,6 +12,9 @@ router.get("/", autenticarToken,usuarioController.getAllUsuarios);
 router.get("/getPerfil",autenticarToken, usuarioController.getPerfil);
 router.get("/getId/:id",autenticarToken, usuarioController.getUsuarioById);
 router.get("/getUsername/:userName",autenticarToken, usuarioController.getUsuarioByUsername);
+router.get("/getJuegotekas",autenticarToken, usuarioController.getAllJuegotekas);
+router.get("/getJugadores",autenticarToken, usuarioController.getAllJugadores);
+
 router.post("/registrar",usuarioController.registrar);
 router.post("/login", usuarioController.login);
 router.put("/edit",autenticarToken, usuarioController.updateUsuario);

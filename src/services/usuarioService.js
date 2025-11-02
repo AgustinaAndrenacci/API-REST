@@ -27,14 +27,21 @@ const getUsuarioById = async (id) => {
   return usuario;
 };
 
+
 //getByUsername
 const getUsuarioByUsername = async (userName) => {
   const usuario = await Usuario.findOne(userName);
   return usuario;
 };
 
-//json a mostrar
-const formatoJsonUsuario = (usuario) => {
+//getById
+const getUsuarioByTipo = async (tipo) => {
+  //todos los jugadores, juegotekas, etc
+  const usuario = await Usuario.find({ rol:tipo });
+  return usuario;
+};
+
+const formatoJsonUsuarioPersonalizado = (usuario) => {
   return {
     id: usuario._id,
     userName: usuario.userName,
@@ -45,6 +52,18 @@ const formatoJsonUsuario = (usuario) => {
     telefono: usuario.telefono,
     mail: usuario.mail,
     direccion: usuario.direccion
+  };
+};
+
+//json a mostrar
+const formatoJsonUsuarioGeneral = (usuario) => {
+  return {
+    id: usuario._id,
+    userName: usuario.userName,
+    rol: usuario.rol,
+    nombre: usuario.nombre,
+    apellido: usuario.apellido,
+    foto: usuario.foto
   };
 };
 
@@ -109,8 +128,10 @@ module.exports = {
   updateUsuarioById,
   getAllUsuarios,
   getUsuarioById,
+  getUsuarioByTipo,
   getUsuarioByUsername,
-  formatoJsonUsuario,
+  formatoJsonUsuarioGeneral,
+  formatoJsonUsuarioPersonalizado,
   updateMisJuegos,
   createMisJuegos,
   deleteMisJuegos,

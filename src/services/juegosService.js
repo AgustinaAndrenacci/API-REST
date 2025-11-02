@@ -25,7 +25,13 @@ const verificarExistenciaJuego = async (id) => {
     }
 }
 
+//necesito una funcion que me diga si el campo "estado" del juego es "activo" o "eliminado"
+
 module.exports = {
     verificarExistenciaJuego
 };
 //incorporar logicas de busqueda (por ejemplo Juego.findById()) en el service para usarse en el controller
+
+/* hay que agregar:
+    
+*/

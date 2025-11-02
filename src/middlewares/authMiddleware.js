@@ -23,13 +23,14 @@ const autenticarToken = (req, res, next) => {
 };
 
 const validarPermisoRuta = async (req, res, next) => {
-  const permisoNecesario = diccionarioRutasYPermisos[req.baseUrl + req.route.path]; // Ejemplo: req.path toma el path COMPLETO | req.route.path toma el cachito p/usar en diccionario
-  if (!permisoNecesario) {
+  const ruta = req.baseUrl + req.route.path;
+  const permisosValidos = diccionarioRutasYPermisos[ruta]; // Ejemplo: req.path toma el path COMPLETO | req.route.path toma el cachito p/usar en diccionario
+  if (!permisosValidos) {
     showErrorMessage(res, 404, "La ruta especificada no existe.");
-  } else if ((req.user.rol === permisoNecesario || req.user.rol === "administrador")){
+  } else if ((permisosValidos.includes(req.user.rol) || permisosValidos.length === 0)){
     next();
   } else {
-    showErrorMessage(res, 403, "No tenés permisos para esta acción.");
+    showErrorMessage(res, 403, "No tenés permisos para esta acción. Sali de acá o llamamos al 911.");
   }
 };
 

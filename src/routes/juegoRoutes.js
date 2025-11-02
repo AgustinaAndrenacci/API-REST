@@ -10,6 +10,7 @@ router.get("/:id", juegoController.getJuegoById);
 router.post("/create", autenticarToken, validarPermisoRuta, juegoController.createJuego);
 router.put("/update/:id", autenticarToken, validarPermisoRuta, juegoController.updateJuego);
 router.delete("/delete/:id", autenticarToken, validarPermisoRuta, juegoController.deleteJuego);
+router.delete("/delete/hard/:id", autenticarToken, validarPermisoRuta, juegoController.deleteJuegoHARD);
 
 //Nuevos Endpoints
 router.get("/nombre/:nombre", juegoController.getJuegoPorNombre);

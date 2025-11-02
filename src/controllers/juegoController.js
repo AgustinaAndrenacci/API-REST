@@ -16,7 +16,7 @@ exports.getJuegoById = async (req, res) => {
   try {
     const juego = await Juego.findById(req.params.id); //lo trae del modelo
     juego //ternario IF
-    ? juego.estado === "activo" ? res.json(juego) : showErrorMessage(res, 404, "Juego eliminado, no existe mas :(") //false
+    ? juego.estado === "activo" ? res.json(juego) : showErrorMessage(res, 410, "Juego eliminado, no existe mas :(") //false
     : showErrorMessage(res, 404, "Juego no encontrado"); //false
   } catch (err){
     showErrorMessage(res, 500, "Error al obtener juego");
@@ -25,11 +25,11 @@ exports.getJuegoById = async (req, res) => {
 
 exports.createJuego = async (req, res) => {
   try {
-    const { titulo, imagen, descripcion, reglamento, cantJugadoresMax, cantJugadoresMin, tiempoEstimado, estado } = req.body;
-    if (!titulo || !imagen || !descripcion || !reglamento || !cantJugadoresMax || !cantJugadoresMin || !tiempoEstimado || !estado){
+    const { titulo, imagen, descripcion, reglamento, cantJugadoresMax, cantJugadoresMin, tiempoEstimado } = req.body;
+    if (!titulo || !imagen || !descripcion || !reglamento || !cantJugadoresMax || !cantJugadoresMin || !tiempoEstimado){
       showErrorMessage(res, 400, "Faltan campos obligatorios");
     } else {
-      const juegoCreado = await Juego.create({ titulo, imagen, descripcion, reglamento, cantJugadoresMax, cantJugadoresMin, tiempoEstimado, estado });
+      const juegoCreado = await Juego.create({ titulo, imagen, descripcion, reglamento, cantJugadoresMax, cantJugadoresMin, tiempoEstimado, estado: "activo" });
       res.json(juegoCreado)
     }
   } catch (err){
@@ -75,7 +75,7 @@ exports.deleteJuego = async (req, res) => {
     showErrorMessage(res, 500, "Error al borrar juego");
   }
 };
-/*
+
 exports.deleteJuegoHARD = async (req, res) => {
   try {
     const juegoBorrado = await Juego.findByIdAndDelete(req.params.id); //lo trae del modelo
@@ -86,12 +86,12 @@ exports.deleteJuegoHARD = async (req, res) => {
     showErrorMessage(res, 500, "Error al borrar juego");
   }
 };
-*/
+
 exports.getJuegoPorNombre = async (req, res) => {
   try {
-    const juegoBuscado = await Juego.findOne({ titulo: req.params.nombre}, {estado: "activo"}); //lo trae del modelo
+    const juegoBuscado = await Juego.findOne({ titulo: req.params.nombre, estado:"activo"}); //lo trae del modelo
     juegoBuscado //ternario IF
-    ? res.json(juegoBuscado) //true
+    ? juegoBuscado.estado === "activo" ? res.json(juegoBuscado) : showErrorMessage(res, 404, "Juego eliminado, no existe mas :(")
     : showErrorMessage(res, 404, "Juego no encontrado, que triste no?");
   } catch (err){
     showErrorMessage(res, 500, "Error al buscar juego");
@@ -103,7 +103,8 @@ exports.getJuegosParaXJugadores = async (req, res) => {
     const cantidad = parseInt(req.params.cantidadJugadores); //lo trae del modelo
     const juegos = await Juego.find({
       cantJugadoresMin: { $lte: cantidad },
-      cantJugadoresMax: { $gte: cantidad }
+      cantJugadoresMax: { $gte: cantidad }, 
+      estado: "activo"
     });
     juegos.length > 0 //ternario IF
     ? res.json(juegos) //true
@@ -122,9 +123,9 @@ exports.getJuegosParaExactamenteXJugadores = async (req, res) => {
     });
     juegos.length > 0 //ternario IF
     ? res.json(juegos) //true
-    : res.status(404).json({ error: `No existen juegos para exactamente ${cantidad} jugadores`});
+    : showErrorMessage(res, 404, `No existen juegos para exactamente ${cantidad} jugadores`);
   } catch (err){
-    res.status(500).json({ error: "Error al buscar juegos"});
+    showErrorMessage(res, 500, "Error al buscar juegos");
   }
 }
 
@@ -133,9 +134,9 @@ exports.getJuegosMenorADuracion = async (req, res) => {
     const juegos = await Juego.find({ tiempoEstimado: { $lte: req.params.tiempoMax}}); //lo trae del modelo
     juegos.length > 0 //ternario IF
     ? res.json(juegos) //true
-    : res.status(404).json({ error: `No existen juegos menores a ${req.params.tiempoMax} minutos`});
+    : showErrorMessage(res, 404, `No existen juegos menores a ${req.params.tiempoMax} minutos`);
   } catch (err){
-    res.status(500).json({ error: "Error al buscar juegos"});
+    showErrorMessage(res, 500, "Error al buscar juegos");
   }
 }
 
@@ -144,8 +145,8 @@ exports.getJuegosMayorADuracion = async (req, res) => {
     const juegos = await Juego.find({ tiempoEstimado: { $gte: req.params.tiempoMin}}); //lo trae del modelo
     juegos.length > 0 //ternario IF
     ? res.json(juegos) //true
-    : res.status(404).json({ error: `No existen juegos mayores a ${req.params.tiempoMin} minutos`});
+    : showErrorMessage(res, 404, `No existen juegos mayores a ${req.params.tiempoMax} minutos`);
   } catch (err){
-    res.status(500).json({ error: "Error al buscar juegos"});
+    showErrorMessage(res, 500, "Error al buscar juegos");
   }
 }

@@ -7,9 +7,7 @@
 const express = require("express");
 const router = express.Router();
 const encuentroController = require("../controllers/encuentroController");
-//middlewares
 const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware");
-//const {esJdor} = require("../middlewares/esUsuarioMiddleware");
 const {isCreator} = require("../middlewares/isCreatorMiddleware");
 
 
@@ -29,8 +27,7 @@ router.get("/desafio",autenticarToken, encuentroController.getAllEncuentros);
 
 //      get byID
 router.get ("/:id",autenticarToken, encuentroController.getEncuentroById);
-//router.get("/torneo/:id", encuentroController.getEncuentroById);
-//router.get("/desafio/:id", encuentroController.getEncuentroById);
+
 
 /////
 router.get("/:tipo/ganador/:id", encuentroController.getByGanador);
@@ -42,45 +39,12 @@ router.get("/:tipo/juego/:juegoId", encuentroController.getByJuego);
 
 // U - Update, Actualizar un encuentro existente
 router.put("/:id", autenticarToken,isCreator, encuentroController.updateEncuentro);
-
-//crear nueva ruta de Update solo para updetear parricipantes , no necesita ser creador.
-
+router.put("/updatejugadores/:id",autenticarToken,encuentroController.updateJugadoresEncuentro); //!!!!!
 
 // D - delete
-//CORREGIR, UNA SOLA RUTA; CON ISCREATOR!!!
-router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
-router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro);  //asi, permitiria a las juegotecas eliminar desafios indeseados en sus jornadas
-
-// :)
-
-
-
-/////
+router.delete("/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
 
 
 
 module.exports = router;
 
-
-//router.get("/torneo", encuentroController.getAllEncuentros);
-//router.get("/desafio", encuentroController.getAllEncuentros);
-
-/////////////////////////////////////////
-//  Version funcionando en local Data
-////////////////////////////////////////
-
-/*
-// src/routes/encuentroRoutes.js
-const express = require("express");
-const router = express.Router();
-const encuentroController = require("../controllers/encuentroController");
-
-// CRUD
-router.get("/", encuentroController.getAllEncuentros);
-router.get("/:id", encuentroController.getEncuentroById);
-router.post("/", encuentroController.createEncuentro);
-router.put("/:id", encuentroController.updateEncuentro);
-router.delete("/:id", encuentroController.deleteEncuentro);
-
-module.exports = router;
-*/

@@ -27,7 +27,7 @@ app.use("/usuarios", usuarioRoutes);
 app.use("/jornadas", jornadaRoutes);
 app.use("/encuentros", encuentroRoutes);
 app.use("/juegos", juegosRoutes);
-app.use("/mensajes", mensajeRoutes); ///AGREGO para mensaje(fede 19.10)
+app.use("/mensajes", mensajeRoutes); 
 
 app.use((req, res) => {
   return showErrorMessage(res, 404, "Suponiamos que charly iba a hacer esto");

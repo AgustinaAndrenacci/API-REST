@@ -10,8 +10,7 @@
  *  - Errores por recurso no encontrado devuelven 404
  *  - Errores inesperados devuelven 500
  *
- * Nota: si querés otro esquema de códigos HTTP (ej: 422 para validaciones), lo adapto.
- */
+  */
 
 const encuentroService = require("../services/encuentroService");
 const { showErrorMessage } = require("../errorHandler");
@@ -42,9 +41,7 @@ exports.getEncuentroById = async (req, res) => {
     const encuentro = await encuentroService.getById(id);
     return res.json(encuentro);
   } catch (err) {
-    const msg = err.message || "";
-   // if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-  // return res.status(400).json({ error: msg });
+    
  showErrorMessage(res, 404, err.message || "encuentro no encontrado");
 
     }
@@ -53,13 +50,11 @@ exports.getEncuentroById = async (req, res) => {
 exports.getEncuentrosByEstado = async (req, res) => {
   try {
     const estado = req.params.estado || req.query.estado || req.body.estado;
-    if (!estado) return res.status(400).json({ error: "Parámetro 'estado' requerido." });
+    if (!estado) showErrorMessage(res, 400, "Parámetro 'estado' requerido.");//return res.status(400).json({ error: "Parámetro 'estado' requerido." });
     const data = await encuentroService.getByEstado(estado);
     return res.json(data);
   } catch (err) {
-    //const status = mapErrorToStatus(err);
-    //return res.status(status).json({ error: err.message });
-    showErrorMessage(res, err, "Error al obtener encuentros por estoado");
+       showErrorMessage(res, err, "Error al obtener encuentros por estoado");
   
   }
 };
@@ -67,42 +62,36 @@ exports.getEncuentrosByEstado = async (req, res) => {
 exports.getByCreador = async (req, res) => {
   try {
     const idCreador = req.params.id || req.query.id || req.body.id;
-    if (!idCreador) return res.status(400).json({ error: "creadorId requerido." });
+    if (!idCreador) showErrorMessage(res, 400, "creadorId requerido.");//return res.status(400).json({ error: "creadorId requerido." });
     const data = await encuentroService.getByCreador(idCreador);
     return res.json(data);
   } catch (err) {
-    //const status = mapErrorToStatus(err);
-    //return res.status(status).json({ error: err.message });
-    showErrorMessage(res, err, "Error al obtener encuentros por Creador");
+     showErrorMessage(res, err, "Error al obtener encuentros por Creador");
   }
 };
 
 exports.getByGanador = async (req, res) => {
   try {
     const idGanador = req.params.id || req.query.id || req.body.id;
-    if (!idGanador) return res.status(400).json({ error: "ganadorId requerido." });
+    if (!idGanador) showErrorMessage(res, err, "ganadorId requerido.");//return res.status(400).json({ error: "ganadorId requerido." });
     const data = await encuentroService.getByGanador(idGanador);
     return res.json(data);
   } catch (err) {
-    //const status = mapErrorToStatus(err);
-    //return res.status(status).json({ error: err.message });
-    showErrorMessage(res, err, "Error al obtener encuentros por estoado");
+    showErrorMessage(res, err, "Error al obtener encuentros por ganador");
   
   }
 };
 
 exports.getByJuego = async (req, res) => {
-  
-  try {
+    try {
     const idJuego = req.params.juegoId || req.query.juegoId || req.body.juegoId;
-    if (!idJuego) return res.status(400).json({ error: "juegoId requerido." });
+    if (!idJuego)  showErrorMessage(res, 400, "juegoId requerido.");//return res.status(400).json({ error: "juegoId requerido." });
    
     const data = await encuentroService.getByJuego(idJuego);
      
     return res.json(data);
   } catch (err) {
-   // const status = mapErrorToStatus(err);
-  //return res.status(status).json({ error: err.message });
+
    showErrorMessage(res, 404, "Error al obtener encuentros por juego");
     }
 };
@@ -110,7 +99,7 @@ exports.getByJuego = async (req, res) => {
 exports.getByJugador = async (req, res) => {
   try {
     const idJugador = req.params.id || req.query.id || req.body.id;
-    if (!idJugador) return res.status(400).json({ error: "jugadorId requerido." });
+    if (!idJugador)   showErrorMessage(res, 400, "jugadorId requerido.");//return res.status(400).json({ error: "jugadorId requerido." });
     const data = await encuentroService.getByJugador(idJugador);
     return res.json(data);
   } catch (err) {
@@ -121,7 +110,7 @@ exports.getByJugador = async (req, res) => {
   }
 };
 
-// POST /encuentro --> el create desde aqui no se utiliza!
+// POST /encuentro --> el CREATE desde aqui no se utiliza!
 /*
 exports.createEncuentro = async (req, res) => {
   try {
@@ -148,8 +137,19 @@ exports.updateEncuentro = async (req, res) => {
     const updated = await encuentroService.update(id, updates);
     return res.json(updated);
   } catch (err) {
-    // Mostramos el mensaje real del error si existe
-    return showErrorMessage(res, 500, err.message || "Error al actualizar Encuentro");
+        
+       return showErrorMessage(res, 500, err.message || "Error al actualizar Encuentro");
+  }
+};
+
+exports.updateJugadoresEncuentro = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updates = req.body;
+    const updated = await encuentroService.updateJugadores(id, updates);
+    return res.json(updated);
+  } catch (err) {
+    return showErrorMessage(res, 500, err.message || "Error al actualizar los jugadores del encuentro");
   }
 };
 
@@ -160,9 +160,7 @@ exports.deleteEncuentro = async (req, res) => {
     const result = await encuentroService.deleteById(id);
     return res.json(result);
   } catch (err) {
-    //const msg = err.message || "";
-    //if (/no encontrado|not found/i.test(msg)) return res.status(404).json({ error: msg });
-    //return res.status(400).json({ error: msg });
+   
    showErrorMessage(res, err, "Error al eliminar el encuentro");
   
   }

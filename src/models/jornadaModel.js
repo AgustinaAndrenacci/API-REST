@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose; //                    F 
+const { Schema } = mongoose; 
+//por que {}?  Para desestructurar el objeto mongoose 
+// y obtener solo la clase Schema
 
 const jornadaSchema = new mongoose.Schema(
   {
@@ -28,7 +30,7 @@ const jornadaSchema = new mongoose.Schema(
     ],
    encuentros: [{ type: Schema.Types.ObjectId, ref: 'Encuentro' }]
   },
-  { timestamps: true }
+  { timestamps: true } // Agrega campos de fecha de creación y actualización
 );
 
 module.exports = mongoose.model("Jornada", jornadaSchema);

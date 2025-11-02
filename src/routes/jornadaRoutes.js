@@ -12,7 +12,7 @@ router.get("/:id", jornadaController.getJornadaById);
 //router.get("/countJugadoresEnJornada/:id", jornadaController.countJugadoresEnJornada);
 router.post("/create",autenticarToken, isJuegoteka, jornadaController.createJornada);
 router.put("/edit/:id",autenticarToken, jornadaController.updateJornada);
-router.put("/updateEncuentros/:id",autenticarToken, isNotAdmin,jornadaController.updateJornadaEncuentros);
+router.put("/updateEncuentros/:id",autenticarToken, jornadaController.updateJornadaEncuentros);
 //router.put("/updateJuegos/:id",autenticarToken, jornadaController.updateJornadaJuegos);
 router.put("/inscripcion/:id",autenticarToken,isJugador, jornadaController.updateJornadaJugador);
 router.put("/updateEstado/:id",autenticarToken, jornadaController.updateJornadaEstado);

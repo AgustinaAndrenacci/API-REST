@@ -12,6 +12,7 @@ exports.getAllUsuarios = async (req, res) => {
     const usuarios = await usuarioService.getAllUsuarios();
     //muestra sin la password
     res.json(usuarios.map(usuarioService.formatoJsonUsuario));
+    //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
     showErrorMessage(res, 500, "Error al obtener usuarios");
   }
@@ -114,7 +115,10 @@ exports.registrar = async (req, res) => {
           showErrorMessage(res, 400, "Rol inválido");
         }else{
         // Hashear la contraseña
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(10); 
+        //genSalt(10): genera un salt de 10 rondas. 
+        // salt es: un valor aleatorio que se utiliza para aumentar la seguridad
+        //  del hash
         const hashPass = await bcrypt.hash(pass, salt);
 
         const nuevoUsuario = new Usuario({ userName, pass: hashPass, rol, nombre, apellido, direccion,foto, telefono, mail });
@@ -195,6 +199,9 @@ exports.updatePassword = async (req, res) => {
             }else{
               //actualizo la nueva contraseña
               const salt = await bcrypt.genSalt(10);
+              //genSalt(10): genera un salt de 10 rondas. 
+            // salt es: un valor aleatorio que se utiliza para aumentar la seguridad
+            //  del hash
               const hashPass = await bcrypt.hash(passNueva, salt);
 
               // Guardo

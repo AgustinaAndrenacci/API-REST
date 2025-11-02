@@ -1,9 +1,3 @@
-//codigo que verifique si dada una jornada, y un body:
-    //en el body recibe capacidad, que la misma no sea menor a los jugadores inscriptos
-    //que en el return devuelva la jornada como deberia quedar
-//creame la funcion completa del service:
-
-// src/services/jornadaService.js
 const Jornada = require("../models/jornadaModel");
 const Encuentro = require("../models/encuentroModel");
 const encuentroService = require("./encuentroService");
@@ -70,7 +64,7 @@ const updateJornada = async (id, data) => {
 const esEstadoCancelado = (jornada) => {
   //const jornada = getJornadaById(id);
   return jornada.estado === "cancelado";
-};
+ };
 
 //Estado:cancelado -> se eliminan todos los encuentros
 const eliminarEncuentrosDeJornada = async (idJornada) => {
@@ -82,8 +76,8 @@ const eliminarEncuentrosDeJornada = async (idJornada) => {
         if (jornadaActualizada && jornadaActualizada.encuentros.length > 0) {
 
             // Extraer solo los IDs de encuentro
-            const idsEncuentros = jornadaActualizada.encuentros.map(e => e._id || e); 
-
+            const idsEncuentros = jornadaActualizada.encuentros.map(e => e._id || e);
+            
             //borro de forma masiva - elimino todos los Encuentros cuyo _id esté en el array idsEncuentros
             const resultadoDelete = await Encuentro.deleteMany({ 
                 _id: { $in: idsEncuentros } 
@@ -104,32 +98,6 @@ const eliminarEncuentrosDeJornada = async (idJornada) => {
     }
 };
 
-
-/*const eliminarEncuentrosDeJornada = async (idJornada) => {
-  try {
-    const jornada = await getJornadaById(idJornada);
-    if (jornada) {
-      const promesas = jornada.encuentros.map(encuentro => {
-       // return encuentroService.deleteById(String(encuentro.id));
-       //dame otra forma sin esa funcion
-       //borro el encuentro de la jornada
-       await Jornada.updateMany(
-        { encuentros: id },
-        { $pull: { encuentros: id } }
-      );
-       //Encuentro.findByIdAndDelete(encuentro.id);
-      });
-      await Promise.all(promesas);
-    }
-    return jornada;
- } catch (error) {
-    // 💡 CAMBIO: Lanza el error original para ver su causa real.
-    // También puedes agregar el contexto, pero manteniendo el mensaje original.
-    throw new Error(`Error en deleteById al procesar jornada ${idJornada}: ${error.message}`); 
-    // O simplemente: throw error;
-  }
-};*/
-
 //borrarEncuentroDeJornada
 const borrarEncuentroDeJornada = async (idJornada, idEncuentro) => {
   try {
@@ -147,7 +115,6 @@ const borrarEncuentroDeJornada = async (idJornada, idEncuentro) => {
     
   } catch (error) {
     console.error("Error detallado al borrar encuentro de jornada:", error);
-    // Luego lanzar un error de negocio
     throw new Error("Error al borrar encuentro de jornada");
   }
 };

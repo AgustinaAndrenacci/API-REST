@@ -8,6 +8,8 @@ const autenticarToken = (req, res, next) => {
     //obtengo el token en el header Authorization en postman
     const token = req.headers["authorization"]?.split(" ")[1];
                 //         .authorization (es de otra forma, ver xq)
+                //? significa: si no hay token, entonces no tira un error
+                //split: separa el string en partes
     if (!token) res.status(401).json({ error: "Token no proporcionado" });
     
     //verifico si el token es valido

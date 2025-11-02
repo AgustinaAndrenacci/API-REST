@@ -9,4 +9,5 @@ const showErrorMessage = (res, httpErrorCode, message) => {
   return res.status(httpErrorCode).json(payload); /* Esta linea va a modificarse con el front, capaz */
 };
 
+
 module.exports = { showErrorMessage };

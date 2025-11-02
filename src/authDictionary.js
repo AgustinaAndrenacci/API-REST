@@ -4,7 +4,7 @@
 diccionarioRutasYPermisos = {
     //RUTAS DE juegoRoutes.js
     "/juegos/create": ["juegoteka", "administrador"],
-    "/juegos/update/:id": ["juegoteka", "administrador"],
+    "/juegos/update/:id": ["administrador"],
     "/juegos/delete/:id": ["administrador"],
     "/juegos/delete/hard/:id": ["administrador"],
 

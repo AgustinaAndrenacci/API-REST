@@ -310,7 +310,7 @@ exports.agregarMisJuegos = async (req, res) => {
         showErrorMessage(res, 400, "El juego ya se encuentra en misJuegos");
       }else{
         const juegosActualizados = await Usuario.findByIdAndUpdate(idUsuario, { $addToSet: { misJuegos: { $each: [juegoNuevo] } } }, { new: true });
-        res.json(juegosActualizados);
+        res.json(juegosActualizados.misJuegos);
       }
     }else{
       showErrorMessage(res, 404, "Juego no encontrado");
@@ -338,7 +338,7 @@ exports.eliminarJuegoDeMisJuegos = async (req, res) => {
       showErrorMessage(res, 404, "El juego no está en tu lista de 'misJuegos'.");
     }else{
       const juegosActualizados = await usuarioService.deleteMisJuegos(idUsuario, idJuego);
-      res.json(juegosActualizados);
+      res.json({ message: "Juego eliminado correctamente" });
     }
   } catch (err) {
     console.error(err);

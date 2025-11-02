@@ -11,9 +11,10 @@ exports.getAllUsuarios = async (req, res) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
     //muestra sin la password
-    res.json(usuarios.map(usuarioService.formatoJsonUsuario));
+    res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
     //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
+    console.error("Error al obtener usuarios", err);
     showErrorMessage(res, 500, "Error al obtener usuarios");
   }
 };
@@ -22,7 +23,7 @@ exports.getUsuarioById = async (req, res) => {
   try {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
     usuario
-      ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
+      ? res.json(usuarioService.formatoJsonUsuarioGeneral(usuario)) //true
       : showErrorMessage(res, 404, "Usuario no encontrado"); 
   } catch (err) {
     showErrorMessage(res, 500, "Error al buscar usuario");
@@ -34,10 +35,34 @@ exports.getUsuarioByUsername = async (req, res) => {
     const userName = req.params; 
     const usuario = await usuarioService.getUsuarioByUsername(userName);
     usuario
-      ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
+      ? res.json(usuarioService.formatoJsonUsuarioGeneral(usuario)) //true
       : showErrorMessage(res, 404, "Usuario no encontrado"); //false
   } catch (err) {
     showErrorMessage(res, 500, "Error al buscar usuario");
+  }
+};
+
+exports.getAllJuegotekas = async (req, res) => {
+  try {
+    const usuarios = await usuarioService.getUsuarioByTipo("juegoteka");
+    //muestra sin la password
+    res.json(usuarios.map(usuarioService.formatoJsonUsuarioPersonalizado));
+    //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
+  } catch (err) {
+    console.error("Error al obtener usuarios", err);
+    showErrorMessage(res, 500, "Error al obtener usuarios");
+  }
+};
+
+exports.getAllJugadores = async (req, res) => {
+  try {
+    const usuarios = await usuarioService.getUsuarioByTipo("jugador");
+    //muestra sin la password
+    res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
+    //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
+  } catch (err) {
+    console.error("Error al obtener usuarios", err);
+    showErrorMessage(res, 500, "Error al obtener usuarios");
   }
 };
 
@@ -46,7 +71,7 @@ exports.getPerfil = async (req, res) => {
     //getPerfil obtiene el id del token
     const usuario = await usuarioService.getUsuarioById(req.user.id);
     usuario
-      ? res.json(usuarioService.formatoJsonUsuario(usuario)) //true
+      ? res.json(usuarioService.formatoJsonUsuarioPersonalizado(usuario)) //true
       : showErrorMessage(res, 404, "Usuario no encontrado"); //false
   } catch (err) {
     showErrorMessage(res, 500, "Error al buscar usuario");
@@ -59,6 +84,10 @@ exports.login = async (req, res) => {
     const { userName, pass } = req.body; //cuando hay + de un parametro
             //campo del postman, puedo cambiar alli el nombre y aca tambien
 
+    //chequeo que ingreso los datos pedidos
+    if (!userName || !pass) {
+      showErrorMessage(res, 400, "Faltan campos obligatorios");
+    }else{
     //busco usuario
     const usuario = await usuarioService.getUsuarioByUsername({userName});
     if(!usuario){
@@ -87,11 +116,11 @@ exports.login = async (req, res) => {
         res.json({
           message: "Login exitoso :)",
           token,
-          usuario: usuarioService.formatoJsonUsuario(usuario)
+          usuario: usuarioService.formatoJsonUsuarioPersonalizado(usuario)
           }
         );
       }
-    }
+    }}
   } catch (err) {
     console.error("Error en el login", err); //NUEVO
     showErrorMessage(res, 500, "Error al buscar usuario");
@@ -126,7 +155,7 @@ exports.registrar = async (req, res) => {
         const newUsuario = await usuarioService.createUsuario(nuevoUsuario);
         res.status(200).json({
           message: "Usuario creado con éxito",
-          usuario: usuarioService.formatoJsonUsuario(newUsuario)
+          usuario: usuarioService.formatoJsonUsuarioPersonalizado(newUsuario)
         }); //true
       }}
       
@@ -163,7 +192,7 @@ exports.updateUsuario = async (req, res) => {
         }
 
         //muestro json final
-        res.json(usuarioService.formatoJsonUsuario(usuarioActualizado));
+        res.json(usuarioService.formatoJsonUsuarioPersonalizado(usuarioActualizado));
     }
     else
     {
@@ -223,7 +252,7 @@ exports.deleteUsuario = async (req, res) => {
     const usuarioEliminado = await usuarioService.deleteUsuarioById(req.params.id);
     if(usuarioEliminado)
     {
-      res.json(usuarioService.formatoJsonUsuario(usuarioEliminado));
+      res.json(usuarioService.formatoJsonUsuarioPersonalizado(usuarioEliminado));
     }
     else{
       showErrorMessage(res, 404, "Usuario no encontrado");

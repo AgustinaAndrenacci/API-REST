@@ -3,6 +3,7 @@ diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "
     "/juegos/create": "juegoteka",
     "/juegos/update/:id": "juegoteka",
     "/juegos/delete/:id": "juegoteka",
+    "/juegos/delete/hard/:id": "juegoteka",
 
     // RUTAS DE usuarioRoutes.js
     //"/usuarios/": "", //todos

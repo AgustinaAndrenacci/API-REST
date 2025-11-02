@@ -39,6 +39,7 @@ const getMensajes = async () => {
 //Es composición porque: lean(sort(limit(skip(find(data)))))
 //////////////////////////////////////////////////////////////////////////////////////////
 // mensajes paginados -max 10 por pag
+
 async function getMensajesPorRemitente(remitenteId, page = 1, limit = 10) {
   const skip = (page - 1) * limit;
 

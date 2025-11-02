@@ -343,7 +343,7 @@ async function updateJugadores(id, updates = {}) {
   // 6 Enviar mensajes a los nuevos jugadores
   const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
   const nombreJuego = encuentro.juego[0]?.nombre || "el encuentro";
-  const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario);
+  const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].id_usuario);
 
   for (const jugadorId of nuevosJugadoresIds) {
     const mensajeData = {
@@ -395,9 +395,10 @@ async function deleteById(id) {
 
       if (creadorId) {
         for (const jugador of encuentro.jugadores) {
-           const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
+          const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
           const jugadorId = jugador.id_jugador || jugador._id || jugador;
           const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
+          const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].id_usuario);
           const nombreJuego = encuentro.juego?.[0]?.nombre || "el encuentro";
           const organizadorNombre = encuentro.createdBy?.[0]?.userName || "el creador";
 
@@ -602,7 +603,6 @@ async function getEncuentroOrThrow(id) {
   if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
   return encuentro;
 }
-
 
 /**
  * Verifica que un id encuentro exista; devuelve el documento si existe, 

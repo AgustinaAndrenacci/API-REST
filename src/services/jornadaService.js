@@ -212,13 +212,23 @@ const crearEncuentrosPorJornada = async (encuentroData,jornadaId,req) => {
 
   
   encuentroData.createdBy = [{
-    idUsuario: req.user._id,
+    id_usuario: req.user.id,
     userName: req.user.userName,
     tipo: req.user.rol
    }];
- 
+ console.log(req.user.id);  
+ console.log(req.user.id);
    encuentroData.jornada = jornadaId;
-  
+   let tipoPorRol;
+
+   if(req.user.rol=="jugador") 
+    {
+      tipoPorRol="desafío"
+   }else if (tipoPorRol=="juegoteka")
+    {
+      tipoPorRol="torneo"
+   }
+   encuentroData.tipo=tipoPorRol;
 
   try {
     const encuentroCreado = await encuentroService.create(encuentroData);

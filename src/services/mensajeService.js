@@ -15,7 +15,7 @@ const Usuario =require("../models/usuarioModel");
   if (!destinatario) {
     throw new Error("El destinatario no existe.");
   }
-  console.log("hola");
+  
   const nuevoMensaje = new Mensaje(data);
   return await nuevoMensaje.save();
 };

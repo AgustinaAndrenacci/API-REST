@@ -17,8 +17,9 @@ const isCreator = async (req, res, next) => {
       codigo = 404;
       respuesta = "Encuentro no encontrado";
       //showErrorMessage(res, 404, "Encuentro no encontrado");
-    } else if (!usuario || usuario.id !== encuentro.createdBy.id_usuario) {
-      
+    } else if (!usuario || usuario.id !== encuentro.createdBy[0].id_usuario) {
+    console.log(usuario.id);
+    console.log(encuentro.createdBy[0].id_usuario)
       codigo = 403;
       respuesta =  "Error. Funcion reservada al creador" ;
       //showErrorMessage(res, 403, err.message||"Error. Funcion reservada al creador");

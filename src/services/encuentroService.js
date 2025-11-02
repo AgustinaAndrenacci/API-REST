@@ -395,7 +395,7 @@ async function deleteById(id) {
 
       if (creadorId) {
         for (const jugador of encuentro.jugadores) {
-           
+           const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
           const jugadorId = jugador.id_jugador || jugador._id || jugador;
           const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
           const nombreJuego = encuentro.juego?.[0]?.nombre || "el encuentro";
@@ -404,10 +404,11 @@ async function deleteById(id) {
           const mensajeData = {
             remitente: creadorId,
             destinatario: destinatarioId,
-            contenido:`El encuentro de "${nombreJuego}" organizado por "${creadorNombre}" ha sido cancelado.`,
+            contenido:`El encuentro de ${nombreJuego} organizado por ${creadorNombre} ha sido cancelado.`,
             tipo: "notificacionEncuentro",
           };
           //const nuevoMensaje = new Mensaje(mensajeData);
+         
          await crearMensaje(mensajeData);
         }
       } else {

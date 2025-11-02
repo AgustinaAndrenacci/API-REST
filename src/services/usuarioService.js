@@ -122,6 +122,16 @@ const hayDatosAModificarEnJornada = async (body) => {
   }
 };
 
+const hayJuegos = async (misJuegos) => {
+  try {
+    return misJuegos && misJuegos.length > 0;
+  } catch (error) {
+    throw new Error("Error al verificar juegos");
+  }
+};
+
+
+
 //exporto
 module.exports = {
   createUsuario,
@@ -137,5 +147,6 @@ module.exports = {
   deleteMisJuegos,
   estadosValidos,
   formatoJsonJuegoteka,
-  hayDatosAModificarEnJornada
+  hayDatosAModificarEnJornada,
+  hayJuegos
 };

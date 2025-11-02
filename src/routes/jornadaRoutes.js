@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const jornadaController = require("../controllers/jornadaController");
-const {autenticarToken} = require("../middlewares/authMiddleware");
+const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddleware")
 const { isNotAdmin, isJugador, isJuegoteka } = require("../middlewares/usuariosMiddleware");
 
 
@@ -10,12 +10,12 @@ const { isNotAdmin, isJugador, isJuegoteka } = require("../middlewares/usuariosM
 router.get("/", jornadaController.getAllJornadas);
 router.get("/:id", jornadaController.getJornadaById);
 //router.get("/countJugadoresEnJornada/:id", jornadaController.countJugadoresEnJornada);
-router.post("/create",autenticarToken, isJuegoteka, jornadaController.createJornada);
-router.put("/edit/:id",autenticarToken, jornadaController.updateJornada);
-router.put("/updateEncuentros/:id",autenticarToken, isNotAdmin,jornadaController.updateJornadaEncuentros);
+router.post("/create",autenticarToken, validarPermisoRuta, jornadaController.createJornada);
+router.put("/edit/:id",autenticarToken, validarPermisoRuta, jornadaController.updateJornada);
+router.put("/updateEncuentros/:id",autenticarToken, validarPermisoRuta, jornadaController.updateJornadaEncuentros);
 //router.put("/updateJuegos/:id",autenticarToken, jornadaController.updateJornadaJuegos);
-router.put("/inscripcion/:id",autenticarToken,isJugador, jornadaController.updateJornadaJugador);
-router.put("/updateEstado/:id",autenticarToken, jornadaController.updateJornadaEstado);
+router.put("/inscripcion/:id",autenticarToken, validarPermisoRuta, jornadaController.updateJornadaJugador);
+router.put("/updateEstado/:id",autenticarToken, validarPermisoRuta, jornadaController.updateJornadaEstado);
 //router.delete("/:id",autenticarToken, jornadaController.deleteJornada);
 
 module.exports = router;

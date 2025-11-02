@@ -47,6 +47,13 @@ exports.createJornada = async (req, res) => {
       // Usamos .lean() para obtener un objeto JS simple y luego accedemos a la propiedad misJuegos.
       const user = await usuarioService.getUsuarioById(id);
       const juegosDisponibles = user.misJuegos;
+
+      //chequeo que los juegos disponibles no estén vacíos
+      const hayJuegosDisponibles = await usuarioService.hayJuegos(juegosDisponibles);
+      if (!hayJuegosDisponibles) {
+        showErrorMessage(res, 400, "El usuario no tiene juegos disponibles, es necesario tener minimo un juego para armar una jornada");
+      }else{
+
       //en juegosDisponibles viene con _id y en jornada lo guardo con id
       const juegosParaGuardar = juegosDisponibles.map(juego => ({
         //_id: juego._id,
@@ -61,7 +68,7 @@ exports.createJornada = async (req, res) => {
       const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles: juegosParaGuardar });
       await nuevaJornada.save();
       res.status(200).json({ id: nuevaJornada.id, nuevaJornada }); //true
-    }
+    }}
     
   } catch (err) {
     console.error(err);

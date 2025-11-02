@@ -161,6 +161,9 @@ const tieneEstadoActivo = async (id) => {
 };
 
 
+
+
+
 const modificaDatosEnJornadaActiva = async (user) => {
   try {
     const resultado = await Jornada.updateMany(

@@ -1,6 +1,6 @@
 diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "jugador". Si puede cualquiera de los 2, no incluir dicha ruta
     //RUTAS DE juegoRoutes.js
-    "/juegos/create": "juegoteka",
+    "/juegos/create": ["juegoteka", "administrador"],
     "/juegos/update/:id": "juegoteka",
     "/juegos/delete/:id": "juegoteka",
     "/juegos/delete/hard/:id": "juegoteka",

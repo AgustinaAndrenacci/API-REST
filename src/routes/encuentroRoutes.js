@@ -38,11 +38,11 @@ router.get("/:tipo/juego/:juegoId", encuentroController.getByJuego);
 ////
 
 // U - Update, Actualizar un encuentro existente
-router.put("/:id", autenticarToken,isCreator, encuentroController.updateEncuentro);
+router.put("/update/:id", autenticarToken,isCreator, encuentroController.updateEncuentro);
 router.put("/updatejugadores/:id",autenticarToken,encuentroController.updateJugadoresEncuentro); //!!!!!
 
 // D - delete
-router.delete("/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
+router.delete("/delete/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
 
 
 

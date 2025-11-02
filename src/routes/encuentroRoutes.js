@@ -37,6 +37,7 @@ router.get("/:tipo/ganador/:id", encuentroController.getByGanador);
 router.get("/:tipo/participante/:id", encuentroController.getByJugador);
 router.get("/:tipo/organizador/:id", encuentroController.getByCreador);
 router.get("/:tipo/estado/:estado", encuentroController.getEncuentrosByEstado);
+router.get("/:tipo/juego/:juegoId", encuentroController.getByJuego);
 ////
 
 // U - Update, Actualizar un encuentro existente
@@ -48,7 +49,7 @@ router.put("/:id", autenticarToken,isCreator, encuentroController.updateEncuentr
 // D - delete
 //CORREGIR, UNA SOLA RUTA; CON ISCREATOR!!!
 router.delete("/torneo/:id",autenticarToken,isCreator, encuentroController.deleteEncuentro);
-router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro); 
+router.delete("/desafio/:id",autenticarToken, encuentroController.deleteEncuentro);  //asi, permitiria a las juegotecas eliminar desafios indeseados en sus jornadas
 
 // :)
 

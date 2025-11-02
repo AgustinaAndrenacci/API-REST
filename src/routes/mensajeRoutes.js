@@ -22,12 +22,10 @@ pueden ser asignadas a variables, pasadas como argumentos y retornadas desde otr
 */
 
 router.get("/", getAllMensajes);//--------------------------ejemplos de FUNCIONES DE PRIMERA CLASE, Las funciones de primera clase son aquellas que pueden ser tratadas como cualquier otro valor en el lenguaje, 
-router.get("/remitente/:id", autenticarToken,isRemitente, getMensajesPorRemitente);
-router.get("/destinatario/:id",autenticarToken,isDestinatario, getMensajesPorDestinatario);
-router.post("/", autenticarToken,crearMensaje);
-router.put("/:id", autenticarToken,actualizarMensaje);
-
-//agregar middleware isRemitente o isDestinatario
-router.delete("/:id", autenticarToken, isRemitenteOrDestinatario, eliminarMensaje);
+router.get("/remitente/:id", autenticarToken,getMensajesPorRemitente);
+router.get("/destinatario/:id",autenticarToken,getMensajesPorDestinatario);
+router.post("/create", autenticarToken,crearMensaje);
+router.put("/update/:id", autenticarToken, isRemitenteOrDestinatario,actualizarMensaje);
+router.delete("/delete/:id", autenticarToken, isRemitenteOrDestinatario, eliminarMensaje);
 
 module.exports = router;

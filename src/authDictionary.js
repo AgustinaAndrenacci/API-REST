@@ -1,4 +1,7 @@
-diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "jugador". Si puede cualquiera de los 2, no incluir dicha ruta
+//utilizados en middlewares/authMiddleware.js para validar si un usuario puede acceder a un endpoint o no. 
+//Si el array es vacío [], acceso publico. Si no, debe incluir el rol del usuario en la lista
+
+diccionarioRutasYPermisos = {
     //RUTAS DE juegoRoutes.js
     "/juegos/create": ["juegoteka", "administrador"],
     "/juegos/update/:id": ["juegoteka", "administrador"],
@@ -19,8 +22,6 @@ diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "
    //Tienen los dos siguientes: isNotAdmin 
     "/usuarios/misJuegos": ["juegoteka", "jugador"], //juegoteka,jugador
     "/usuarios/misJuegos/:idJuego": ["juegoteka", "jugador"], //juegoteka,jugador
-
-
 
     // RUTAS DE jornadaRoutes.js
     "/jornadas/": [], //todos

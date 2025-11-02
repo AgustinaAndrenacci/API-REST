@@ -113,7 +113,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
     const encuentroData = req.body;
     const { tipo,capacidad,juego} = req.body;
 
-    if (!tipo || !capacidad || !juego ) {
+    if (!capacidad || !juego ) {
       showErrorMessage(res, 400, "Faltan campos obligatorios");
     }else{
 
@@ -143,8 +143,8 @@ exports.updateJornadaEncuentros = async (req, res) => {
       }}
     }
   } catch (err) {
-    console.error("Error al actualizar jornada:", err.message);
-    showErrorMessage(res, 500, "Error al actualizar jornada :)");
+    //console.error("Error al actualizar jornada:", err.message);
+    showErrorMessage(res, 500, err.message || "Error al actualizar jornada :)");
   }
 };
 ///////////////////////////////////////////////////////////////////////////////////////////

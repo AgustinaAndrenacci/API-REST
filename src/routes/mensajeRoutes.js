@@ -13,8 +13,15 @@ const {
 
 
 const router = express.Router();
+/*
+La función getAllMensajes, como las otras, se le pasa como argumento a router.get() sin ser invocada (sin paréntesis). 
+Express recibe la función como un valor, la almacena internamente 
+y la ejecutará posteriormente cuando llegue una petición HTTP GET a la ruta "/". 
+Este comportamiento demuestra que en JavaScript las funciones son ciudadanos de primera clase: 
+pueden ser asignadas a variables, pasadas como argumentos y retornadas desde otras funciones.
+*/
 
-router.get("/", getAllMensajes);
+router.get("/", getAllMensajes);//--------------------------ejemplos de FUNCIONES DE PRIMERA CLASE, Las funciones de primera clase son aquellas que pueden ser tratadas como cualquier otro valor en el lenguaje, 
 router.get("/remitente/:id", autenticarToken,isRemitente, getMensajesPorRemitente);
 router.get("/destinatario/:id",autenticarToken,isDestinatario, getMensajesPorDestinatario);
 router.post("/", autenticarToken,crearMensaje);

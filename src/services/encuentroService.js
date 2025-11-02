@@ -14,35 +14,16 @@
  *      * getByCreador, getByGanador, getByJuego, getByEstado, getByJugador
  *  - deleteByJornada: método pensado para uso interno por otros services (p. ej. Jornada).
  *
- * Nota: 
+ * Notas: 
  */
 
 const mongoose = require("mongoose");
 const Encuentro = require("../models/encuentroModel");
 const Mensaje = require('../models/mensajeModel');
+const Jornada = require("../models/jornadaModel");
+const Usuario = require("../models/usuarioModel");
+const Juego = require("../models/juegoModel");
 const { crearMensaje } = require("./mensajeService");
-
-let Jornada, Usuario, Juego; // cargamos con try para dar mensajes claros si faltan.
-
-try {
-  Jornada = require("../models/jornadaModel");
-} catch (e) {
-  // No abortamos: algunos proyectos no usan jornadaModel en este módulo.
-  Jornada = null;
-}
-
-try {
-  Usuario = require("../models/usuarioModel");
-} catch (e) {
-  Usuario = null;
-}
-
-try {
-  Juego = require("../models/juegoModel");
-} catch (e) {
-  Juego = null;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -55,6 +36,9 @@ try {
  * @param {Object} filtro - objeto de filtro (ej: { tipo: 'torneo' })
  */
 async function getAll(filtro = {}) {
+  //Ejemplo de operador spread (...) copia todas las propiedades de filtro dentro de un nuevo objeto:
+  //Si luego modificás safeFilter, no afecta al objeto original filtro.
+  //Esto es lo que se llama una copia superficial (shallow copy).
   // Seguridad: no permitir filtros peligrosos por defecto (se asume uso interno / controller)
   const safeFilter = { ...filtro };
   
@@ -130,7 +114,7 @@ async function getByJugador(idJugador) {
  */
 async function create(payload) {
   if (!payload) throw new Error("create: payload requerido.");
-
+console.log("111");
   // Validar jugadores
   if (payload.jugadores && Array.isArray(payload.jugadores) && payload.jugadores.length > 0) {
     const ids = payload.jugadores.map((j) => j.id_jugador || j._id || j);
@@ -199,7 +183,7 @@ if (Array.isArray(payload.juego) && payload.juego.length > 0) {
 
 async function update(id, updates = {}) {
 
-  // 1️⃣ Obtener encuentro existente
+  // 1 Obtener encuentro existente
   let encuentro = await Encuentro.findById(id).populate('jornada');
   console.log(encuentro);
   if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
@@ -210,8 +194,12 @@ async function update(id, updates = {}) {
   }
 
   //  Actualizar jugadores si vienen en updates
-  if (Array.isArray(updates.jugadores) && updates.jugadores.length > 0) {
+  if (Array.isArray(updates.jugadores) && updates.jugadores.length > 0) 
+    {
+      await updateJugadores(id, updates);
+    }
     // Crear un mapa de jugadores actuales por ID para acceso rápido
+  /*  {
     const jugadoresMap = new Map();
     encuentro.jugadores.forEach(j => jugadoresMap.set(j.id_jugador.toString(), j));
 
@@ -263,7 +251,7 @@ async function update(id, updates = {}) {
       await crearMensaje(mensajeData);
     }
   }
-
+*/
   //  Actualizar juego si viene
   if (updates.juego) {
     const idJuego = updates.juego.id_juego || updates.juego._id || updates.juego;
@@ -290,6 +278,92 @@ async function update(id, updates = {}) {
   const updated = await encuentro.save();
   return updated.toObject();
 }
+
+/**
+ * UPDATE JUGADORES- actualiza exclusivametne los jugadores de un encuentro 
+ * - id: id del encuentro a actualizar
+ * - updates: objeto con campos a modificar (jugadores)
+ */
+
+async function updateJugadores(id, updates = {}) {
+  
+  // 1 Obtener el encuentro existente
+  let encuentro = await Encuentro.findById(id).populate('jornada');
+  if (!encuentro) throw new Error(`Encuentro no encontrado: ${id}`);
+
+  // 2 Verificar si la jornada está cerrada
+  if (encuentro.jornada?.estado === 'cancelado' || encuentro.jornada?.estado === 'finalizado') {
+    throw new Error('La jornada está cerrada, no se puede modificar el encuentro');
+  }
+
+  // 3 Validar que vengan jugadores en updates
+  if (!Array.isArray(updates.jugadores) || updates.jugadores.length === 0) {
+    throw new Error('No se proporcionaron jugadores para actualizar');
+  }
+
+  // Crear un mapa de jugadores actuales por ID para acceso rápido
+  const jugadoresMap = new Map();
+  encuentro.jugadores.forEach(j => jugadoresMap.set(j.id_jugador.toString(), j));
+
+  const nuevosJugadoresIds = [];
+
+  // 4 Procesar cada jugador del update
+  for (const jBody of updates.jugadores) {
+    const idJugadorStr = jBody.id_jugador?.toString();
+    if (!idJugadorStr) continue;
+ 
+    if (jugadoresMap.has(idJugadorStr)) {
+      // Ya existe → actualizar estado si viene
+      if (jBody.estado) jugadoresMap.get(idJugadorStr).estado = jBody.estado;
+    } else {
+      // Nuevo jugador
+      const nuevoJugador = {
+        id_jugador: new mongoose.Types.ObjectId(idJugadorStr),
+        estado: jBody.estado || 'pendiente'
+      };
+       
+      encuentro.jugadores.push(nuevoJugador);
+       
+      nuevosJugadoresIds.push(idJugadorStr);
+    }
+  }
+
+  // 5 Validaciones
+  await verificarJugadoresExistentes(encuentro.jugadores.map(j => j.id_jugador));
+  await verificarNoRepetidosEnEncuentro(id, encuentro.jugadores);
+
+  const idJornada = encuentro.jornada._id;
+  await verificarJugadoresEnJornada(idJornada, nuevosJugadoresIds, id);
+  
+  const capacidadFinal = encuentro.capacidad;
+  if (encuentro.jugadores.length > capacidadFinal) {
+    throw new Error(`La cantidad de jugadores supera la capacidad (${capacidadFinal})`);
+  }
+
+  // 6 Enviar mensajes a los nuevos jugadores
+  const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
+  const nombreJuego = encuentro.juego[0]?.nombre || "el encuentro";
+  const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario);
+
+  for (const jugadorId of nuevosJugadoresIds) {
+    const mensajeData = {
+      remitente: creadorId,
+      destinatario: new mongoose.Types.ObjectId(jugadorId),
+      contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
+      tipo: "notificacionEncuentro",
+    };
+    console.log(mensajeData);
+    await crearMensaje(mensajeData);
+    
+  }
+ 
+  // 7 Guardar y devolver el encuentro actualizado
+  const updated = await encuentro.save();
+  
+
+  return updated.toObject();
+}
+
 
 /**
  * DELETE - ELIMINA un encuentro .
@@ -321,7 +395,7 @@ async function deleteById(id) {
 
       if (creadorId) {
         for (const jugador of encuentro.jugadores) {
-           
+           const creadorNombre = encuentro.createdBy[0]?.userName || "El organizador";
           const jugadorId = jugador.id_jugador || jugador._id || jugador;
           const destinatarioId = new mongoose.Types.ObjectId(jugadorId);
           const nombreJuego = encuentro.juego?.[0]?.nombre || "el encuentro";
@@ -330,11 +404,12 @@ async function deleteById(id) {
           const mensajeData = {
             remitente: creadorId,
             destinatario: destinatarioId,
-            contenido:`El encuentro de "${nombreJuego}" organizado por "${creadorNombre}" ha sido cancelado.`,
+            contenido:`El encuentro de ${nombreJuego} organizado por ${creadorNombre} ha sido cancelado.`,
             tipo: "notificacionEncuentro",
           };
-          const nuevoMensaje = new Mensaje(mensajeData);
-          await nuevoMensaje.save();
+          //const nuevoMensaje = new Mensaje(mensajeData);
+         
+         await crearMensaje(mensajeData);
         }
       } else {
         console.warn("No se pudo determinar el creador del encuentro para enviar mensajes.");
@@ -453,25 +528,20 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
 
   // Buscar la jornada con sus encuentros y jugadores
   const jornada = await Jornada.findById(jornadaId)
-    .populate({
-      path: 'encuentros',
-      select: 'jugadores', // solo necesitamos los jugadores
-    })
-    .lean();
+    .populate().lean();
 
   if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
 
-  const jugadoresInscripto = new Set();
-
-  // Recorrer todos los encuentros de la jornada
-  jornada.encuentros.forEach(encuentro => {
-    (encuentro.jugadores || []).forEach(j => {
-      jugadoresInscripto.add(j.id_jugador?.toString() || j._id?.toString());
-    });
-  });
+ 
+  const jugadoresInscriptos = new Set(
+    (jornada.jugadoresInscriptos || []).map(j =>
+      j.id_jugador?.toString() || j.id?.toString() || j.toString()
+    )
+  );
+ console.log(jornada.jugadoresInscriptos)
 
   // Verificar que todos los jugadores pasados estén inscritos
-  const noInscritos = idsJugadores.filter(jId => !jugadoresInscripto.has(jId.toString()));
+  const noInscritos = idsJugadores.filter(jId => !jugadoresInscriptos.has(jId.toString()));
 
   if (noInscritos.length > 0) {
     throw new Error(`Los siguientes jugadores no están inscriptos en la jornada: ${noInscritos.join(", ")}`);
@@ -548,12 +618,6 @@ async function getEncuentroOrEmpty(id) {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-/**
- * Export: métodos públicos del service.
- *
- * Observación: exportamos deleteByJornada también para que otros services (p. ej. jornadaService)
- * puedan invocarlo cuando eliminen una jornada o necesiten limpiar encuentros asociados.
- */
 module.exports = {
   // queries
   getAll,
@@ -565,8 +629,9 @@ module.exports = {
   getByJugador,
 
   // operaciones
-  create,
+  create, //solo desde jornadaController
   update,
+  updateJugadores,
   deleteById,
 
   // método "interno" reutilizable

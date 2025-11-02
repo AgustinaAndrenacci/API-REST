@@ -10,6 +10,20 @@ const getAllMensajes = async (req, res) => {
   }
 };
 
+/*
+version transformando ASYNC/AWAIT x .THEN/CHATCH
+
+const getAllMensajes = (req, res) => {
+  mensajeService.getMensajes()
+    .then(mensajes => {
+      res.json(mensajes);
+    })
+    .catch(error => {
+      res.status(500).json({ error: "Error al obtener los mensajes" });
+    });
+};
+*/ 
+
 // mensajes paginados 
 
 const getMensajesPorRemitente = async (req, res) => {

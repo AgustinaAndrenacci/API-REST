@@ -14,6 +14,8 @@ diccionarioRutasYPermisos = { //es para discriminar entre si sos "juegoteka" o "
    // "/usuarios/getId/:id": "", //todos
     //"/usuarios/getUsername/:userName": "", //todos
    // "/usuarios/cambiarPassword": "", //todos
+   // "/usuarios/getJuegotekas": "", //todos
+   // "/usuarios/getJugadores": "", //todos
    //Tienen los dos siguientes: isNotAdmin 
    //"/usuarios/misJuegos": "", //juegoteka,jugador
    // "/usuarios/misJuegos/:idJuego": "", //juegoteka,jugador

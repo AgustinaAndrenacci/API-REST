@@ -58,7 +58,7 @@ export const isRemitenteOrDestinatario = async(req, res, next) => {
       return res.status(403).json({ error: "No autorizado para eliminar este mensaje." });
     }
 
-    next(); // ✅ autorizado
+    next(); // autorizado
   } catch (err) {
     console.error("Error en isRemitenteOrDestinatario:", err);
     return res.status(500).json({ error: "Error interno del servidor." });

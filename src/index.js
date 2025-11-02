@@ -2,7 +2,7 @@
 // src/index.js
 
 const express = require("express");
-const cors = require("cors");
+const cors = require("cors"); 
 const dotenv = require("dotenv");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const jornadaRoutes = require("./routes/jornadaRoutes");
@@ -16,8 +16,8 @@ const connectDB = require("./config/db");
 dotenv.config(); // carga variables de entorno.env 
 
 const app = express();
-app.use(cors()); // middleware para...
-app.use(express.json()); // middleware para...
+app.use(cors()); // middleware para habilitar CORS
+app.use(express.json()); // middleware para parsear el cuerpo de las peticiones como JSON
 
 //Conectar BD
 connectDB(); 
@@ -27,8 +27,9 @@ app.use("/usuarios", usuarioRoutes);
 app.use("/jornadas", jornadaRoutes);
 app.use("/encuentros", encuentroRoutes);
 app.use("/juegos", juegosRoutes);
-app.use("/mensajes", mensajeRoutes); ///AGREGO para mensaje(fede 19.10)
+app.use("/mensajes", mensajeRoutes); 
 
+//Cuando usa otra ruta que no existe
 app.use((req, res) => {
   return showErrorMessage(res, 404, "Suponiamos que charly iba a hacer esto");
 });

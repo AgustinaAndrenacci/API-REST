@@ -8,22 +8,22 @@ const {autenticarToken, validarPermisoRuta} = require("../middlewares/authMiddle
 
   
 // CRUD
-router.get("/", autenticarToken,usuarioController.getAllUsuarios);
-router.get("/getPerfil",autenticarToken, usuarioController.getPerfil);
-router.get("/getId/:id",autenticarToken, usuarioController.getUsuarioById);
-router.get("/getUsername/:userName",autenticarToken, usuarioController.getUsuarioByUsername);
-router.get("/getJuegotekas",autenticarToken, usuarioController.getAllJuegotekas);
-router.get("/getJugadores",autenticarToken, usuarioController.getAllJugadores);
+router.get("/", autenticarToken,validarPermisoRuta,usuarioController.getAllUsuarios);
+router.get("/getPerfil",autenticarToken,validarPermisoRuta, usuarioController.getPerfil);
+router.get("/getId/:id",autenticarToken,validarPermisoRuta, usuarioController.getUsuarioById);
+router.get("/getUsername/:userName",autenticarToken,validarPermisoRuta, usuarioController.getUsuarioByUsername);
+router.get("/getJuegotekas",autenticarToken,validarPermisoRuta, usuarioController.getAllJuegotekas);
+router.get("/getJugadores",autenticarToken,validarPermisoRuta, usuarioController.getAllJugadores);
 
 router.post("/registrar",usuarioController.registrar);
 router.post("/login", usuarioController.login);
-router.put("/edit",autenticarToken, usuarioController.updateUsuario);
-router.put("/cambiarPassword",autenticarToken, usuarioController.updatePassword);
+router.put("/edit",autenticarToken,validarPermisoRuta, usuarioController.updateUsuario);
+router.put("/cambiarPassword",autenticarToken,validarPermisoRuta, usuarioController.updatePassword);
 //router.delete("/:id",autenticarToken, usuarioController.deleteUsuario);
 //misJuegos
-router.get("/misJuegos",autenticarToken,isNotAdmin, usuarioController.getMisJuegos);
-router.put("/misJuegos/:idJuego",autenticarToken,isNotAdmin, usuarioController.agregarMisJuegos);
-router.delete("/misJuegos/:idJuego",autenticarToken,isNotAdmin, usuarioController.eliminarJuegoDeMisJuegos);
+router.get("/misJuegos",autenticarToken,validarPermisoRuta, usuarioController.getMisJuegos);
+router.put("/misJuegos/:idJuego",autenticarToken,validarPermisoRuta, usuarioController.agregarMisJuegos);
+router.delete("/misJuegos/:idJuego",autenticarToken,validarPermisoRuta, usuarioController.eliminarJuegoDeMisJuegos);
 
 
 module.exports = router;

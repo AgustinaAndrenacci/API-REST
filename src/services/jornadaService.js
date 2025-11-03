@@ -2,9 +2,12 @@ const Jornada = require("../models/jornadaModel");
 const Encuentro = require("../models/encuentroModel");
 const encuentroService = require("./encuentroService");
 
+//chequeo si mi id es del de la jornada
+const esMiJornada = (jornadaExistente, idUsuario) => {
+  return jornadaExistente.Juegoteka.id.toString() === idUsuario.toString();
+};
 
 const validarJornada = (jornadaExistente, body) => {
-
   const nuevaCapacidad = body.capacidad;
 
   // Solo valida si la capacidad está presente en el body
@@ -17,7 +20,7 @@ const validarJornada = (jornadaExistente, body) => {
       throw new Error(errorMessage);
     }
   }
-  return body;
+return body;
 };
 
 //getAll
@@ -161,6 +164,9 @@ const tieneEstadoActivo = async (id) => {
 };
 
 
+
+
+
 const modificaDatosEnJornadaActiva = async (user) => {
   try {
     const resultado = await Jornada.updateMany(
@@ -220,5 +226,6 @@ module.exports = {
   esEstadoCancelado,
   getJornadaByIdAndEncuentrosCompletos,
   modificaDatosEnJornadaActiva,
-  crearEncuentrosPorJornada
+  crearEncuentrosPorJornada,
+  esMiJornada
 };

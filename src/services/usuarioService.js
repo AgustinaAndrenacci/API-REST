@@ -122,8 +122,26 @@ const hayDatosAModificarEnJornada = async (body) => {
   }
 };
 
+const hayJuegos = async (misJuegos) => {
+  try {
+    return misJuegos && misJuegos.length > 0;
+  } catch (error) {
+    throw new Error("Error al verificar juegos");
+  }
+};
+
+//ver que funcion de formatoJson da
+const formatoJsonSeleccionado = async (rol) => {
+  if (rol === "administrador") {
+    return formatoJsonUsuarioPersonalizado;
+  } else {
+    return formatoJsonUsuarioGeneral;
+  }
+};
+
 //exporto
 module.exports = {
+  formatoJsonSeleccionado,
   createUsuario,
   updateUsuarioById,
   getAllUsuarios,
@@ -137,5 +155,6 @@ module.exports = {
   deleteMisJuegos,
   estadosValidos,
   formatoJsonJuegoteka,
-  hayDatosAModificarEnJornada
+  hayDatosAModificarEnJornada,
+  hayJuegos
 };

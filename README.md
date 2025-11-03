@@ -35,35 +35,69 @@ La aplicación final te permitirá organizar jornadas, agregar juegos que tengas
 ---
 ## :wrench::hammer: Tecnologías utilizadas:
 
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/) | Entorno de desarrollo JS y gestor de dependencias
-[![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/) | Motor de base de datos NoSQL
-[![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/) | Framework de desarrollo web Node.js
+Entorno de desarrollo JavaScript [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
+Motor de base de datos NoSQL [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)
+Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/)
 
 ---
 
 ## :file_folder::pushpin: Estructura de directorios:
 
-
+![Mi Imagen](./assets/img/directoryManagement.jpg)
 
 ---
 
 ## :mag_right::notebook_with_decorative_cover: Documentación API:
 
-
+[![Postman](https://img.shields.io/badge/Postman-API_Docs-orange)](https://documenter.getpostman.com/view/38998120/2sB3WpSgnK)  
 
 ---
 
 ## :pencil: Setup del entorno:
 
+1. **Clonar el repositorio usando git**:  
+   ```bash  
+   git clone https://github.com/AgustinaAndrenacci/API-REST
+   ```  
 
+2. **Instalar dependencias**:  
+   ```bash  
+   npm install  
+   ```  
+
+3. **Establecer variables de entorno (.env)**:  
+   Create a `.env` file:  
+   ```env  
+   PORT=4000  
+   SECRETKEY=your_JWT_secret_key 
+   DB_USER=your_MongoDB_user
+   ```  
+
+4. **Iniciar el servidor de desarrollo**:  
+   ```bash  
+   npm run devstart
+   ```  
 
 ---
 
 ## :cop: Autenticación:
 
-
+- **JWT Tokens**: Utilizamos JWT Tokens para realizar autenticación de usuarios.   
+  ```  
+  Authorization: Bearer <token>
+  ```  
+- **Bcrypt**: Utilizamos Bcrypt para encriptar las contraseñas de los usuarios.
 
 ---
 
 ## :link::cloud: Deployment:
 
+El deployment se realiza utilizando Render, con base de datos MongoDB Atlas.
+
+### Pasos a realizar:  
+1. **MongoDB Atlas**:  
+   - Crear un cluster de MongoDB en la nube. Esto permitira la integración de la base de datos con la aplicación.
+2. **Render**:  
+   - Interlace su link de aplicación remota en Github con Render..
+   - Agregue sus variables de entorno (.env) a Render.  
+   - Listo! Aplicación desplegada.

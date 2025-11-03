@@ -1,6 +1,6 @@
 # Bienvenidos a la JuegotekAPI! :game_die: :black_joker:
 # Programación 3.603 | 2025
-
+**API desplegada**: [https://api-rest-jyt3.onrender.com](https://api-rest-jyt3.onrender.com)  
 ---
 
 ## :bookmark_tabs: Indice: 
@@ -9,9 +9,9 @@
 - [Tecnologías](#wrenchhammer-tecnologías-utilizadas)
 - [Estructura de directorios](#file_folderpushpin-estructura-de-directorios)   
 - [Documentacion API](#mag_rightnotebook_with_decorative_cover-documentación-api)  
-- [Setup del entorno](#setup-del-entorno)
-- [Autenticación](#-autenticación)  
-- [Deployment](#deployment)  
+- [Setup del entorno](#pencil-setup-del-entorno)
+- [Autenticación](#cop-autenticación)  
+- [Deployment](#linkcloud-deployment)  
 
 ---
 
@@ -35,9 +35,9 @@ La aplicación final te permitirá organizar jornadas, agregar juegos que tengas
 ---
 ## :wrench::hammer: Tecnologías utilizadas:
 
-Entorno de desarrollo JavaScript [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)  
-Motor de base de datos NoSQL [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)  
-Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/)  
+Entorno de desarrollo JavaScript | -> [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)  
+Motor de base de datos NoSQL | -> [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)  
+Framework de desarrollo web Node.js | ->  [![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/)  
 
 ---
 
@@ -49,7 +49,7 @@ Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Exp
 
 ## :mag_right::notebook_with_decorative_cover: Documentación API:
 
-[![Postman](https://img.shields.io/badge/Postman-API_Docs-orange)](https://documenter.getpostman.com/view/38998120/2sB3WpSgnK)  
+[![Postman](https://img.shields.io/badge/Postman-API_Docs-orange)](https://documenter.getpostman.com/view/38998120/2sB3WpSgnK) <- clickeá acá para ver la documentación de los endpoints en Postman. 
 
 ---
 

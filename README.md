@@ -4,13 +4,13 @@
 ---
 
 ## :bookmark_tabs: Indice: 
-- [Autores](#-Autores) 
-- [Descripción general del proyecto](#-Descripción)  
-- [Tecnologías](#-Tecnologías)  
-- [Documentacion API](#-api-documentation)  
-- [Setup del entorno](#-installation)
-- [Autenticación](#-authentication)  
-- [Link de despliegue de la aplicación](#-deployment)  
+- [Autores](#autores) 
+- [Descripción general del proyecto](#-descripción-general-del-proyecto)  
+- [Tecnologías](#tecnologías)  
+- [Documentacion API](#api-documentation)  
+- [Setup del entorno](#setup-del-entorno)
+- [Autenticación](#-autenticación)  
+- [Deployment](#deployment)  
 
 ---
 

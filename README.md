@@ -35,15 +35,15 @@ La aplicación final te permitirá organizar jornadas, agregar juegos que tengas
 ---
 ## :wrench::hammer: Tecnologías utilizadas:
 
-Entorno de desarrollo JavaScript [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
-Motor de base de datos NoSQL [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)
-Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/)
+Entorno de desarrollo JavaScript [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)  
+Motor de base de datos NoSQL [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)  
+Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Express-4.x-lightgrey)](https://expressjs.com/)  
 
 ---
 
 ## :file_folder::pushpin: Estructura de directorios:
 
-![Mi Imagen](./assets/img/directoryManagement.jpg)
+![Mi Imagen](./src/assets/img/directoryManagement.jpg)
 
 ---
 
@@ -66,7 +66,7 @@ Framework de desarrollo web Node.js [![Express](https://img.shields.io/badge/Exp
    ```  
 
 3. **Establecer variables de entorno (.env)**:  
-   Create a `.env` file:  
+   Crear el archivo `.env`:  
    ```env  
    PORT=4000  
    SECRETKEY=your_JWT_secret_key 

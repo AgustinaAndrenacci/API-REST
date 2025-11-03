@@ -157,8 +157,10 @@ exports.updateJornadaEncuentros = async (req, res) => {
       showErrorMessage(res, 404, "La jornada no existe");
     } else {
 
+      
       const esMiJornada = jornadaService.esMiJornada(jornadaExistente, req.user.id);
-      if (!esMiJornada) {
+      //puede ser el creador o jugador
+      if (!esMiJornada &&  req.user.rol !== "jugador") {
         showErrorMessage(res, 403, "No tienes permiso para modificar esta jornada, debido a que no sos el creador");
       }else{
 

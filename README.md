@@ -4,9 +4,9 @@
 ---
 
 ## :bookmark_tabs: Indice: 
-- [Autores](#-autores) 
-- [Descripción general del proyecto](#-descripción)  
-- [Tecnologías](#-tecnologías)  
+- [Autores](#-Autores) 
+- [Descripción general del proyecto](#-Descripción)  
+- [Tecnologías](#-Tecnologías)  
 - [Documentacion API](#-api-documentation)  
 - [Setup del entorno](#-installation)
 - [Autenticación](#-authentication)  
@@ -32,6 +32,7 @@ La aplicación final permitirá a un usuario ingresar como jugador a una platafo
 La aplicación final te permitirá organizar jornadas, agregar juegos que tengas en tu negocio a nuestra base de datos, y poder organizar los encuentros según los juegos que dispongas y quieras gestionar. 
 
 ---
+## :wrench::hammer: Tecnologías utilizadas: 
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)  
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-blue)](https://www.mongodb.com/)  

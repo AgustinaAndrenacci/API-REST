@@ -54,7 +54,8 @@ exports.getEncuentrosByEstado = async (req, res) => {
     const data = await encuentroService.getByEstado(estado);
     return res.json(data);
   } catch (err) {
-       showErrorMessage(res, err, "Error al obtener encuentros por estoado");
+    console.log(err);
+       showErrorMessage(res, 500, err.message||"Error al obtener encuentros por estado");
   
   }
 };

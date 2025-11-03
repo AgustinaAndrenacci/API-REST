@@ -191,7 +191,7 @@ const crearEncuentrosPorJornada = async (encuentroData,jornadaId,req) => {
    if(req.user.rol=="jugador") 
     {
       tipoPorRol="desafío"
-   }else if (tipoPorRol=="juegoteka")
+   }else if (req.user.rol=="juegoteka")
     {
       tipoPorRol="torneo"
    }

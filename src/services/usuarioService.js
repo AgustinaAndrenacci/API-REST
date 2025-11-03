@@ -130,10 +130,18 @@ const hayJuegos = async (misJuegos) => {
   }
 };
 
-
+//ver que funcion de formatoJson da
+const formatoJsonSeleccionado = async (rol) => {
+  if (rol === "administrador") {
+    return formatoJsonUsuarioPersonalizado;
+  } else {
+    return formatoJsonUsuarioGeneral;
+  }
+};
 
 //exporto
 module.exports = {
+  formatoJsonSeleccionado,
   createUsuario,
   updateUsuarioById,
   getAllUsuarios,

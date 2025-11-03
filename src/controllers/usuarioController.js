@@ -12,11 +12,10 @@ exports.getAllUsuarios = async (req, res) => {
     const usuarios = await usuarioService.getAllUsuarios();
     //muestra sin la password
     //el admin puede ver con otro formato mas completo
-    if (req.user.rol === "administrador") {
-      res.json(usuarios.map(usuarioService.formatoJsonUsuarioPersonalizado));
-    } else {
-      res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
-    }
+    //depende si es admin o no, muestra diferente el json
+    const formatoJson = await usuarioService.formatoJsonSeleccionado(req.user.rol);
+    res.json(usuarios.map(formatoJson));
+
     //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
     console.error("Error al obtener usuarios", err);
@@ -27,10 +26,18 @@ exports.getAllUsuarios = async (req, res) => {
 exports.getUsuarioById = async (req, res) => {
   try {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
-    usuario
-      ? res.json(usuarioService.formatoJsonUsuarioGeneral(usuario)) //true
-      : showErrorMessage(res, 404, "Usuario no encontrado"); 
+    if(usuario)
+    {
+      //depende si es admin o no, muestra diferente el json
+      const formatoJson = await usuarioService.formatoJsonSeleccionado(req.user.rol);
+      res.json(formatoJson(usuario));
+
+    }
+    else{
+      showErrorMessage(res, 404, "Usuario no encontrado"); 
+    }
   } catch (err) {
+    console.log("Error al buscar usuario", err);
     showErrorMessage(res, 500, "Error al buscar usuario");
   }
 };
@@ -39,9 +46,16 @@ exports.getUsuarioByUsername = async (req, res) => {
   try {
     const userName = req.params; 
     const usuario = await usuarioService.getUsuarioByUsername(userName);
-    usuario
-      ? res.json(usuarioService.formatoJsonUsuarioGeneral(usuario)) //true
-      : showErrorMessage(res, 404, "Usuario no encontrado"); //false
+    if(usuario)
+    {
+      //depende si es admin o no, muestra diferente el json
+      const formatoJson = await usuarioService.formatoJsonSeleccionado(req.user.rol);
+      res.json(formatoJson(usuario));
+
+    }
+    else{
+      showErrorMessage(res, 404, "Usuario no encontrado"); 
+    }
   } catch (err) {
     showErrorMessage(res, 500, "Error al buscar usuario");
   }
@@ -51,7 +65,7 @@ exports.getAllJuegotekas = async (req, res) => {
   try {
     const usuarios = await usuarioService.getUsuarioByTipo("juegoteka");
     //muestra sin la password
-    res.json(usuarios.map(usuarioService.formatoJsonUsuarioPersonalizado));
+      res.json(usuarios.map(usuarioService.formatoJsonUsuarioPersonalizado));
     //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
     console.error("Error al obtener usuarios", err);
@@ -62,8 +76,11 @@ exports.getAllJuegotekas = async (req, res) => {
 exports.getAllJugadores = async (req, res) => {
   try {
     const usuarios = await usuarioService.getUsuarioByTipo("jugador");
-    //muestra sin la password
-    res.json(usuarios.map(usuarioService.formatoJsonUsuarioGeneral));
+
+    //depende si es admin o no, muestra diferente el json
+    const formatoJson = await usuarioService.formatoJsonSeleccionado(req.user.rol);
+    res.json(usuarios.map(formatoJson));
+
     //map: aplica la funcion formatoJsonUsuario a cada elemento del array usuarios
   } catch (err) {
     console.error("Error al obtener usuarios", err);
@@ -185,6 +202,7 @@ exports.updateUsuario = async (req, res) => {
     //que no se guarde el userName
     delete datosAActualizar.userName;
     delete datosAActualizar.pass;
+    delete datosAActualizar.rol; //no puede cambiar el rol
 
     const usuarioActualizado = await usuarioService.updateUsuarioById(id, datosAActualizar);
     if(usuarioActualizado)

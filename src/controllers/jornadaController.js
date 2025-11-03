@@ -33,14 +33,19 @@ exports.createJornada = async (req, res) => {
   try {
     //ID del usuario por el token
     const id = req.user.id;
-    const { nombre, fechaHora, precioInscripcion, capacidad, juegosDisponibles } = req.body;
+    const { nombre, fechaHora, precioInscripcion, capacidad } = req.body;
     
     //const { nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles } = req.body;
-    
-    if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !juegosDisponibles) {
-     
-    //if (!nombre || !fechaHora || !precioInscripcion || !capacidad || !Juegoteka || !juegosDisponibles) {
-      showErrorMessage(res, 400, "Faltan campos obligatorios");
+    //campos obligatorios + capacidad positiva + precio mayor a cero
+    if (
+        !nombre ||
+        !fechaHora ||
+        typeof precioInscripcion !== "number" || //que no ingresen "0"
+        precioInscripcion < 0 ||
+        typeof capacidad !== "number" || //que no ingresen "0"
+        capacidad < 1
+      )
+     {  showErrorMessage(res, 400, "Faltan campos obligatorios o la capacidad / precio de inscripcion no tiene los valores correctos");
     }
     else{
       //Guardo en juegosDisponibles lo que tiene la jornada en Usuario.misJuegos
@@ -55,6 +60,7 @@ exports.createJornada = async (req, res) => {
       }else{
 
       //en juegosDisponibles viene con _id y en jornada lo guardo con id
+      //para que el map?  sirve para transformar los datos
       const juegosParaGuardar = juegosDisponibles.map(juego => ({
         //_id: juego._id,
         id: juego._id,
@@ -62,7 +68,7 @@ exports.createJornada = async (req, res) => {
         imagen: juego.imagen
       }));
 
-      //creo el json de juegoteka
+      //creo el json de la juegoteka
       const Juegoteka = usuarioService.formatoJsonJuegoteka(user);
       
       const nuevaJornada = new Jornada({ nombre, fechaHora, precioInscripcion, capacidad, Juegoteka, juegosDisponibles: juegosParaGuardar });
@@ -82,12 +88,26 @@ exports.updateJornada = async (req, res) => {
     const bodyJson = req.body; //body a modificar
     //encuentros no
     delete bodyJson.encuentros;
+    delete bodyJson.Juegoteka;
+
+    //si se ingreso capacidad o precio, chequeo que los valores sean correctos, capacidad<0 y precio<-1
+    if (
+      (typeof bodyJson.capacidad === "number" && bodyJson.capacidad < 1) ||
+      (typeof bodyJson.precioInscripcion === "number" && bodyJson.precioInscripcion < 0)
+    ) {
+      showErrorMessage(res, 400, "La capacidad debe ser mayor a 0 y el precio de inscripción debe ser mayor a 0");    
+    }else{
 
     const jornadaExistente = await jornadaService.getJornadaById(id);
     
     if (!jornadaExistente) {
       showErrorMessage(res, 404, "Jornada no encontrada");
     }else{
+      //chequeo si la jornada es del usuario
+      const esMiJornada = jornadaService.esMiJornada(jornadaExistente, req.user.id);
+      if (!esMiJornada && req.user.rol !== "administrador") {
+        showErrorMessage(res, 403, "No tienes permiso para modificar esta jornada, debido a que no sos el creador");
+      }else{
       //Si el estado es "Activo" se puede modificar, sino no
       const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
       if (!tieneEstadoActivo) {
@@ -105,12 +125,19 @@ exports.updateJornada = async (req, res) => {
       );
       
       res.json(jornadaActualizada);
-    }}
+    }}}}
     } catch (err) {
 
     // Para cualquier otro error (Mongoose, servidor, etc.)
     console.error("Error detallado al actualizar jornada:", err);
+
+    if (err.message.includes("capacidad")) {
+    // Error controlado (validación de jornada)
+    showErrorMessage(res, 400, err.message); // muestra el msj de error de validar jornada
+  } else {
+    // Error inesperado
     showErrorMessage(res, 500, "Error al actualizar jornada");
+  }
   }
 };
 
@@ -129,6 +156,12 @@ exports.updateJornadaEncuentros = async (req, res) => {
     if (!jornadaExistente) {
       showErrorMessage(res, 404, "La jornada no existe");
     } else {
+
+      const esMiJornada = jornadaService.esMiJornada(jornadaExistente, req.user.id);
+      if (!esMiJornada) {
+        showErrorMessage(res, 403, "No tienes permiso para modificar esta jornada, debido a que no sos el creador");
+      }else{
+
       //2) Si el estado es "Activo" se puede modificar, sino no
       const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(idJornada);
       if (!tieneEstadoActivo) {
@@ -147,7 +180,7 @@ exports.updateJornadaEncuentros = async (req, res) => {
 
         //console.log(encuentroCreado);
         res.json(jornadaActualizada);
-      }}
+      }}}
     }
   } catch (err) {
     //console.error("Error al actualizar jornada:", err.message);
@@ -230,6 +263,12 @@ exports.updateJornadaEstado = async (req, res) => {
       if (!jornadaExistente) {
         showErrorMessage(res, 404, "Jornada no encontrada");
       } else {
+
+        const esMiJornada = jornadaService.esMiJornada(jornadaExistente, req.user.id);
+      if (!esMiJornada && req.user.rol !== "administrador") {
+        showErrorMessage(res, 403, "No tienes permiso para modificar esta jornada, debido a que no sos el creador");
+      }else{
+
         //Si el estado es "Activo" se puede modificar, sino no
         const tieneEstadoActivo = await jornadaService.tieneEstadoActivo(id);
         if (!tieneEstadoActivo) {
@@ -247,7 +286,7 @@ exports.updateJornadaEstado = async (req, res) => {
             }
             console.log("Jornada actualizada:", jornadaActualizada);
             res.json(jornadaActualizada) 
-    }}}}}
+    }}}}}}
     catch (err) {
       console.error("Error detallado al actualizar jornada:", err);
       showErrorMessage(res, 500, "Error al actualizar jornada");

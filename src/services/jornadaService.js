@@ -87,7 +87,7 @@ const eliminarEncuentrosDeJornada = async (idJornada) => {
             });
             
             // 3. Limpiar el array de referencias en la Jornada (con [] porque con push, map, daba error)
-            await Jornada.updateOne(
+            await jornadaActualizada.updateOne(
                 { _id: idJornada }, 
                 { $set: { encuentros: [] } } 
             );

@@ -226,7 +226,9 @@ async function update(id, updates = {}) {
 
 // Actualizar ganador si viene
 if (updates.ganador) {
-       
+  const idJornada = encuentro.jornada._id;
+  await verificarJugadoresEnJornada(idJornada, [updates.ganador]);
+   
 const usuario = await usuarioService.getUsuarioById(updates.ganador);
     if(usuario)
     {
@@ -427,7 +429,7 @@ async function deleteByJornada(jornadaId) {
  */
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Lanza Error si alguno de los ids de jugadores no existe.
+ * Lanza Error si alguno de los ids de jugadores es valido
  * @param {String[]} idsJugadores - array de ids (string/ObjectId)
  * @throws {Error} con mensaje descriptivo si falta alguno
  */

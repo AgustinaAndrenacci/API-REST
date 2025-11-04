@@ -8,7 +8,7 @@ const usuarioService = require('../services/usuarioService');
 const { showErrorMessage } = require("../errorHandler"); //F:agrego require para mostrar errores por showErrMsj
 
 
-exports.getAllJornadas = async (req, res) => {
+exports.getAllJornadas = async (req, res) => { //
   try {
     const jornadas = await jornadaService.getAllJornadas();
     res.json(jornadas);

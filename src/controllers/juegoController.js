@@ -129,7 +129,7 @@ exports.getJuegosMayorADuracion = async (req, res) => {
     const juegos = await juegosService.getJuegosMayorDuracion(req.params.tiempoMin);
     juegos.length > 0 
     ? res.json(juegos) 
-    : showErrorMessage(res, 200, `No existen juegos mayores a ${req.params.tiempoMax} minutos`);
+    : showErrorMessage(res, 200, `No existen juegos mayores a ${req.params.tiempoMin} minutos`);
   } catch (err){
     showErrorMessage(res, 500, "Error al buscar juegos");
   }

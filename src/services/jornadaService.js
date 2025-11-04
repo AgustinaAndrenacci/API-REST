@@ -94,7 +94,7 @@ const eliminarEncuentrosDeJornada = async (idJornada) => {
 
         }
         
-        return jornadaActualizada; // Retorna la jornada
+        return Jornada; // Retorna la jornada
         
     } catch (error) {
         throw new Error(`Error al eliminar encuentros para la jornada ${idJornada}: ${error.message}`);

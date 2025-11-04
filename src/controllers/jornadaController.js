@@ -58,7 +58,6 @@ exports.createJornada = async (req, res) => {
       if (!hayJuegosDisponibles) {
         showErrorMessage(res, 400, "El usuario no tiene juegos disponibles, es necesario tener minimo un juego para armar una jornada");
       }else{
-
       //en juegosDisponibles viene con _id y en jornada lo guardo con id
       //para que el map?  sirve para transformar los datos
       //que filtre tambien que el estado sea activo
@@ -66,9 +65,10 @@ exports.createJornada = async (req, res) => {
        .map(juego => ({
           id: juego._id,
           titulo: juego.titulo,
-          imagen: juego.imagen
+          imagen: juego.imagen,
+        //  estado: juego.estado
         }))
-        .filter(juego => juego.estado == "activo");
+       // .filter(juego => juego.estado == "activo");
       
 
       //creo el json de la juegoteka

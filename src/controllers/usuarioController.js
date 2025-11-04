@@ -166,8 +166,10 @@ exports.registrar = async (req, res) => {
           showErrorMessage(res, 400, "Rol inválido");
         }else{
         // Hashear la contraseña
-        const salt = await bcrypt.genSalt(10); 
+        const salt = await bcrypt.genSalt(10); //2^10
         //genSalt(10): genera un salt de 10 rondas. 
+        //¿Qué significa? Cuando estableces el factor de costo en $10$, el algoritmo bcrypt 
+        // realiza $1024$ rondas de su función interna para generar el hash.
         // salt es: un valor aleatorio que se utiliza para aumentar la seguridad
         //  del hash
         const hashPass = await bcrypt.hash(pass, salt);
@@ -319,7 +321,7 @@ exports.agregarMisJuegos = async (req, res) => {
     const juegoNuevo = await juegoModel.findById(idJuego);
     // res.json( juegoNuevo );
       
-    if (juegoNuevo){
+    if (juegoNuevo && juegoNuevo.estado==="activo"){
       //busco el usuario
       const user = await Usuario.findById(idUsuario);
       //Chequeo que el id no exista en el vector

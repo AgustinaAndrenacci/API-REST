@@ -58,15 +58,18 @@ exports.createJornada = async (req, res) => {
       if (!hayJuegosDisponibles) {
         showErrorMessage(res, 400, "El usuario no tiene juegos disponibles, es necesario tener minimo un juego para armar una jornada");
       }else{
-
       //en juegosDisponibles viene con _id y en jornada lo guardo con id
       //para que el map?  sirve para transformar los datos
-      const juegosParaGuardar = juegosDisponibles.map(juego => ({
-        //_id: juego._id,
-        id: juego._id,
-        titulo: juego.titulo,
-        imagen: juego.imagen
-      }));
+      //que filtre tambien que el estado sea activo
+      const juegosParaGuardar = juegosDisponibles
+       .map(juego => ({
+          id: juego._id,
+          titulo: juego.titulo,
+          imagen: juego.imagen,
+        //  estado: juego.estado
+        }))
+       // .filter(juego => juego.estado == "activo");
+      
 
       //creo el json de la juegoteka
       const Juegoteka = usuarioService.formatoJsonJuegoteka(user);
@@ -287,7 +290,7 @@ exports.updateJornadaEstado = async (req, res) => {
             console.log("Se eliminaron los encuentros de la jornada:", jornadaActualizada);
             }
             console.log("Jornada actualizada:", jornadaActualizada);
-            res.json(jornadaActualizada) 
+            res.json({"message": `Se modifico el estado a ${estado}`});
     }}}}}}
     catch (err) {
       console.error("Error detallado al actualizar jornada:", err);

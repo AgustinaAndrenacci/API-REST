@@ -19,6 +19,7 @@ const usuarioSchema = new mongoose.Schema(
         id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
         titulo: { type: String, required: true },
         imagen: { type: String, default: "" },
+        //estado: { type: String, enum: ["activo", "eliminado"] }
       }
     ],
     

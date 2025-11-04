@@ -6,7 +6,8 @@ const { Schema } = mongoose;
 const juegoSchema = new Schema({
   id: { type: mongoose.Schema.Types.ObjectId, ref: "Juego", required: true },
   titulo: { type: String, required: true },
-  imagen: { type: String, default: "" }
+  imagen: { type: String, default: "" },
+//  estado: { type: String, enum: ["activo", "eliminado"]}
 }, { _id: false }); // deshabilita _id automático para subdocumentos
 
 const jugadorSchema = new Schema({

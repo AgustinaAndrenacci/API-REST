@@ -38,18 +38,22 @@ const getJuegosParaXJugadores = async (cantidadJugadores) => {
 const getJuegosParaExactamenteXJugadores = async (cantidadJugadores) => {
   const juegos = await Juego.find({
     cantJugadoresMin: cantidadJugadores,
-    cantJugadoresMax: cantidadJugadores
+    cantJugadoresMax: cantidadJugadores,
+    estado: "activo"
   });
   return juegos;
 };
 
 const getJuegosMenorDuracion = async (tiempoMax) => {
-  const juegos = await Juego.find({ tiempoEstimado: { $lte: tiempoMax }});
+  const juegos = await Juego.find({
+     tiempoEstimado: { $lte: tiempoMax },
+     estado: "activo"
+    });
   return juegos;
 };
 
 const getJuegosMayorDuracion = async (tiempoMin) => {
-  const juegos = await Juego.find({ tiempoEstimado: { $gte: tiempoMin }});
+  const juegos = await Juego.find({ tiempoEstimado: { $gte: tiempoMin },estado: "activo"});
   return juegos;
 };
 

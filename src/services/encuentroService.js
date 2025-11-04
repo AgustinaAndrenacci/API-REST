@@ -226,13 +226,11 @@ async function update(id, updates = {}) {
 
 // Actualizar ganador si viene
 if (updates.ganador) {
-    const id_ganador = updates.ganador
-    //if (usuarioService.getUsuarioById(id_ganador)!==null) encuentro.ganador = id_ganador;
-    ///////////////
-const usuario = await usuarioService.getUsuarioById(id_ganador);
+       
+const usuario = await usuarioService.getUsuarioById(updates.ganador);
     if(usuario)
     {
-     encuentro.ganador = id_ganador;
+     encuentro.ganador = updates.ganador;
     }
     else{
       throw new Error(`usuario no encontrado.`)
@@ -241,7 +239,7 @@ const usuario = await usuarioService.getUsuarioById(id_ganador);
   }
 
   //  Actualizar otros campos simples
-  const camposSimples = ['nombre', 'fecha', 'estado','ganador'];
+  const camposSimples = ['nombre', 'fecha', 'estado'];
   for (const campo of camposSimples) {
     if (updates[campo] !== undefined) encuentro[campo] = updates[campo];
   }

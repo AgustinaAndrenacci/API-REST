@@ -41,7 +41,7 @@ const encuentroSchema = new mongoose.Schema(
     capacidad: { type: Number, required: true },
     juego: { type: [juegoSchema], required: true },
     jugadores: { type: [jugadorSchema], default: [] }, 
-    ganador: { type: String, default: [] },   
+    ganador: { type: String, default: "" },   
     estado: { 
       type: String, 
       enum: ["cancelado","pendiente", "en proceso", "finalizado"], 

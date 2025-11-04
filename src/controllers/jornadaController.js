@@ -67,8 +67,9 @@ exports.createJornada = async (req, res) => {
           id: juego._id,
           titulo: juego.titulo,
           imagen: juego.imagen
-        }))
-        .filter(juego => juego.estado == "activo");
+        }));
+  
+      
 
       //creo el json de la juegoteka
       const Juegoteka = usuarioService.formatoJsonJuegoteka(user);

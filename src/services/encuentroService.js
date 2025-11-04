@@ -69,7 +69,7 @@ async function getByCreador(idUsuario) {
  */
 async function getByGanador(idUsuario) {
   if (!idUsuario) throw new Error("getByGanador: idUsuario requerido.");
-  const data = await Encuentro.find({ "ganador.id_jugador": idUsuario }).lean();
+  const data = await Encuentro.find({ "ganador": idUsuario }).lean();
   return data;
 }
 

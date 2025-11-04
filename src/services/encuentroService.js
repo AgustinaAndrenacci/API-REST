@@ -87,6 +87,13 @@ async function getByJuego(idJuego) {
  */
 async function getByEstado(estado) {
   if (!estado) throw new Error("getByEstado: estado requerido.");
+  const estadosValidos = Encuentro.schema.path('estado').enumValues;
+
+  if (!estadosValidos.includes(estado)) {
+    const errorMessage= "Estado inválido";
+    throw new Error(errorMessage)
+    
+  }
   const data = await Encuentro.find({ estado }).lean();
   return data;
 }
@@ -114,7 +121,7 @@ async function getByJugador(idJugador) {
  */
 async function create(payload) {
   if (!payload) throw new Error("create: payload requerido.");
-console.log("111");
+
   // Validar jugadores
   if (payload.jugadores && Array.isArray(payload.jugadores) && payload.jugadores.length > 0) {
     const ids = payload.jugadores.map((j) => j.id_jugador || j._id || j);

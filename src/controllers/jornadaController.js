@@ -63,11 +63,11 @@ exports.createJornada = async (req, res) => {
       //para que el map?  sirve para transformar los datos
       //que filtre tambien que el estado sea activo
       const juegosParaGuardar = juegosDisponibles
-      /*  .map(juego => ({
+       .map(juego => ({
           id: juego._id,
           titulo: juego.titulo,
           imagen: juego.imagen
-        }))*/
+        }))
         .filter(juego => juego.estado == "activo");
       
 

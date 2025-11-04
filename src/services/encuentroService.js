@@ -24,7 +24,9 @@ const Jornada = require("../models/jornadaModel");
 const Usuario = require("../models/usuarioModel");
 const Juego = require("../models/juegoModel");
 const { crearMensaje } = require("./mensajeService");
-
+const juegosService = require("../services/juegosService");
+const usuarioService = require("../services/usuarioService");
+const { showErrorMessage } = require("../errorHandler");
 /////////////////////////////////////////////////////////////////////////////////////
 /**
  * Consultas públicas : GET,CREATE; UDATE; DELETE
@@ -205,60 +207,7 @@ async function update(id, updates = {}) {
     {
       await updateJugadores(id, updates);
     }
-    // Crear un mapa de jugadores actuales por ID para acceso rápido
-  /*  {
-    const jugadoresMap = new Map();
-    encuentro.jugadores.forEach(j => jugadoresMap.set(j.id_jugador.toString(), j));
-
-    const nuevosJugadoresIds = [];
-
-    // Procesar cada jugador enviado en updates
-    for (const jBody of updates.jugadores) {
-      const idJugadorStr = jBody.id_jugador?.toString();
-      if (!idJugadorStr) continue;
-
-      if (jugadoresMap.has(idJugadorStr)) {
-        // Si ya existe, actualizar estado si viene
-        if (jBody.estado) jugadoresMap.get(idJugadorStr).estado = jBody.estado;
-      } else {
-        // Nuevo jugador, agregar con estado por defecto 'pendiente' si no viene
-        const nuevoJugador = {
-          id_jugador: new mongoose.Types.ObjectId(idJugadorStr),
-          estado: jBody.estado || 'pendiente'
-        };
-        encuentro.jugadores.push(nuevoJugador);
-        nuevosJugadoresIds.push(idJugadorStr);
-      }
-    }
-
-    // Validaciones: jugadores existentes y capacidad
-    await verificarJugadoresExistentes(encuentro.jugadores.map(j => j.id_jugador));
-    await verificarNoRepetidosEnEncuentro(id, encuentro.jugadores);
-
-    const idJornada = encuentro.jornada._id;
-    await verificarJugadoresEnJornada(idJornada, nuevosJugadoresIds, id);
-
-    const capacidadFinal = typeof updates.capacidad === "number" ? updates.capacidad : encuentro.capacidad;
-    if (encuentro.jugadores.length > capacidadFinal) {
-      throw new Error(`La cantidad de jugadores supera la capacidad (${capacidadFinal})`);
-    }
-
-    // Enviar mensajes a los nuevos jugadores
-    const creadorNombre = encuentro.createdBy[0]?.userName || "El creador";
-    const nombreJuego = encuentro.juego[0]?.nombre || "el encuentro";
-    const creadorId = new mongoose.Types.ObjectId(encuentro.createdBy[0].idUsuario);
-
-    for (const jugadorId of nuevosJugadoresIds) {
-      const mensajeData = {
-        remitente: creadorId,
-        destinatario: new mongoose.Types.ObjectId(jugadorId),
-        contenido: `Has sido desafiado por ${creadorNombre} en ${nombreJuego}`,
-        tipo: "notificacionEncuentro",
-      };
-      await crearMensaje(mensajeData);
-    }
-  }
-*/
+  
   //  Actualizar juego si viene
   if (updates.juego) {
     const idJuego = updates.juego.id_juego || updates.juego._id || updates.juego;
@@ -275,8 +224,24 @@ async function update(id, updates = {}) {
     encuentro.capacidad = updates.capacidad;
   }
 
+// Actualizar ganador si viene
+if (updates.ganador) {
+    const id_ganador = updates.ganador
+    //if (usuarioService.getUsuarioById(id_ganador)!==null) encuentro.ganador = id_ganador;
+    ///////////////
+const usuario = await usuarioService.getUsuarioById(id_ganador);
+    if(usuario)
+    {
+     encuentro.ganador = id_ganador;
+    }
+    else{
+      throw new Error(`usuario no encontrado.`)
+    }
+    //////////////////
+  }
+
   //  Actualizar otros campos simples
-  const camposSimples = ['nombre', 'fecha', 'estado']; // ejemplo
+  const camposSimples = ['nombre', 'fecha', 'estado','ganador'];
   for (const campo of camposSimples) {
     if (updates[campo] !== undefined) encuentro[campo] = updates[campo];
   }
@@ -341,7 +306,7 @@ async function updateJugadores(id, updates = {}) {
 
   const idJornada = encuentro.jornada._id;
   await verificarJugadoresEnJornada(idJornada, nuevosJugadoresIds, id);
-  
+
   const capacidadFinal = encuentro.capacidad;
   if (encuentro.jugadores.length > capacidadFinal) {
     throw new Error(`La cantidad de jugadores supera la capacidad (${capacidadFinal})`);
@@ -472,9 +437,7 @@ async function verificarJugadoresExistentes(idsJugadores) {
   if (!Array.isArray(idsJugadores)) {
     throw new Error("verificarJugadoresExistentes: se esperaba un arreglo de ids de jugadores.");
   }
-
-  if (idsJugadores.length === 0) return;
-
+  
   if (!Usuario) {
     throw new Error("Modelo Usuario no disponible.");
   }
@@ -538,7 +501,9 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
   const jornada = await Jornada.findById(jornadaId)
     .populate().lean();
 
-  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`);
+    
+
+  if (!jornada) throw new Error(`Jornada ${jornadaId} no encontrada.`); ///no mdanda el msj de error
 
  
   const jugadoresInscriptos = new Set(
@@ -562,6 +527,7 @@ async function verificarJugadoresEnJornada(jornadaId, idsJugadores = []) {
  * @param {String} idJuego
  */
 async function verificarJuegoExistente(idJuego) {
+
   if (!idJuego) throw new Error("verificarJuegoExistente: idJuego requerido.");
 
   if (!Juego) throw new Error("Modelo Juego no disponible");
@@ -575,6 +541,9 @@ async function verificarJuegoExistente(idJuego) {
 
   const existe = await Juego.exists({ _id: objectId });
   if (!existe) throw new Error(`Juego no encontrado: ${idJuego}`);
+
+  const juegoCheck = juegosService.getJuegoById(idJuego);
+  if (juegoCheck.estado !== "activo") throw new Error(`Juego no encontrado: ${idJuego}`);
 }
 
 /**

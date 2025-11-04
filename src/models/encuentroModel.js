@@ -10,7 +10,7 @@ const juegoSchema = new mongoose.Schema({
   id_juego: { type: String, required: true },
   nombre: { type: String, required: true },
   imagen: { type: String, default: "" },
-});
+}, { _id: false });
 
 const jugadorSchema = new mongoose.Schema({
   id_jugador: { type: String },
@@ -22,7 +22,7 @@ const jugadorSchema = new mongoose.Schema({
       enum: ["pendiente", "confirmado"], 
       default: "pendiente"},
   
-});
+}, { _id: false });
 
 const organizadorSchema = new mongoose.Schema({
   id_usuario: { type: String },
@@ -31,7 +31,7 @@ const organizadorSchema = new mongoose.Schema({
       type: String, 
       enum: ["jugador", "juegoteka"],
       required: true}, 
-});
+}, { _id: false });
 
 
 const encuentroSchema = new mongoose.Schema(
@@ -41,7 +41,7 @@ const encuentroSchema = new mongoose.Schema(
     capacidad: { type: Number, required: true },
     juego: { type: [juegoSchema], required: true },
     jugadores: { type: [jugadorSchema], default: [] }, 
-    ganador: { type: [jugadorSchema], default: [] },   //abierto a la posibilidad de mutliples ganadores
+    ganador: { type: String, default: [] },   //abierto a la posibilidad de mutliples ganadores
     estado: { 
       type: String, 
       enum: ["cancelado","pendiente", "en proceso", "finalizado"], 

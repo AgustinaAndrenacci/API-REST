@@ -287,7 +287,7 @@ exports.updateJornadaEstado = async (req, res) => {
             console.log("Se eliminaron los encuentros de la jornada:", jornadaActualizada);
             }
             console.log("Jornada actualizada:", jornadaActualizada);
-            res.json(jornadaActualizada) 
+            res.json({"message": `Se modifico el estado a ${estado}`});
     }}}}}}
     catch (err) {
       console.error("Error detallado al actualizar jornada:", err);

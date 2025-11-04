@@ -52,4 +52,4 @@ diccionarioRolesYTipos = {
     "jugador": "desafio"
 };
 
-module.exports = diccionarioRutasYPermisos, diccionarioRolesYTipos;
+module.exports = { diccionarioRutasYPermisos, diccionarioRolesYTipos };

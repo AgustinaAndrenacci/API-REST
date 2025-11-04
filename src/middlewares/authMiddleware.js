@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const diccionarioRutasYPermisos = require("../authDictionary");
+const { diccionarioRutasYPermisos, diccionarioRolesYTipos } = require("../authDictionary");
 const { showErrorMessage } = require("../errorHandler");
 //verifica token JWT
 //verifica si el token que me diste es mio
@@ -34,4 +34,4 @@ const validarPermisoRuta = async (req, res, next) => {
   }
 };
 
-module.exports = { autenticarToken, validarPermisoRuta};
+module.exports = { autenticarToken, validarPermisoRuta };

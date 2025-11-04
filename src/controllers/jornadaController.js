@@ -61,12 +61,14 @@ exports.createJornada = async (req, res) => {
 
       //en juegosDisponibles viene con _id y en jornada lo guardo con id
       //para que el map?  sirve para transformar los datos
-      const juegosParaGuardar = juegosDisponibles.map(juego => ({
-        //_id: juego._id,
-        id: juego._id,
-        titulo: juego.titulo,
-        imagen: juego.imagen
-      }));
+      //que filtre tambien que el estado sea activo
+      const juegosParaGuardar = juegosDisponibles
+        .filter(juego => juego.estado === "activo")
+        .map(juego => ({
+          id: juego._id,
+          titulo: juego.titulo,
+          imagen: juego.imagen
+        }));
 
       //creo el json de la juegoteka
       const Juegoteka = usuarioService.formatoJsonJuegoteka(user);

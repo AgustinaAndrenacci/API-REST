@@ -321,7 +321,7 @@ exports.agregarMisJuegos = async (req, res) => {
     const juegoNuevo = await juegoModel.findById(idJuego);
     // res.json( juegoNuevo );
       
-    if (juegoNuevo){
+    if (juegoNuevo && juegoNuevo.estado==="activo"){
       //busco el usuario
       const user = await Usuario.findById(idUsuario);
       //Chequeo que el id no exista en el vector
